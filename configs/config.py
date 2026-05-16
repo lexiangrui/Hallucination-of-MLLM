@@ -18,7 +18,7 @@ GPT_JUDGE_TEMPERATURE = 0.0
 MODEL_API_CONFIGS = {
     "gpt-5.4-mini": {
         "api_key": os.environ.get("GPT_API_KEY", ""),
-        "base_url": "https://bscclheilkfs.sealosbja.site/v1",
+        "base_url": "https://api-vip.codex-for.me/v1",
         "api_method": "responses",
     },
     "gpt-5.5": {
@@ -28,9 +28,9 @@ MODEL_API_CONFIGS = {
     },
     "Qwen3.5-35B-A3B": {
         "api_key": os.environ.get("QWEN_API_KEY", ""),
-        "base_url": "https://yunwu.ai/v1",
+        "base_url": "https://api.siliconflow.cn/v1",
         "api_method": "chat",
-        "api_model": "qwen3.5-35b-a3b",
+        "api_model": "Qwen/Qwen3.5-35B-A3B",
     },
     "Qwen3-VL-235B-A22B-Instruct": {
         "api_key": os.environ.get("QWEN_VL_API_KEY", ""),
@@ -87,7 +87,7 @@ def resolve_model_api_config(model_name: str) -> dict:
 # Each directory points to the HF Datasets parquet location
 POPE_DATA_DIR = str(_PROJECT_ROOT / "data" / "POPE" / "data")
 MATHVISTA_DATA_DIR = str(_PROJECT_ROOT / "data" / "MathVista" / "data")
-OCR_DATA_DIR = str(_PROJECT_ROOT / "data" / "OCRBench" / "data")
+VQARAD_DATA_DIR = str(_PROJECT_ROOT / "data" / "VQA-RAD" / "data")
 
 POPE_DEFAULT_MAX_SAMPLES = 1000
 POPE_SAMPLE_SEED = 42

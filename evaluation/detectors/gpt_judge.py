@@ -79,7 +79,7 @@ def build_judge_prompt(
     question: str,
     model_response: str,
     ground_truth: str,
-    dataset: Literal["pope", "mathvista", "ocr"],
+    dataset: Literal["pope", "mathvista", "vqarad"],
 ) -> str:
     """Build the evaluation prompt."""
     if dataset == "pope":
@@ -88,10 +88,9 @@ def build_judge_prompt(
         task_desc = "The question requires mathematical visual reasoning (chart, diagram, or geometry)."
     else:
         task_desc = (
-            "The question requires optical character recognition (OCR) "
-            "from an image — reading text in scene images, documents, "
-            "or handwritten content. Carefully check whether the model "
-            "correctly reads the text visible in the image."
+            "The question is about medical visual question answering based on a radiology image "
+            "(X-ray, CT, or MRI). Carefully check whether the model's response is consistent "
+            "with the visual content of the image and with established medical and anatomical knowledge."
         )
 
     return f"""{task_desc}

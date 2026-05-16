@@ -12,7 +12,8 @@
 ├── data/
 │   ├── __init__.py
 │   ├── pope_loader.py        # POPE 数据集加载
-│   └── mathvista_loader.py   # MathVista 数据集加载
+│   ├── mathvista_loader.py   # MathVista 数据集加载
+│   └── vqarad_loader.py      # VQA-RAD 数据集加载
 ├── evaluation/
 │   ├── detectors/            # 检测方法
 │   ├── metrics/              # 指标计算
@@ -54,7 +55,7 @@ pip install openai anthropic Pillow pyarrow pandas python-dotenv
 
 - **POPE**: 从 https://github.com/RUCAIBox/POPE 下载，放置于 `data/POPE/`
 - **MathVista**: 从 https://mathvista.github.io/ 下载，放置于 `data/MathVista/`
-- **OCRBench**: 从 https://github.com/Yuliang-Liu/MultimodalOCR 下载，放置于 `data/OCRBench/`
+- **VQA-RAD**: 从 https://huggingface.co/datasets/flaviagiammarino/vqa-rad 下载，放置于 `data/VQA-RAD/`
 
 ### 4. 生成模型回答
 
@@ -198,27 +199,27 @@ python scripts/generate_responses.py --dataset mathvista \
   --workers 10
 ```
 
-#### OCRBench
+#### VQA-RAD
 
 ```bash
-python scripts/generate_responses.py --dataset ocr \
+python scripts/generate_responses.py --dataset vqarad \
   --model gpt-5.4-mini \
-  --output responses/gpt5.4-mini_ocr.json \
+  --output responses/gpt5.4-mini_vqarad.json \
   --workers 4
 
-python scripts/generate_responses.py --dataset ocr \
+python scripts/generate_responses.py --dataset vqarad \
   --model gemini-2.5-flash \
-  --output responses/gemini-2.5-flash_ocr.json \
+  --output responses/gemini-2.5-flash_vqarad.json \
   --workers 4
 
-python scripts/generate_responses.py --dataset ocr \
+python scripts/generate_responses.py --dataset vqarad \
   --model Qwen3.5-35B-A3B \
-  --output responses/Qwen3.5-35B-A3B_ocr.json \
+  --output responses/Qwen3.5-35B-A3B_vqarad.json \
   --workers 4
 
-python scripts/generate_responses.py --dataset ocr \
+python scripts/generate_responses.py --dataset vqarad \
   --model Qwen3-VL-235B-A22B-Instruct \
-  --output responses/Qwen3-VL-235B-A22B-Instruct_ocr.json \
+  --output responses/Qwen3-VL-235B-A22B-Instruct_vqarad.json \
   --workers 10
 ```
 
@@ -236,7 +237,7 @@ python scripts/generate_responses.py --dataset ocr \
 
 ### 5. 运行检测
 
-POPE 评测同样使用每个 split 1000 条随机样本（seed=42）。评测会自动只使用回答文件中已有的样本；MathVista 和 OCR 会调用 GPT Judge，POPE 不需要裁判模型 API。
+POPE 评测同样使用每个 split 1000 条随机样本（seed=42）。评测会自动只使用回答文件中已有的样本；MathVista 和 VQA-RAD 会调用 GPT Judge，POPE 不需要裁判模型 API。
 
 #### POPE random
 
@@ -338,23 +339,23 @@ python main.py --dataset mathvista --model Qwen3-VL-235B-A22B-Instruct-cot \
   --workers 5
 ```
 
-#### OCRBench
+#### VQA-RAD
 
 ```bash
-python main.py --dataset ocr --model Qwen3.5-35B-A3B \
-  --response-files Qwen3.5-35B-A3B:ocr=responses/Qwen3.5-35B-A3B_ocr.json \
+python main.py --dataset vqarad --model Qwen3.5-35B-A3B \
+  --response-files Qwen3.5-35B-A3B:vqarad=responses/Qwen3.5-35B-A3B_vqarad.json \
   --workers 4
 
-python main.py --dataset ocr --model Qwen3-VL-235B-A22B-Instruct \
-  --response-files Qwen3-VL-235B-A22B-Instruct:ocr=responses/Qwen3-VL-235B-A22B-Instruct_ocr.json \
+python main.py --dataset vqarad --model Qwen3-VL-235B-A22B-Instruct \
+  --response-files Qwen3-VL-235B-A22B-Instruct:vqarad=responses/Qwen3-VL-235B-A22B-Instruct_vqarad.json \
   --workers 4
 
-python main.py --dataset ocr --model gpt-5.4-mini \
-  --response-files gpt-5.4-mini:ocr=responses/gpt5.4-mini_ocr.json \
+python main.py --dataset vqarad --model gpt-5.4-mini \
+  --response-files gpt-5.4-mini:vqarad=responses/gpt5.4-mini_vqarad.json \
   --workers 4
 
-python main.py --dataset ocr --model gemini-2.5-flash \
-  --response-files gemini-2.5-flash:ocr=responses/gemini-2.5-flash_ocr.json \
+python main.py --dataset vqarad --model gemini-2.5-flash \
+  --response-files gemini-2.5-flash:vqarad=responses/gemini-2.5-flash_vqarad.json \
   --workers 4
 ```
 
@@ -366,7 +367,7 @@ python main.py --dataset ocr --model gemini-2.5-flash \
 |--------|----------|------|
 | **POPE** | 规则判断法 | 二元 Yes/No 对象存在性问题，参考 POPE 官方评估代码归一化回答并计算二分类指标 |
 | **MathVista** | GPT Judge | 数学视觉推理题型多样，使用 GPT-5.5 作为自动化裁判综合判断 |
-| **OCRBench** | GPT Judge | 文本识别任务，使用 GPT-5.5 作为自动化裁判判断识别准确性 |
+| **VQA-RAD** | GPT Judge | 医学放射科 VQA，使用 GPT-5.5 作为自动化裁判，额外按 closed/open 答案类型分层统计幻觉率 |
 
 ### POPE (Polling-based Object Probing Evaluation)
 
@@ -382,11 +383,11 @@ python main.py --dataset ocr --model gemini-2.5-flash \
 - **数据集**：默认使用 testmini split（1000 条样本），也可选择完整的 test split（6141 条样本）
 - **检测方式**：以图片 + 问题 + 模型回答 + ground truth 为输入，输出幻觉判定与类型分类（faithfulness / factuality / logical）
 
-### OCRBench
+### VQA-RAD
 
-- **用途**：评估文本识别中的幻觉 —— 检测 MLLM 是否能准确识别图片中的文本
-- **题型**：自由回答，要求模型识别并输出图片中的文本内容
-- **检测方式**：以图片 + 问题 + 模型回答 + ground truth 为输入，使用 GPT Judge 判断识别准确性
+- **用途**：评估医学放射科 VQA 中的幻觉 —— 检测 MLLM 在 X-ray、CT、MRI 图像问答中的视觉误判与知识错误
+- **题型**：closed（yes/no）和 open-ended 两类，共 2,244 条 QA 对，覆盖 314 张放射科图像
+- **检测方式**：以图片 + 问题 + 模型回答 + ground truth 为输入，使用 GPT Judge 判断幻觉；额外按 closed/open 分层统计幻觉率
 
 ## 检测方法详情
 
@@ -400,10 +401,10 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 | 二分类评估 | `yes` 为正类，计算 TP / FP / TN / FN、Accuracy、Precision、Recall、F1、Yes Ratio |
 | 对象幻觉判定 | `label=no` 但模型回答 `yes`，即 FP，记为对象幻觉 |
 
-### GPT Judge (evaluation/detectors/gpt_judge.py) — MathVista 和 OCR 专用
+### GPT Judge (evaluation/detectors/gpt_judge.py) — MathVista 和 VQA-RAD 专用
 
 使用 GPT-5.5 作为自动化裁判，以图片 + 问题 + 模型回答 + ground truth 作为输入，
-判断回答是否包含幻觉。只有 `cot` 回答结果会进一步分类至忠实性/事实性/逻辑性三种类型。
+判断回答是否包含幻觉。所有 VQA-RAD 结果和 MathVista CoT 结果均会进一步分类至忠实性/事实性/逻辑性三种类型。
 
 **direct 输出格式**：
 ```json
@@ -434,7 +435,7 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 | **F1 Score** | 2PR / (P + R) | Precision 与 Recall 的调和平均 |
 | **Yes Ratio** | N_{pred=yes} / N_total | POPE 官方报告指标，用于观察模型是否倾向回答 yes |
 | **Object Hallucination Rate** | FP / N_total | POPE 中 `label=no` 但模型回答 `yes` 的比例 |
-| **Hallucination Rate** | N_{score<3} / N_total | MathVista GPT Judge 指标。参考 MMHal-Bench (Sun et al., ACL Findings 2024, Table 6) 的 0-6 评分协议，使用 GPT-5.5 评分；score < 3 为含幻觉，score >= 3 为无幻觉，值越低越好 |
+| **Hallucination Rate** | N_{score<3} / N_total | MathVista / VQA-RAD GPT Judge 指标。参考 MMHal-Bench (Sun et al., ACL Findings 2024, Table 6) 的 0-6 评分协议，使用 GPT-5.5 评分；score < 3 为含幻觉，score >= 3 为无幻觉，值越低越好 |
 
 > 注：幻觉检测视为二分类问题 —— Positive = 存在幻觉。
 
@@ -444,9 +445,9 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 
 ```
 results/
-├── gpt-5.4-mini_pope_random.json # POPE 规则检测结果
-├── gpt-5.4-mini_mathvista.json   # MathVista GPT Judge 结果
-└── gpt-5.4-mini_ocr.json         # OCR GPT Judge 结果
+├── gpt-5.4-mini_pope_random.json  # POPE 规则检测结果
+├── gpt-5.4-mini_mathvista.json    # MathVista GPT Judge 结果
+└── gpt-5.4-mini_vqarad.json       # VQA-RAD GPT Judge 结果（含 closed/open 分层）
 ```
 
 ## 扩展指南

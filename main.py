@@ -5,6 +5,7 @@ Hallucination detection for MLLMs.
 Dataset → Method mapping:
   POPE      → 规则判断法
   MathVista → GPT Judge
+  VQA-RAD   → GPT Judge
 """
 
 import argparse
@@ -13,10 +14,10 @@ import os
 from typing import Optional
 
 from configs import config
-from evaluation.runners import run_mathvista, run_pope, run_ocr
+from evaluation.runners import run_mathvista, run_pope, run_vqarad
 
 
-METHOD_MAP = {"pope": "规则判断法", "mathvista": "gpt-judge", "ocr": "gpt-judge"}
+METHOD_MAP = {"pope": "规则判断法", "mathvista": "gpt-judge", "vqarad": "gpt-judge"}
 LOGGER = logging.getLogger(__name__)
 
 
@@ -40,7 +41,7 @@ def _parse_response_files(entries: Optional[list[str]]) -> dict[str, str]:
         model_name, dataset = [part.strip() for part in key.split(":", 1)]
         if not model_name or dataset not in METHOD_MAP:
             raise ValueError(
-                f"Invalid --response-files key {key!r}; dataset must be pope, mathvista, or ocr"
+                f"Invalid --response-files key {key!r}; dataset must be pope, mathvista, or vqarad"
             )
 
         normalized_key = f"{model_name}:{dataset}"
@@ -96,8 +97,8 @@ def _run_one(
             max_samples=max_samples,
             workers=workers,
         )
-    if dataset == "ocr":
-        return run_ocr(
+    if dataset == "vqarad":
+        return run_vqarad(
             model_name=model_name,
             response_file=response_file,
             max_samples=max_samples,
@@ -125,17 +126,17 @@ def main():
 Dataset → Method:
   POPE      → 规则判断法
   MathVista → GPT Judge
-  OCR       → GPT Judge
+  VQA-RAD   → GPT Judge
 
 Examples:
   python main.py --dataset pope --model gpt-5.4 --response-files gpt-5.4:pope=responses/gpt54_pope_random.json
   python main.py --dataset mathvista --model gpt-5.4 --response-files gpt-5.4:mathvista=responses/gpt54_mathvista.json --workers 4
-  python main.py --dataset ocr --model gpt-5.4 --response-files gpt-5.4:ocr=responses/gpt54_ocr.json --workers 4
-  python main.py --dataset all --response-files gpt-5.4:pope=responses/gpt54_pope_random.json gpt-5.4:mathvista=responses/gpt54_mathvista.json gpt-5.4:ocr=responses/gpt54_ocr.json --max-samples 100
+  python main.py --dataset vqarad --model gpt-5.4 --response-files gpt-5.4:vqarad=responses/gpt54_vqarad.json --workers 4
+  python main.py --dataset all --response-files gpt-5.4:pope=responses/gpt54_pope_random.json gpt-5.4:mathvista=responses/gpt54_mathvista.json gpt-5.4:vqarad=responses/gpt54_vqarad.json --max-samples 100
         """,
     )
     parser.add_argument("--dataset", default="pope",
-                        choices=["pope", "mathvista", "ocr", "all"])
+                        choices=["pope", "mathvista", "vqarad", "all"])
     parser.add_argument("--model", default=None,
                         help="Model to evaluate (default: all in config.MODELS)")
     parser.add_argument("--response-files", nargs="+", required=True,
@@ -162,7 +163,7 @@ Examples:
     os.makedirs(config.OUTPUT_DIR, exist_ok=True)
 
     models = [args.model] if args.model else config.MODELS
-    datasets = [args.dataset] if args.dataset != "all" else ["pope", "mathvista", "ocr"]
+    datasets = [args.dataset] if args.dataset != "all" else ["pope", "mathvista", "vqarad"]
     response_files = _parse_response_files(args.response_files)
 
     all_results = {}

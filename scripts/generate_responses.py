@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate model responses for POPE, MathVista, or OCRBench.
+Generate model responses for POPE, MathVista, or VQA-RAD.
 """
 
 import argparse
@@ -14,13 +14,13 @@ from typing import Optional
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from data import load_mathvista, load_pope_by_split, load_ocrbench
+from data import load_mathvista, load_pope_by_split, load_vqarad
 from utils.api import ModelClient, call_vision_model_with_retries, create_model_client
 from utils.batch import load_text_map, run_resumable_batch, save_json_atomic, sort_json_keys
 
 LOGGER = logging.getLogger(__name__)
 
-ID_KEYS = {"pope": "question_id", "mathvista": "pid", "ocr": "id"}
+ID_KEYS = {"pope": "question_id", "mathvista": "pid", "vqarad": "id"}
 
 
 def _default_output_path(dataset: str, model: str, pope_split: str) -> str:
@@ -58,8 +58,12 @@ def _build_prompt(sample: dict, dataset: str, prompt_mode: str) -> str:
     if dataset == "pope":
         return f"{question}\nPlease answer YES or NO without an explanation."
 
-    if dataset == "ocr":
-        return question
+    if dataset == "vqarad":
+        return (
+            "You are an expert radiologist.\n\n"
+            f"{question}\n"
+            "Please provide a detailed answer based on what you observe in the medical image."
+        )
 
     choices = sample.get("choices")
     choices_text = ""
@@ -89,8 +93,8 @@ def _build_prompt(sample: dict, dataset: str, prompt_mode: str) -> str:
 def _load_samples(dataset: str, pope_split: str, max_samples: Optional[int]) -> list[dict]:
     if dataset == "pope":
         return load_pope_by_split(split=pope_split, max_samples=max_samples)
-    if dataset == "ocr":
-        return load_ocrbench(max_samples=max_samples)
+    if dataset == "vqarad":
+        return load_vqarad(max_samples=max_samples)
     return load_mathvista(max_samples=max_samples)
 
 
@@ -141,7 +145,7 @@ def generate_responses(args) -> None:
 def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description="Generate VLM responses for evaluation.")
-    parser.add_argument("--dataset", required=True, choices=["pope", "mathvista", "ocr"])
+    parser.add_argument("--dataset", required=True, choices=["pope", "mathvista", "vqarad"])
     parser.add_argument("--model", required=True)
     parser.add_argument("--output", default=None)
     parser.add_argument("--pope-split", default="random", choices=["random", "popular", "adversarial"])

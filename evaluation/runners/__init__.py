@@ -1,5 +1,5 @@
 from .mathvista import run_mathvista
 from .pope import run_pope
-from .ocr import run_ocr
+from .vqarad import run_vqarad
 
-__all__ = ["run_mathvista", "run_pope", "run_ocr"]
+__all__ = ["run_mathvista", "run_pope", "run_vqarad"]
