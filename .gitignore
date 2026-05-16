@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+
+# Data — large image datasets, do not commit
+data/pope/coco/
+data/mathvista/images/
+data/mathvista/*.parquet
+
+# Output
+results/
+responses/
+doc/
+report/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Temp files from atomic saves
+*.tmp
