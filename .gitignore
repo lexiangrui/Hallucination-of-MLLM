@@ -15,9 +15,6 @@ data/mathvista/images/
 data/mathvista/*.parquet
 
 # Output
-results/
-responses/
-doc/
 report/
 
 # macOS

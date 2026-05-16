@@ -23,7 +23,7 @@ MODEL_API_CONFIGS = {
     },
     "gpt-5.5": {
         "api_key": os.environ.get("GPT_API_KEY", ""),
-        "base_url": "https://yunwu.ai/v1",
+        "base_url": "https://bscclheilkfs.sealosbja.site/v1",
         "api_method": "responses",
     },
     "Qwen3.5-35B-A3B": {
