@@ -27,3 +27,4 @@ report/
 
 # Temp files from atomic saves
 *.tmp
+data/*/
