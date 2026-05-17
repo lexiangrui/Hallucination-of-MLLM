@@ -15,9 +15,13 @@
 │   ├── mathvista_loader.py   # MathVista 数据集加载
 │   └── vqarad_loader.py      # VQA-RAD 数据集加载
 ├── evaluation/
-│   ├── detectors/            # 检测方法
-│   ├── metrics/              # 指标计算
-│   └── runners/              # 各数据集评测运行逻辑
+│   ├── __init__.py              # 导出 judge / run_* 接口
+│   ├── judge.py                 # GPT Judge 裁判逻辑
+│   ├── metrics.py               # 检测指标计算
+│   ├── rule_based.py            # POPE 规则判断法
+│   ├── run_mathvista.py         # MathVista 评测运行
+│   ├── run_pope.py              # POPE 评测运行
+│   └── run_vqarad.py            # VQA-RAD 评测运行
 ├── scripts/
 │   ├── generate_responses.py # 调用测试模型 API 生成回答 JSON
 │   ├── export_human_eval.py
@@ -61,7 +65,7 @@ pip install openai anthropic Pillow pyarrow pandas python-dotenv
 
 先调用测试模型 API 生成回答文件。输出格式为 `{样本ID: 模型回答}`，可直接传给 `main.py`。
 
-POPE 默认按每个 split 随机抽样 1000 条（seed=42，方便复现），下面 POPE 命令显式写出 `--max-samples 1000`。MathVista 默认使用 testmini split（1000 条样本）。VQA-RAD 同样从全量数据中随机抽样 1000 条（seed=42，方便复现），下面命令显式写出 `--max-samples 1000`。
+POPE 默认按每个 split 随机抽样 1000 条（seed=42，方便复现），下面 POPE 命令显式写出 `--max-samples 1000`。MathVista 默认使用 testmini split（1000 条样本）。VQA-RAD 使用 Hugging Face Parquet 的 test split（451 条样本），无需额外采样。
 
 #### POPE random
 
@@ -344,19 +348,19 @@ python main.py --dataset mathvista --model Qwen3-VL-235B-A22B-Instruct-cot \
 ```bash
 python main.py --dataset vqarad --model Qwen3.5-35B-A3B \
   --response-files Qwen3.5-35B-A3B:vqarad=responses/Qwen3.5-35B-A3B_vqarad.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset vqarad --model Qwen3-VL-235B-A22B-Instruct \
   --response-files Qwen3-VL-235B-A22B-Instruct:vqarad=responses/Qwen3-VL-235B-A22B-Instruct_vqarad.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset vqarad --model gpt-5.4-mini \
   --response-files gpt-5.4-mini:vqarad=responses/gpt5.4-mini_vqarad.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset vqarad --model gemini-2.5-flash \
   --response-files gemini-2.5-flash:vqarad=responses/gemini-2.5-flash_vqarad.json \
-  --workers 4
+  --workers 10
 ```
 
 生成回答和 GPT Judge 检测都通过 `utils/api.py` 的 `create_model_client()` 统一解析模型配置；命令行只需指定模型名，脚本自动从 `configs/config.py` 获取 API key、base URL 和调用协议。评测只使用回答文件中已有的样本；GPT Judge 默认断点续跑，每 10 条自动保存一次；并发度通过 `--workers` 控制。
@@ -386,12 +390,12 @@ python main.py --dataset vqarad --model gemini-2.5-flash \
 ### VQA-RAD
 
 - **用途**：评估医学放射科 VQA 中的幻觉 —— 检测 MLLM 在 X-ray、CT、MRI 图像问答中的视觉误判与知识错误
-- **题型**：closed（yes/no）和 open-ended 两类，共 2,244 条 QA 对，覆盖 314 张放射科图像
+- **题型**：closed（yes/no）和 open-ended 两类，共 451 条 QA 对（使用 Hugging Face test split），覆盖放射科图像
 - **检测方式**：以图片 + 问题 + 模型回答 + ground truth 为输入，使用 GPT Judge 判断幻觉；额外按 closed/open 分层统计幻觉率
 
 ## 检测方法详情
 
-### 规则判断法 (evaluation/detectors/rule_based.py) — POPE 专用
+### 规则判断法 (evaluation/rule_based.py) — POPE 专用
 
 POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官方 `evaluate.py`，随后进行二分类评估：
 
@@ -401,7 +405,7 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 | 二分类评估 | `yes` 为正类，计算 TP / FP / TN / FN、Accuracy、Precision、Recall、F1、Yes Ratio |
 | 对象幻觉判定 | `label=no` 但模型回答 `yes`，即 FP，记为对象幻觉 |
 
-### GPT Judge (evaluation/detectors/gpt_judge.py) — MathVista 和 VQA-RAD 专用
+### GPT Judge (evaluation/judge.py) — MathVista 和 VQA-RAD 专用
 
 使用 GPT-5.5 作为自动化裁判，以图片 + 问题 + 模型回答 + ground truth 作为输入，
 判断回答是否包含幻觉。所有 VQA-RAD 结果和 MathVista CoT 结果均会进一步分类至忠实性/事实性/逻辑性三种类型。

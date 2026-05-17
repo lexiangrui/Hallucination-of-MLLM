@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hallucination Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --surface: #ffffff;
+    --text: #1c1c1e;
+    --text-secondary: #7a746e;
+    --text-muted: #b0aaa3;
+    --accent: #9a7b56;
+    --accent-hover: #7c6346;
+    --accent-glow: rgba(154, 123, 86, 0.08);
+    --border: #e8e4de;
+    --border-focus: #c4b8a8;
+    --red: #c44a4a;
+    --red-bg: #fcf0f0;
+    --green: #4a7c5c;
+    --green-bg: #f0f7f2;
+    --blue: #4a6a7c;
+    --blue-bg: #eff3f5;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --header-h: 56px;
+    --nav-h: 64px;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Sora', -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── Header ─── */
+  header {
+    height: var(--header-h);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .brand {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .progress-wrap {
+    width: 160px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+  .progress-label {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── Main Split ─── */
+  .main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ─── Image Panel ─── */
+  .image-panel {
+    flex: 0 0 55%;
+    position: relative;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+  .image-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 24px;
+    transition: opacity 0.35s ease;
+  }
+  .image-panel img.loading { opacity: 0; }
+  .image-panel img.loaded { opacity: 1; }
+  .image-placeholder {
+    color: var(--text-muted);
+    font-size: 14px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ─── Detail Panel ─── */
+  .detail-panel {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .detail-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 36px 16px;
+  }
+  .detail-scroll::-webkit-scrollbar { width: 4px; }
+  .detail-scroll::-webkit-scrollbar-track { background: transparent; }
+  .detail-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ─── Sample Meta ─── */
+  .sample-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .model-badge {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.03em;
+  }
+  .meta-divider {
+    width: 1px;
+    height: 14px;
+    background: var(--border);
+  }
+  .meta-pid {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .sample-id {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Fields ─── */
+  .field { margin-bottom: 20px; }
+  .field:last-of-type { margin-bottom: 0; }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .field-value {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .field-value.gt {
+    color: var(--green);
+    font-weight: 500;
+  }
+  .field-value.response {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .field-value.response::-webkit-scrollbar { width: 3px; }
+  .field-value.response::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+
+  /* ─── Annotation Area ─── */
+  .annotation-area {
+    margin-top: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .annotation-area .field-label { margin-bottom: 12px; }
+
+  .label-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .label-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .label-btn:hover { border-color: var(--border-focus); background: var(--accent-glow); }
+  .label-btn:active { transform: scale(0.98); }
+  .label-btn .kbd {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+  .label-btn.selected-no {
+    border-color: var(--green);
+    background: var(--green-bg);
+    color: var(--green);
+  }
+  .label-btn.selected-yes {
+    border-color: var(--red);
+    background: var(--red-bg);
+    color: var(--red);
+  }
+  .label-btn .check {
+    display: none;
+    margin-right: 6px;
+  }
+  .label-btn.selected-no .check,
+  .label-btn.selected-yes .check { display: inline; }
+
+  .type-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+  }
+  .type-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .type-btn {
+    padding: 8px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+  }
+  .type-btn:hover:not(:disabled) { border-color: var(--border-focus); }
+  .type-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .type-btn.selected {
+    border-color: var(--blue);
+    background: var(--blue-bg);
+    color: var(--blue);
+  }
+  .type-btn .kbd {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  /* ─── Save Toast ─── */
+  .save-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: var(--text);
+    color: var(--surface);
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+  .save-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ─── Navigation ─── */
+  nav {
+    height: var(--nav-h);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    padding: 10px 24px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    text-align: center;
+  }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .nav-counter {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.03em;
+    min-width: 80px;
+    text-align: center;
+  }
+  .nav-spacer { flex: 1; }
+
+  /* ─── Empty / Done States ─── */
+  .empty-state, .done-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-muted);
+  }
+  .done-state .icon { font-size: 32px; color: var(--green); }
+  .done-state p { font-size: 15px; letter-spacing: 0.02em; }
+  .done-state .sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ─── Sample Transitions ─── */
+  .detail-scroll.fade-out { opacity: 0; }
+  .detail-scroll { transition: opacity 0.2s ease; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .main { flex-direction: column; }
+    .image-panel { flex: 0 0 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .image-panel img { padding: 12px; object-fit: contain; }
+    .detail-scroll { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="brand">Hallucination Lab</div>
+  <div class="header-right">
+    <span class="progress-label" id="progressLabel">0 / 0</span>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<div class="main" id="app"></div>
+
+<!-- Save Toast -->
+<div class="save-toast" id="saveToast">已保存</div>
+
+<!-- Navigation -->
+<nav>
+  <button class="nav-btn" id="prevBtn" onclick="prev()" disabled>← 上一个</button>
+  <span class="nav-counter" id="navCounter">—</span>
+  <button class="nav-btn" id="nextBtn" onclick="next()" disabled>下一个 →</button>
+</nav>
+
+<script>
+const samples = [];
+let current = -1;
+let transitioning = false;
+
+// ─── API ──────────────────────────────────────────────────────
+
+async function fetchSamples() {
+  const res = await fetch('/api/samples');
+  const data = await res.json();
+  samples.push(...data.samples);
+  updateProgress(data.stats);
+  if (samples.length === 0) { renderEmpty(); return; }
+  // Resume at first unannotated
+  const idx = samples.findIndex(s => !s.human_label);
+  goTo(idx >= 0 ? idx : 0);
+}
+
+async function saveCurrent() {
+  const s = samples[current];
+  if (!s) return;
+  try {
+    await fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sample_id: s.sample_id,
+        human_label: s.human_label || '',
+        human_type: s.human_type || '',
+      }),
+    });
+    showToast('已保存');
+    updateProgress();
+  } catch {
+    showToast('保存失败');
+  }
+}
+
+// ─── Rendering ────────────────────────────────────────────────
+
+function renderDetail(s) {
+  const app = document.getElementById('app');
+  const imgUrl = s.image ? `/api/image?path=${encodeURIComponent(s.image)}` : '';
+
+  app.innerHTML = `
+    <div class="image-panel">
+      ${imgUrl
+        ? `<img src="${imgUrl}" alt="" class="loading" onload="this.classList.remove('loading');this.classList.add('loaded')" onerror="this.outerHTML='<div class=image-placeholder>图片加载失败</div>'">`
+        : `<div class="image-placeholder">无图片</div>`}
+    </div>
+    <div class="detail-panel">
+      <div class="detail-scroll" id="detailScroll">
+        <div class="sample-meta">
+          <span class="model-badge">${esc(s.model)}</span>
+          <span class="meta-divider"></span>
+          <span class="meta-pid">PID ${esc(s.pid)}</span>
+          <span class="sample-id">${esc(s.sample_id)}</span>
+        </div>
+
+        <div class="field">
+          <div class="field-label">问题</div>
+          <div class="field-value">${esc(s.question)}</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">标准答案</div>
+          <div class="field-value gt">${esc(s.gt_answer)}</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">模型回答</div>
+          <div class="field-value response">${esc(s.model_response)}</div>
+        </div>
+
+        <div class="annotation-area">
+          <div class="field-label">标注</div>
+          <div class="label-group">
+            <button class="label-btn ${s.human_label === '0' ? 'selected-no' : ''}" data-v="0" onclick="setLabel(0)">
+              <span class="check">✓</span>无幻觉 <span class="kbd">[1]</span>
+            </button>
+            <button class="label-btn ${s.human_label === '1' ? 'selected-yes' : ''}" data-v="1" onclick="setLabel(1)">
+              <span class="check">✗</span>有幻觉 <span class="kbd">[2]</span>
+            </button>
+          </div>
+          <div class="type-hint">幻觉类型</div>
+          <div class="type-group">
+            <button class="type-btn ${s.human_type === 'faithfulness' ? 'selected' : ''}"
+                    onclick="setType('faithfulness')" ${s.human_label !== '1' ? 'disabled' : ''}>
+              Faithfulness <span class="kbd">[3]</span>
+            </button>
+            <button class="type-btn ${s.human_type === 'factuality' ? 'selected' : ''}"
+                    onclick="setType('factuality')" ${s.human_label !== '1' ? 'disabled' : ''}>
+              Factuality <span class="kbd">[4]</span>
+            </button>
+            <button class="type-btn ${s.human_type === 'logical' ? 'selected' : ''}"
+                    onclick="setType('logical')" ${s.human_label !== '1' ? 'disabled' : ''}>
+              Logical <span class="kbd">[5]</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEmpty() {
+  document.getElementById('app').innerHTML = `<div class="empty-state">暂无样本数据</div>`;
+}
+
+function renderDone() {
+  document.getElementById('app').innerHTML = `
+    <div class="done-state">
+      <div class="icon">✓</div>
+      <p>所有样本已标注完成</p>
+      <div class="sub">共 ${samples.length} 条</div>
+    </div>
+  `;
+}
+
+// ─── Navigation ────────────────────────────────────────────────
+
+function goTo(index) {
+  if (index < 0 || index >= samples.length || transitioning) return;
+  transitioning = true;
+  current = index;
+  const s = samples[index];
+  renderDetail(s);
+  const counter = document.getElementById('navCounter');
+  counter.textContent = `${index + 1} / ${samples.length}`;
+  document.getElementById('prevBtn').disabled = index <= 0;
+  document.getElementById('nextBtn').disabled = index >= samples.length - 1;
+
+  // Render LaTeX formulas
+  if (window.renderMathInElement) {
+    renderMathInElement(document.getElementById('detailScroll'), {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      throwOnError: false,
+    });
+  }
+
+  setTimeout(() => { transitioning = false; }, 250);
+}
+
+function prev() { goTo(current - 1); }
+function next() { goTo(current + 1); }
+
+// ─── Annotation Actions ──────────────────────────────────────
+
+function setLabel(v) {
+  const s = samples[current];
+  if (!s) return;
+  s.human_label = String(v);
+  if (v === 0) s.human_type = '';
+  saveCurrent().then(() => {
+    renderDetail(samples[current]);
+    updateProgress();
+  });
+}
+
+function setType(t) {
+  const s = samples[current];
+  if (!s || s.human_label !== '1') return;
+  s.human_type = s.human_type === t ? '' : t;
+  saveCurrent().then(() => {
+    renderDetail(samples[current]);
+  });
+}
+
+// ─── Progress ─────────────────────────────────────────────────
+
+function updateProgress(stats) {
+  if (!stats) {
+    const annotated = samples.filter(x => x.human_label).length;
+    stats = { total: samples.length, annotated };
+  }
+  document.getElementById('progressLabel').textContent = `${stats.annotated} / ${stats.total}`;
+  const pct = stats.total > 0 ? (stats.annotated / stats.total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ─── Toast ────────────────────────────────────────────────────
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('saveToast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('visible'), 1500);
+}
+
+// ─── Utilities ────────────────────────────────────────────────
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ─── Keyboard ─────────────────────────────────────────────────
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const s = samples[current];
+  if (!s) return;
+  switch (e.key) {
+    case '1': setLabel(0); break;
+    case '2': setLabel(1); break;
+    case '3': if (s.human_label === '1') setType('faithfulness'); break;
+    case '4': if (s.human_label === '1') setType('factuality'); break;
+    case '5': if (s.human_label === '1') setType('logical'); break;
+    case 'ArrowLeft':  if (current > 0) prev(); break;
+    case 'ArrowRight': if (current < samples.length - 1) next(); break;
+    default: return;
+  }
+  e.preventDefault();
+});
+
+// ─── Init ─────────────────────────────────────────────────────
+
+fetchSamples();
+</script>
+</body>
+</html>
