@@ -82,7 +82,7 @@ HuggingFace Parquet 格式，每条包含：
 
 ### 4.1 主检测：GPT Judge
 
-复用现有 **MMHal-Bench 0-6 评分协议** \cite{sunAligningLargeMultimodal2023}（`evaluation/detectors/gpt_judge.py`），针对医学场景做 prompt 特化：
+复用现有 **MMHal-Bench 0-6 评分协议** \cite{sunAligningLargeMultimodal2023}（`evaluation/judge.py`），针对医学场景做 prompt 特化：
 
 - **任务描述**：提示 Judge 当前是放射科医学 VQA，要求关注视觉内容与医学知识的一致性
 - **幻觉类型分类**：始终启用三分类（faithfulness / factuality / logical）
@@ -97,7 +97,7 @@ with the visual content of the image and with established medical and anatomical
 
 ### 4.2 分层评估
 
-VQA-RAD 额外按答案类型分层统计幻觉率（`evaluation/runners/vqarad.py`）：
+VQA-RAD 额外按答案类型分层统计幻觉率（`evaluation/run_vqarad.py`）：
 
 | 指标 | 说明 |
 |------|------|
@@ -128,13 +128,13 @@ hallucination-of-mllm/
 │   └── VQA-RAD/data/          # HF Parquet 文件（需下载）
 │
 ├── evaluation/
-│   ├── detectors/
-│   │   └── gpt_judge.py       # 修改：增加 vqarad prompt 分支
-│   └── runners/
-│       └── vqarad.py          # VQA-RAD 评估 runner
+│   ├── judge.py               # GPT Judge 裁判逻辑
+│   └── run_vqarad.py          # VQA-RAD 评估 runner
 │
 ├── configs/
-│   └── config.py              # 修改：添加 VQARAD_DATA_DIR
+│
+├── configs/
+│   └── config.py              # 全局配置
 │
 └── main.py                    # 修改：增加 vqarad 数据集支持
 ```
@@ -146,7 +146,7 @@ data/vqarad_loader.py
     ↓ load_vqarad()
 list[dict]  # id, image, question, answer, answer_type
     ↓
-evaluation/runners/vqarad.py
+evaluation/run_vqarad.py
     ├─ load_response_subset()  → 过滤有模型回答的样本
     ├─ GPTJudge.judge()        → 逐条评估（医学特化 prompt）
     └─ run_resumable_batch()   → 批处理 + 断点续跑
@@ -174,7 +174,7 @@ snapshot_download('flaviagiammarino/vqa-rad', repo_type='dataset', local_dir='da
 python scripts/generate_responses.py \
     --dataset vqarad \
     --model gpt-5.4-mini \
-    --output responses/gpt5.4-mini_vqarad.json
+    --output responses/gpt-5.4-mini_vqarad.json
 ```
 
 VQA-RAD 的 prompt（`scripts/generate_responses.py`, `_build_prompt`）：
@@ -194,8 +194,8 @@ Please provide a detailed answer based on what you observe in the medical image.
 python main.py \
     --dataset vqarad \
     --model gpt-5.4-mini \
-    --response-files gpt-5.4-mini:vqarad=responses/gpt5.4-mini_vqarad.json \
-    --workers 4
+    --response-files gpt-5.4-mini:vqarad=responses/gpt-5.4-mini_vqarad.json \
+    --workers 10
 ```
 
 ### 6.4 多模型同时评估
@@ -204,10 +204,10 @@ python main.py \
 python main.py \
     --dataset all \
     --response-files \
-    gpt-5.4-mini:pope=responses/gpt5.4-mini_pope_random.json \
-    gpt-5.4-mini:mathvista=responses/gpt5.4-mini_mathvista.json \
-    gpt-5.4-mini:vqarad=responses/gpt5.4-mini_vqarad.json \
-    --workers 4
+    gpt-5.4-mini:pope=responses/gpt-5.4-mini_pope_random.json \
+    gpt-5.4-mini:mathvista=responses/gpt-5.4-mini_mathvista.json \
+    gpt-5.4-mini:vqarad=responses/gpt-5.4-mini_vqarad.json \
+    --workers 10
 ```
 
 ---

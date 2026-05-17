@@ -112,12 +112,10 @@ class GPTJudge:
     def __init__(
         self,
         model: Optional[str] = None,
-        temperature: Optional[float] = None,
         hallucination_threshold: int = 3,
     ):
         self.model = model if model is not None else config.GPT_JUDGE_MODEL
         self.client = create_model_client(self.model)
-        self.temperature = temperature if temperature is not None else config.GPT_JUDGE_TEMPERATURE
         self.hallucination_threshold = hallucination_threshold
 
     def judge(
@@ -135,7 +133,6 @@ class GPTJudge:
             prompt=prompt,
             image_path=image_path,
             system_prompt=JUDGE_SYSTEM_PROMPT,
-            temperature=self.temperature,
             require_image=False,
             retries=retries,
         )
@@ -256,6 +253,9 @@ def run_gpt_judge(
     samples: list[dict],
     id_key: str,
     workers: int = 1,
+    judge_model: Optional[str] = None,
+    output_dir: Optional[str] = None,
+    output_name: Optional[str] = None,
     compute_summary: Optional[Callable] = None,
     extra_detail_fields: Optional[Callable[[dict], dict]] = None,
     log_extra: Optional[Callable[[dict], None]] = None,
@@ -280,11 +280,12 @@ def run_gpt_judge(
     total = len(samples)
 
     LOGGER.info("[3/4] Initializing GPT Judge...")
-    judge = GPTJudge(model=config.GPT_JUDGE_MODEL, temperature=config.GPT_JUDGE_TEMPERATURE)
+    judge = GPTJudge(model=judge_model or config.GPT_JUDGE_MODEL)
     LOGGER.info("  GPT Judge ready (model: %s, api_method: %s)", judge.model, judge.client.api_method)
 
     LOGGER.info("[4/4] Running GPT Judge (%s samples)...", total)
-    out_path = os.path.join(config.OUTPUT_DIR, f"{model_name}_{dataset_name}.json")
+    out_dir = output_dir or config.OUTPUT_DIR
+    out_path = os.path.join(out_dir, output_name or f"{model_name}_{dataset_name}.json")
     sample_ids = [str(s.get(id_key, "")) for s in samples]
     completed_details = load_existing_details(out_path, id_key, set(sample_ids))
 
@@ -325,4 +326,4 @@ def run_gpt_judge(
     )
     LOGGER.info("\nSaved to: %s", out_path)
 
-    return {"model_name": model_name, "dataset": dataset_name, "metrics": metrics}
+    return {"model_name": model_name, "dataset": dataset_name, "metrics": metrics, "details": details}

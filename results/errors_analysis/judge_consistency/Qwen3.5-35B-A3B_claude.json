@@ -1,0 +1,1022 @@
+{
+  "model_name": "Qwen3.5-35B-A3B",
+  "dataset": "mathvista",
+  "method": "gpt-judge",
+  "metrics": {
+    "total_samples": 100,
+    "completed_samples": 100,
+    "hallucination_rate": 0.18,
+    "avg_score": 4.61,
+    "n_hallucinated": 18,
+    "n_valid": 100,
+    "type_counts": {
+      "faithfulness": 10,
+      "factuality": 2,
+      "logical": 6,
+      "none": 82,
+      "error": 0
+    }
+  },
+  "details": [
+    {
+      "pid": "7",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What time is shown? Answer by typing a time word, not a number. It is (_) after eight.\nC",
+      "gt_answer": "quarter",
+      "model_response": "The hour hand is past the 8, and the minute hand is on the 3. This indicates the time is 8:15.\n15 minutes is a quarter of an hour.\nSo, the time is a quarter after eight.\n\nThe correct option is (B).\n\nB",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the time as 8:15 and reasons that 15 minutes is a quarter of an hour, selecting 'quarter' which matches the ground truth. The reasoning is accurate and grounded in the image."
+    },
+    {
+      "pid": "26",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Black greater than Deep Sky Blue?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "no",
+      "model_response": "The \"Black\" bar has a value of approximately 11, while the \"Deep Sky Blue\" bar has a value of approximately 18. Therefore, Black is not greater than Deep Sky Blue.\n\nB",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model's final answer (B) is correct, but it states Deep Sky Blue is approximately 18, when the chart shows Deep Sky Blue around 17-18 and Black around 11. Actually, Black appears to be around 11 and Deep Sky Blue around 17, so the values are roughly correct. However the answer is correct. Re-evaluating: the values stated seem reasonable based on the chart. The conclusion is correct. No clear hallucination."
+    },
+    {
+      "pid": "28",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: $\\overline{AB}$ is a diameter, $AC=8$ inches, and $BC=15$ inches. Find the radius of the",
+      "gt_answer": "8.5",
+      "model_response": "The problem states that $\\overline{AB}$ is a diameter. According to the geometric theorem that an angle inscribed in a semicircle is a right angle, the angle $\\angle ACB$ is $90^\\circ$. Therefore, triangle $\\triangle ABC$ is a right-angled triangle with hypotenuse $\\overline{AB}$.\n\nWe can use the Py",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly applies Thales' theorem and the Pythagorean theorem to find the diameter and then the radius. The reasoning is clear, accurate, and consistent with the image."
+    },
+    {
+      "pid": "31",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Are there more big red rubber double buss in front of the large red double bus than big ",
+      "gt_answer": "No",
+      "model_response": "The count of \"big red rubber double buss in front of the large red double bus\" is 0, as there are no other buses in the scene. The count of \"big green things\" is 1 (the green car). Since 0 is not greater than 1, the answer is No.\n\n(B)",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies that there are no red rubber double buses in front of a large red double bus, and correctly arrives at the answer No. However, it incorrectly describes the green object as a car rather than properly addressing it, though this doesn't affect the final answer. The reasoning is consistent with the image."
+    },
+    {
+      "pid": "33",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Use a sector paper sheet with a central angle of 120.0 and a radius of 6.0 to roll into ",
+      "gt_answer": "4πcm",
+      "model_response": "The problem asks for the bottom perimeter (circumference) of the cone formed by rolling a sector.\n\n1.  **Identify the relationship:** When a sector is rolled into a cone, the arc length of the sector becomes the circumference of the cone's base.\n2.  **Calculate the arc length of the sector:**\n    * ",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the relationship between the sector's arc length and the cone's base circumference, applies the correct formula, and arrives at the correct answer 4π (option C) with clear reasoning."
+    },
+    {
+      "pid": "45",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: An administrator at the Department of Motor Vehicles (DMV) tracked the av",
+      "gt_answer": "-3",
+      "model_response": "To find the rate of change between August and September, we look at the waiting times for those two months:\n\n*   **August:** 17 minutes\n*   **September:** 14 minutes\n\nThe rate of change is calculated as the change in waiting time divided by the change in time (months).\n\nRate of change = (Waiting tim",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the waiting times for August (17) and September (14) from the table and computes the rate of change as -3 minutes per month, matching the ground truth."
+    },
+    {
+      "pid": "47",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all rubber balls. Subtract all yellow shiny things. How many obj",
+      "gt_answer": "6",
+      "model_response": "The objects to subtract are:\n- Rubber balls: The yellow sphere and the cyan sphere.\n- Yellow shiny things: The yellow cylinder.\n\nThe remaining objects are:\n1.  Blue cube\n2.  Blue cylinder\n3.  Red cylinder (shiny, back)\n4.  Purple sphere\n5.  Red cylinder (matte, front)\n6.  Cyan cube\n\nTotal count: 6\n\n",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The final answer of 6 matches the ground truth, but the reasoning describes objects not in the image (e.g., yellow sphere, cyan sphere, red cylinders, blue cylinder, purple sphere as separate from what's shown). The actual image contains a blue cube, yellow cylinder, blue cylinder, red metal cylinder, purple sphere, yellow shiny cylinder, cyan sphere, red matte cylinder, and cyan cube. The model's object list is inconsistent with the image."
+    },
+    {
+      "pid": "72",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: A real estate agent drove around the neighborhood and counted the number ",
+      "gt_answer": "1",
+      "model_response": "To find the number of blocks with exactly 36 houses, look at the stem-and-leaf plot:\n\n1.  Find the **Stem** row for the tens digit, which is **3**.\n2.  Look at the **Leaf** column in that row for the ones digit, which is **6**.\n3.  The leaves in the row for stem 3 are: 0, 1, 2, 4, **6**, 8.\n4.  The ",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the stem-and-leaf plot structure and finds that 36 appears once in the data (stem 3, leaf 6). The answer of 1 matches the ground truth, and the reasoning is accurate based on the image."
+    },
+    {
+      "pid": "81",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the value of r at theta=3*pi/2?",
+      "gt_answer": "-1",
+      "model_response": "The graph shows a polar plot. The angle $\\theta = 3\\pi/2$ corresponds to $270^\\circ$. Looking at the graph, at the $270^\\circ$ mark (at the bottom), the blue curve touches the center point. The center point represents $r = 0$.\n\n0",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The curve appears to be r=sin(θ), which at θ=3π/2 gives r=-1, not 0. The model incorrectly concludes r=0 based on misreading the polar plot. The answer 0 contradicts the ground truth of -1."
+    },
+    {
+      "pid": "82",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: A square is inscribed in a circle of area 18$\\pi$ square units. Find the length of a sid",
+      "gt_answer": "6",
+      "model_response": "The area of the circle is given by the formula $A = \\pi r^2$.\nGiven $A = 18\\pi$, we can solve for the radius $r$:\n$$ \\pi r^2 = 18\\pi $$\n$$ r^2 = 18 $$\n$$ r = \\sqrt{18} = 3\\sqrt{2} $$\n\nThe diameter of the circle is $d = 2r = 2(3\\sqrt{2}) = 6\\sqrt{2}$.\n\nFor a square inscribed in a circle, the diagonal",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly computes the radius, diameter, and side length with clear reasoning, arriving at the correct answer C (6)."
+    },
+    {
+      "pid": "90",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all yellow matte blocks. Subtract all tiny brown cylinders. How ",
+      "gt_answer": "5",
+      "model_response": "5",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 5 matches the ground truth and is consistent with the image content."
+    },
+    {
+      "pid": "95",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, the straight lines AB and CD intersect at point O, OD bisects ∠A",
+      "gt_answer": "80°",
+      "model_response": "The problem asks for the measure of $\\angle EOB$.\n\n1.  **Identify Vertical Angles:** Since lines $AB$ and $CD$ intersect at $O$, $\\angle AOD$ and $\\angle BOC$ are vertical angles. Therefore, they are equal.\n    $$ \\angle AOD = \\angle BOC = 50^\\circ $$\n\n2.  **Use Angle Bisector Property:** We are giv",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies vertical angles, applies the angle bisector property, and uses the straight line property to arrive at 80°, matching the ground truth. The reasoning is detailed and accurate."
+    },
+    {
+      "pid": "96",
+      "question": "Hint: Please answer the question requiring a floating-point number with one decimal place and provide the final value, e.g., 1.2, 1.3, 1.4, at the end.\nQuestion: How many times Dissatisfied more than ",
+      "gt_answer": "3.9",
+      "model_response": "3.9",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 3.9 correctly matches the ground truth (78/20 = 3.9), consistent with the chart."
+    },
+    {
+      "pid": "100",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the sum of all the values in the ruling group?",
+      "gt_answer": "12",
+      "model_response": "The \"ruling\" group has two bars:\n- The cyan bar (\"ace\") has a value of 9.\n- The red bar (\"tin\") has a value of 3.\n\nSum = 9 + 3 = 12.\n\n12",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the values in the ruling group (ace=9, tin=3) and accurately computes the sum as 12, matching the ground truth."
+    },
+    {
+      "pid": "104",
+      "question": "Hint: Please answer the question requiring a floating-point number with one decimal place and provide the final value, e.g., 1.2, 1.3, 1.4, at the end.\nQuestion: What is the fraction of females facing",
+      "gt_answer": "0.8",
+      "model_response": "0.8",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer 0.8 matches the ground truth exactly, indicating correct visual reasoning about the fraction of females facing the camera."
+    },
+    {
+      "pid": "105",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Does Dark Violet have the minimum area under the curve?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "(A)",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 'A' (yes) matches the ground truth. The response is minimal but correct, providing the right option without additional analysis or false claims."
+    },
+    {
+      "pid": "115",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "3",
+      "model_response": "The two players are Daley Blind (born in 1990) and Edinson Cavani (born in 1987).\n\n3 years",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer of 3 years is correct, matching the ground truth. The identification of the players is plausible given the jerseys (Netherlands #15 Blind and Uruguay #7 Cavani)."
+    },
+    {
+      "pid": "128",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all large metal blocks. Subtract all yellow cylinders. How many ",
+      "gt_answer": "6",
+      "model_response": "6",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 6 matches the ground truth and is consistent with the image."
+    },
+    {
+      "pid": "143",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, in the parallelogram ABCD, CE bisects ∠BCD and it intersects the",
+      "gt_answer": "3",
+      "model_response": "The problem asks for the length of side $AB$ in the parallelogram $ABCD$.\n\n1.  **Identify Parallel Lines and Transversal:** Since $ABCD$ is a parallelogram, side $AD$ is parallel to side $BC$ ($AD \\parallel BC$). The line segment $CE$ acts as a transversal intersecting these parallel lines.\n2.  **Al",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the geometric properties, provides clear step-by-step reasoning, and arrives at the correct answer (C) 3."
+    },
+    {
+      "pid": "160",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find x.\nChoices:\n(A) 10\n(B) 11\n(C) 12\n(D) 13",
+      "gt_answer": "12",
+      "model_response": "To find the value of $x$, we can use the Pythagorean theorem, which states that for a right-angled triangle with legs $a$ and $b$ and hypotenuse $c$:\n$$a^2 + b^2 = c^2$$\n\nFrom the image, we have:\n*   One leg ($a$) = 9\n*   The other leg ($b$) = $x$\n*   The hypotenuse ($c$) = 15\n\nSubstitute these valu",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the right triangle with legs 9 and x, hypotenuse 15, applies the Pythagorean theorem, and arrives at x=12 (option C), matching the ground truth."
+    },
+    {
+      "pid": "164",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, in ▱ABCD, CE ⊥ AB, point E is the foot of perpendicular, if ∠D =",
+      "gt_answer": "35°",
+      "model_response": "The problem asks for the measure of $\\angle BCE$ given that $ABCD$ is a parallelogram, $CE \\perp AB$, and $\\angle D = 55^\\circ$.\n\n1.  **Use the property of parallelograms:** In a parallelogram, opposite angles are equal. Therefore, $\\angle B = \\angle D$.\n    Since $\\angle D = 55^\\circ$, we have $\\an",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly applies parallelogram properties and triangle angle sum to arrive at 35°, matching the ground truth, with clear reasoning."
+    },
+    {
+      "pid": "167",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the biggest zero of this function?",
+      "gt_answer": "2",
+      "model_response": "The function is given by $f(x) = \\frac{x^3 + 3x^2 - 6x - 8}{4}$. To find the zeros, we set $f(x) = 0$, which means the numerator must be zero:\n$x^3 + 3x^2 - 6x - 8 = 0$\n\nLooking at the graph, the function intersects the x-axis at three points. We can estimate these points visually and verify them al",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies all three zeros from the graph, verifies them algebraically, and correctly identifies 2 as the largest zero, matching the ground truth."
+    },
+    {
+      "pid": "197",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: How many sequences have negative Influence Scores?",
+      "gt_answer": "2",
+      "model_response": "Based on the chart, the \"Influence Scores\" are plotted on the y-axis. The x-axis represents different \"Sequences\". There are two bars for each sequence: blue for \"English Followed by Mandarin\" and orange for \"Mandarin Followed by English\".\n\nA negative Influence Score corresponds to a bar extending b",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model incorrectly identifies 6 negative bars when only 2 are clearly negative (sequences 1 and 6). The answer of 6 is wrong; the correct answer is 2."
+    },
+    {
+      "pid": "204",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: از سمت راست تصویر درب دوم چند شیشه بدون رنگ داره؟",
+      "gt_answer": "12",
+      "model_response": "The second door from the right is the one located towards the left-center of the image (between the far-left door and the wall with the painting). Looking at the grid of panes below the stained glass arch:\n- There are two columns of panes.\n- There are 5 rows of panes in each column.\n- Total panes = ",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model incorrectly counts the panes and arrives at 10, which contradicts the correct answer of 12. The description of the pane structure is inaccurate."
+    },
+    {
+      "pid": "215",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Layla went on a camping trip and logged the number of miles she hiked eac",
+      "gt_answer": "8",
+      "model_response": "To find the range of the numbers, I need to subtract the smallest number of miles hiked from the largest number of miles hiked.\n\n1.  **Identify the numbers:** The numbers of miles hiked are 6, 5, 3, 8, 10, and 2.\n2.  **Find the maximum:** The largest number is 10 (on Monday).\n3.  **Find the minimum:",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer is correct (8) and the reasoning identifies the correct max (10) and min (2). Minor inaccuracy in attributing days but the core values match the chart."
+    },
+    {
+      "pid": "221",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, A, B, C are three points on ⊙O, ∠ACB = 25.0, then the degree of ",
+      "gt_answer": "65°",
+      "model_response": "To find the degree of $\\angle BAO$, we can follow these steps:\n\n1.  **Find the central angle $\\angle AOB$:**\n    The inscribed angle theorem states that the measure of an inscribed angle is half the measure of the central angle that subtends the same arc. Here, the inscribed angle is $\\angle ACB$ an",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly applies the inscribed angle theorem and isosceles triangle properties to arrive at 65°, matching the ground truth, with clear step-by-step reasoning."
+    },
+    {
+      "pid": "224",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is this a periodic function?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "No",
+      "model_response": "The graph shows the function $g(x) = 0.5^x$, which is an exponential decay function. A periodic function is one that repeats its values in regular intervals or periods (like a sine or cosine wave). This graph is strictly decreasing and never repeats its pattern; it approaches zero as $x$ goes to pos",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer with accurate analysis of the exponential decay function and proper explanation of why it is not periodic."
+    },
+    {
+      "pid": "226",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What time is shown? Answer by typing a time word, not a number. It is (_) past three.\nCh",
+      "gt_answer": "quarter",
+      "model_response": "The digital clock shows the time 3:15.\n15 minutes is equal to a quarter of an hour.\nSince the minutes are past the hour, the time is \"quarter past three\".\nThe sentence to complete is \"It is (_) past three.\"\nThe word that fits in the blank is \"quarter\".\n\n(B)",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies 3:15 on the clock and reasons that 15 minutes equals a quarter past three, matching the ground truth answer 'quarter' (option B)."
+    },
+    {
+      "pid": "229",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What is the highest lysine level given?\nChoices:\n(A) 0.33%\n(B) 0.31%\n(C) 0.29%\n(D) 0.32%",
+      "gt_answer": "0.30%",
+      "model_response": "E",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identified option E (0.30%) as the highest lysine level shown in the document, matching the ground truth answer."
+    },
+    {
+      "pid": "234",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: In the figure shown above, AC = 6. What is the length of segment AB?\nChoices:\n(A) 3\n(B) ",
+      "gt_answer": "6",
+      "model_response": "The triangle shown has two angles given as $60^{\\circ}$ (at vertex A and vertex B).\nThe sum of angles in a triangle is $180^{\\circ}$. Therefore, the third angle at vertex C is:\n$180^{\\circ} - 60^{\\circ} - 60^{\\circ} = 60^{\\circ}$.\n\nSince all three angles are $60^{\\circ}$, the triangle is an equilate",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the two 60° angles, deduces the third is 60°, concludes the triangle is equilateral, and correctly states AB = 6, matching the ground truth."
+    },
+    {
+      "pid": "239",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Sky Blue the minimum?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Sky Blue has the smallest value (essentially 0) on the chart, making it the minimum. The answer 'A' (yes) is correct and consistent with the visual evidence."
+    },
+    {
+      "pid": "251",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all green balls. Subtract all shiny things. How many objects are",
+      "gt_answer": "4",
+      "model_response": "The objects are:\n1.  Green shiny sphere (Remove: green ball, shiny)\n2.  Cyan shiny cube (Remove: shiny)\n3.  Gold shiny sphere (Remove: shiny)\n4.  Green matte cube (Keep)\n5.  Brown matte sphere (Keep)\n6.  Cyan matte sphere (Keep)\n7.  Grey matte cylinder (Keep)\n8.  Purple shiny sphere (Remove: shiny)\n",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model arrives at the correct answer (4) but misidentifies objects in the image. The image shows a green shiny sphere, cyan shiny cube, brown shiny sphere, green matte cube, brown matte sphere, cyan matte sphere, gray matte cylinder, and purple shiny sphere. The model invented a 'gold shiny sphere' that doesn't exist and missed/misidentified objects, though the final count happens to be correct."
+    },
+    {
+      "pid": "271",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find y\nChoices:\n(A) 3\n(B) 4.5\n(C) 5\n(D) 6",
+      "gt_answer": "5",
+      "model_response": "The problem shows three parallel lines intersected by two transversals.\n\n1.  **Analyze the left transversal:** The segments cut by the parallel lines are marked with double tick marks. This indicates that the segments are congruent (equal in length).\n    *   Top segment: $20 - 5x$\n    *   Bottom seg",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the geometric setup, applies the parallel lines theorem, and solves for y=5, matching the ground truth. The reasoning is thorough and consistent with the image."
+    },
+    {
+      "pid": "282",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What percent of the sun is showing?",
+      "gt_answer": "100",
+      "model_response": "100",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer correctly matches the ground truth, as the sun is fully visible in the image."
+    },
+    {
+      "pid": "285",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, it is known that AB is the diameter of ⊙O, if the degree of ∠BOC",
+      "gt_answer": "25°",
+      "model_response": "The problem asks for the measure of angle $\\angle A$ (which is $\\angle BAC$) given that $AB$ is the diameter of circle $O$ and $\\angle BOC = 50^\\circ$.\n\n**Method 1: Using the Inscribed Angle Theorem**\n1.  Identify the arc subtended by the angles. Both the central angle $\\angle BOC$ and the inscribed",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the answer as 25° (option D) and provides two valid mathematical methods to arrive at the solution, both grounded in the geometric properties shown in the figure."
+    },
+    {
+      "pid": "297",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of green buss greater than the number of blue school buss?\nChoices:\n(A) Ye",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer A (Yes) is correct as there is a green bus and no blue school bus visible. Minimal but accurate."
+    },
+    {
+      "pid": "301",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which model performs the best overall across the three stages in terms of Messenger trai",
+      "gt_answer": "Dynalang",
+      "model_response": "Based on the provided charts and the caption, the yellow line representing **Dynalang** consistently achieves the highest scores across all three stages, particularly excelling in Stage 3 where other models fail. The caption also explicitly states that \"Dynalang outperforms...\".\n\nA",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies Dynalang as the best performer, accurately references the chart and caption, and provides the correct answer A."
+    },
+    {
+      "pid": "345",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: How many kites are there?",
+      "gt_answer": "25",
+      "model_response": "The image shows 5 groups of kites. Each group contains 5 kites.\n5 groups * 5 kites/group = 25 kites.\n\n25",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies 5 groups of 5 kites each, totaling 25, matching the ground truth."
+    },
+    {
+      "pid": "349",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which capability boasts the highest proportion (%)?\nChoices:\n(A) Rec\n(B) OCR\n(C) Know\n(D",
+      "gt_answer": "Rec",
+      "model_response": "The chart labeled (a) displays the proportion of each capability. The bar for \"Rec (Recognition)\" is the tallest, with a value of 68.8%, which is higher than all other categories (OCR at 44.0%, Know at 38.5%, etc.).\n\nA",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies Rec as the highest with 68.8%, and accurately cites other values from the chart."
+    },
+    {
+      "pid": "353",
+      "question": "Hint: Please answer the question requiring a floating-point number with one decimal place and provide the final value, e.g., 1.2, 1.3, 1.4, at the end.\nQuestion: At time $t=0$ a tank contains $Q_0 \\ma",
+      "gt_answer": "130.4",
+      "model_response": "The differential equation describing the amount of salt $Q(t)$ is:\n$$ \\frac{dQ}{dt} = (\\text{rate in}) - (\\text{rate out}) $$\n$$ \\frac{dQ}{dt} = \\left( \\frac{1}{4} \\text{ lb/gal} \\right)(r \\text{ gal/min}) - \\left( \\frac{Q(t)}{100 \\text{ gal}} \\right)(r \\text{ gal/min}) $$\n$$ \\frac{dQ}{dt} = \\frac{r",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly sets up the ODE, solves it, and arrives at the correct answer 130.4 with clear reasoning grounded in the problem."
+    },
+    {
+      "pid": "364",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, AB is the diameter of ⊙O, and points C and D are on ⊙O. If ∠ABD ",
+      "gt_answer": "40°",
+      "model_response": "The problem asks for the measure of $\\angle BCD$ given that $AB$ is the diameter of circle $O$ and $\\angle ABD = 50^\\circ$.\n\n1.  **Identify the arc subtended by $\\angle ABD$**: The inscribed angle $\\angle ABD$ subtends the arc $AD$. According to the inscribed angle theorem, the measure of the arc is",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly applies the inscribed angle theorem and Thales' theorem with clear reasoning, arriving at the correct answer of 40° (option C)."
+    },
+    {
+      "pid": "368",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of yellow matte school buss greater than the number of big yellow metal ca",
+      "gt_answer": "No",
+      "model_response": "The number of yellow matte school buss is 0 (the yellow bus is metallic and a double-decker, not a matte school bus). The number of big yellow metal cars is 1 (the large gold/yellow station wagon in the front). Therefore, 0 is not greater than 1.\n\nB",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that there are no yellow matte school buses (the bus is metallic/shiny) and that there is a big yellow metal car, arriving at the correct answer B."
+    },
+    {
+      "pid": "371",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图，在Rt△ABC中，∠ABC＝90°，点D、E、F分别是边AB、BC、CA的中点，若DE+BF＝8，则BF的值为（）\nChoices:\n(A) 3\n(B) 4\n(C) 5\n",
+      "gt_answer": "4",
+      "model_response": "**Analysis:**\n1.  **Identify the geometric relationships:**\n    *   In $\\triangle ABC$, $D$ and $E$ are the midpoints of sides $AB$ and $BC$ respectively. According to the Triangle Midsegment Theorem, the segment connecting the midpoints of two sides of a triangle is parallel to the third side and i",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly applies the midsegment theorem and the right triangle median property, arriving at BF=4, matching the ground truth."
+    },
+    {
+      "pid": "374",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the sum of the accuracies of the algorithms calf and ivory?",
+      "gt_answer": "13",
+      "model_response": "The accuracy for the \"ivory\" algorithm is 9.\nThe accuracy for the \"calf\" algorithm is 4.\nThe sum is 9 + 4 = 13.\n\n13",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the accuracy values from the bar chart (ivory=9, calf=4) and correctly sums them to 13, matching the ground truth."
+    },
+    {
+      "pid": "380",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: For how many years that the percentage value over 4?",
+      "gt_answer": "6",
+      "model_response": "6",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that there are 6 years (2005-2010) where the percentage value is over 4%, matching the ground truth."
+    },
+    {
+      "pid": "388",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Express the ratio of $\\tan M$ as a decimal to the nearest hundredth.\nChoices:\n(A) 0.38\n(",
+      "gt_answer": "0.42",
+      "model_response": "To find the ratio of $\\tan M$, we need to use the definition of the tangent function in a right-angled triangle. The tangent of an angle is the ratio of the length of the opposite side to the length of the adjacent side.\n\n$$ \\tan M = \\frac{\\text{Opposite}}{\\text{Adjacent}} $$\n\nFrom the given image:\n",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct identification of opposite and adjacent sides, accurate calculation, and correct answer matching ground truth."
+    },
+    {
+      "pid": "390",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Are there fewer jets that are left of the small brown suv than objects right of the big ",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer 'A' matches the ground truth 'Yes', correctly identifying that there are fewer jets left of the small brown SUV than objects right of the big shiny car."
+    },
+    {
+      "pid": "430",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: The derivative of f(x) at x=0 is ____ that at x=5\nChoices:\n(A) larger than\n(B) equal to\n",
+      "gt_answer": "smaller than",
+      "model_response": "The function is given by $f(x) = |2x - 3| + 1$.\n\nTo find the derivative, we look at the slope of the graph. The graph is composed of two linear rays meeting at a vertex.\nThe vertex occurs where the expression inside the absolute value is zero: $2x - 3 = 0 \\Rightarrow x = 1.5$.\n\n*   **For $x < 1.5$ (",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the function, computes derivatives on both sides of the vertex, and arrives at the correct answer C with sound reasoning consistent with the image."
+    },
+    {
+      "pid": "433",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "5",
+      "model_response": "The two people in the image are King Bhumibol Adulyadej (Rama IX) of Thailand and Queen Sirikit.\n\n*   King Bhumibol was born on December 5, 1927.\n*   Queen Sirikit was born on August 12, 1932.\n\nThe difference in their birth years is 1932 - 1927 = 5. The actual age difference is approximately 4 years",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the individuals, provides accurate birth dates, and arrives at the correct answer of 5 years with clear reasoning."
+    },
+    {
+      "pid": "460",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: If there were fewer leaves in this ecosystem, the first organism to experience change as",
+      "gt_answer": "Crickets",
+      "model_response": "The correct answer is (B).",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer matching ground truth."
+    },
+    {
+      "pid": "465",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Light Green the low median?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that Light Green is the median (low median in a 3-value set), matching the ground truth answer A."
+    },
+    {
+      "pid": "471",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Lily and her friends recorded their scores while playing a board game. Wh",
+      "gt_answer": "8",
+      "model_response": "8",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 8 matches the ground truth. The response is correct but minimal, providing just the answer without explanation."
+    },
+    {
+      "pid": "518",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "4",
+      "model_response": "15 years",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "factuality",
+      "reason": "The model gives a specific numeric answer (15 years) that is incorrect; the actual gap is 4 years."
+    },
+    {
+      "pid": "550",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the accuracy of the algorithm with highest accuracy?",
+      "gt_answer": "8",
+      "model_response": "8",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 8 is correct and matches the ground truth, though it provides only the number without additional explanation."
+    },
+    {
+      "pid": "559",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: what is the highest number shown on the black outer part of the watch?",
+      "gt_answer": "55",
+      "model_response": "55",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies 55 as the highest number on the black outer bezel, matching the ground truth."
+    },
+    {
+      "pid": "566",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图，已知△ABC≌△DEF，CD平分∠BCA，若∠A＝22°，∠CGF＝88°，则∠E的度数是（）\nChoices:\n(A) 26°\n(B) 28°\n(C) 30°\n(D) ",
+      "gt_answer": "26°",
+      "model_response": "The problem asks for the measure of $\\angle E$.\n\n1.  **Identify Corresponding Angles:** Since $\\triangle ABC \\cong \\triangle DEF$, the corresponding angles are equal. Based on the vertex order, $\\angle A = \\angle D$, $\\angle B = \\angle E$, and $\\angle ACB = \\angle DFE$.\n    Given $\\angle A = 22^\\cir",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the geometric configuration, applies the angle bisector property, uses the exterior angle relationship, and arrives at the correct answer of 26° (option A) with clear step-by-step reasoning consistent with the figure."
+    },
+    {
+      "pid": "575",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Lines $l$, $m$, and $n$ are perpendicular bisectors of $\\triangle PQR$ and meet at $T$. ",
+      "gt_answer": "3",
+      "model_response": "The problem states that lines $l$, $m$, and $n$ are perpendicular bisectors of $\\triangle PQR$. This means they intersect at the circumcenter $T$, which is equidistant from the vertices ($PT = QT = RT$).\n\nMore importantly for finding $z$, line $l$ is the perpendicular bisector of the side $PR$. By d",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that the perpendicular bisector divides PR into equal segments, sets z+4=7, and solves z=3, matching the ground truth. The reasoning is well-grounded in the image."
+    },
+    {
+      "pid": "592",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the global maximum of this function?",
+      "gt_answer": "4",
+      "model_response": "The graph shows a periodic function. By observing the peaks of the wave, we can see that the highest points align with the value $y = 4$ on the vertical axis.\n\n4",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the global maximum as 4, matching the ground truth and consistent with the graph's peaks."
+    },
+    {
+      "pid": "604",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Dark Orchid the roughest?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "no",
+      "model_response": "B",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 'B' (no) matches the ground truth, correctly indicating Dark Orchid is not the roughest."
+    },
+    {
+      "pid": "605",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all large green matte cubes. Subtract all big green blocks. How ",
+      "gt_answer": "6",
+      "model_response": "6",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 6 matches the ground truth. The response is correct and concise."
+    },
+    {
+      "pid": "617",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: The magnitude of the acceleration vector a is $10 \\mathrm{~cm} / \\mathrm{",
+      "gt_answer": "9",
+      "model_response": "The acceleration vector $\\mathbf{a}$ is shown acting on a particle moving along a curved path. The acceleration vector can be decomposed into two components: a tangential component ($a_t$) parallel to the velocity vector (tangent to the path) and a normal component ($a_n$) perpendicular to the veloc",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model concludes the acceleration is entirely normal (10 cm/s²), but the correct normal component is 9 cm/s², meaning there is a small tangential component. The reasoning that a is exactly perpendicular to the tangent is incorrect."
+    },
+    {
+      "pid": "619",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the value of f(4)?",
+      "gt_answer": "16",
+      "model_response": "The function given in the graph is $f(x) = 2^x$. To find the value of $f(4)$, substitute $x = 4$ into the equation:\n\n$$f(4) = 2^4 = 2 \\times 2 \\times 2 \\times 2 = 16$$\n\n16",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer with clear reasoning based on the function shown in the image."
+    },
+    {
+      "pid": "634",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图，直线AB，CD交于点O．射线OE平分∠BOC，若∠AOD＝70°，则∠AOE等于（）\nChoices:\n(A) 35°\n(B) 110°\n(C) 135°\n(D) 145",
+      "gt_answer": "145°",
+      "model_response": "The problem asks for the measure of $\\angle AOE$.\n\n1.  **Find $\\angle BOC$**: Since lines $AB$ and $CD$ intersect at $O$, $\\angle BOC$ and $\\angle AOD$ are vertical angles. Vertical angles are equal.\n    $$ \\angle BOC = \\angle AOD = 70^\\circ $$\n\n2.  **Find $\\angle BOE$**: Ray $OE$ bisects $\\angle BO",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer with clear, accurate reasoning grounded in the figure."
+    },
+    {
+      "pid": "644",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What is the missing number in the picture?\nChoices:\n(A) 6\n(B) 8\n(C) 10\n(D) 11",
+      "gt_answer": "6",
+      "model_response": "The pattern for each triangle is: (Bottom Left Number + Bottom Right Number) - Top Number = Center Number.\n\n*   **First Triangle:** $(8 + 4) - 2 = 12 - 2 = 10$. This matches the center number.\n*   **Second Triangle:** $(3 + 2) - 3 = 5 - 3 = 2$. This matches the center number.\n*   **Third Triangle:**",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model's answer (8) is incorrect; the correct answer is 6. The pattern likely is (12+1)-5-2=6 or similar, but the model's derived rule gives wrong final answer, indicating a logical reasoning error."
+    },
+    {
+      "pid": "651",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: For an assignment, Johnny looked at which countries got the most Nobel Pr",
+      "gt_answer": "7",
+      "model_response": "7",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 7 matches the ground truth. Canada had 8 and Italy had 1 in the 1990s, with a difference of 7."
+    },
+    {
+      "pid": "655",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the value of Russia has the highest transport?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Russia has 1.97M, the highest value in the chart, so the answer A (Yes) is correct."
+    },
+    {
+      "pid": "666",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all red objects. Subtract all big green things. How many objects",
+      "gt_answer": "4",
+      "model_response": "4",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 4 matches the ground truth."
+    },
+    {
+      "pid": "678",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find x\nChoices:\n(A) 21\n(B) 34\n(C) 58\n(D) 67",
+      "gt_answer": "58",
+      "model_response": "The triangle shown is a right-angled triangle. We need to find the angle $x$.\n\n1.  Identify the sides relative to angle $x$:\n    *   The side opposite to angle $x$ has a length of 16.\n    *   The side adjacent to angle $x$ has a length of 10.\n\n2.  Use the tangent trigonometric ratio, which is define",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the right triangle, applies the tangent ratio with the correct opposite (16) and adjacent (10) sides relative to angle x, and arrives at the correct answer of 58 (option C). The reasoning is sound and consistent with the image."
+    },
+    {
+      "pid": "687",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What could happen that would increase the number of krill?\nChoices:\n(A) increase in phyt",
+      "gt_answer": "increase in phytoplankton",
+      "model_response": "Based on the food web diagram:\n1.  **Identify what krill eat:** There is an arrow pointing from **phytoplankton** to **krill**. This means krill feed on phytoplankton.\n2.  **Identify what eats krill:** Arrows point from krill to baleen whales, other seals, birds, carnivorous zooplankton, fish, and p",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the food web relationships from the diagram, provides accurate reasoning for each option, and arrives at the correct answer (A). The analysis is grounded in the visual evidence."
+    },
+    {
+      "pid": "693",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the orange larger than the car?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "No",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answers B (No), matching the ground truth. The response is brief but accurate with no hallucination."
+    },
+    {
+      "pid": "715",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is this a periodic function?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "No",
+      "model_response": "The function shown is a cubic polynomial, $f(x) = \\frac{x^3 + 3x^2 - 6x - 8}{4}$. Polynomial functions of degree greater than 0 are not periodic because their values grow towards positive or negative infinity and do not repeat in a cycle. Visually, the graph does not show a repeating pattern.\n\nB",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the function from the image, provides accurate reasoning about why polynomial functions are not periodic, and selects the correct answer B."
+    },
+    {
+      "pid": "719",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Brenda graphed the daily low temperature for 5 days. What is the range of",
+      "gt_answer": "13",
+      "model_response": "To find the range, subtract the lowest temperature from the highest temperature.\n\n*   Highest temperature: 20\n*   Lowest temperature: 7\n\nRange = 20 - 7 = 13\n\n13",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the highest (20) and lowest (7) temperatures from the chart and computes the range as 13, matching the ground truth."
+    },
+    {
+      "pid": "722",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Deep Sky Blue the high median?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 'A' (yes) is correct - Deep Sky Blue is the median value in the chart. The response is brief but accurate with no hallucination."
+    },
+    {
+      "pid": "734",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Are there fewer double buss that are behind the aeroplane than things on the left side o",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer 'A' matches the ground truth 'Yes'."
+    },
+    {
+      "pid": "748",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, PA and PB are tangents of ⊙O, the tangent point of point A and B",
+      "gt_answer": "65°",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer A (65°) matches the ground truth."
+    },
+    {
+      "pid": "755",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What is this function most likely be?\nChoices:\n(A) a polynomial\n(B) a trigonometric func",
+      "gt_answer": "a polynomial",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer is correct (constant function is a polynomial) but provides no explanation."
+    },
+    {
+      "pid": "759",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Move the ruler to measure the length of the nail to the nearest inch. The",
+      "gt_answer": "2",
+      "model_response": "The nail's head aligns with the 0-inch mark, and its tip aligns with the 2-inch mark. Therefore, the nail is about 2 inches long.\n\n2",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer of 2 inches matches the ground truth, and the explanation is consistent with measuring the nail against the ruler."
+    },
+    {
+      "pid": "760",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of yellow tandem bikes less than the number of big objects?\nChoices:\n(A) Y",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer A (Yes) is correct and consistent with the image."
+    },
+    {
+      "pid": "778",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Can you find the missing shape in this picture puzzle?\nChoices:\n(A) A\n(B) B\n(C) C\n(D) D",
+      "gt_answer": "A",
+      "model_response": "The pattern involves the number of sides of the polygons decreasing by one in each step:\n1.  First shape: Heptagon (7 sides), filled black.\n2.  Second shape: Hexagon (6 sides), white outline.\n3.  Third shape: Should be a Pentagon (5 sides).\n4.  Fourth shape: Trapezoid (4 sides), white outline.\n\nRega",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the pattern (decreasing sides and alternating fill), accurately describes the shapes in the image, and arrives at the correct answer A with sound reasoning."
+    },
+    {
+      "pid": "782",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Which number is missing?",
+      "gt_answer": "4",
+      "model_response": "The puzzle consists of four quadrants. In each quadrant, there is a number in the outer corner and a number inside the central diamond. Let's look at the relationship between these pairs:\n\n*   **Top Right Quadrant:** Outer number is 18, inner number is 2. Product: $18 \\times 2 = 36$.\n*   **Bottom Ri",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer with clear reasoning grounded in the image."
+    },
+    {
+      "pid": "792",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "7",
+      "model_response": "The two people in the image are **Catherine King** (New Zealand High Commissioner to the UK) and **Philip Hammond** (former UK Chancellor of the Exchequer).\n\n*   Catherine King was born on May 19, 1953.\n*   Philip Hammond was born on August 6, 1955.\n\nThe age gap is approximately 2 years.\n\n2 years",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "factuality",
+      "reason": "The model provides an incorrect age gap (2 years vs. correct 7 years) and likely fabricated birthdate information, resulting in a wrong final answer."
+    },
+    {
+      "pid": "826",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which is the largest part of the lung?\nChoices:\n(A) Inferior lobes\n(B) Cardiac notch\n(C)",
+      "gt_answer": "Superior lobes",
+      "model_response": "A",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered A (Inferior lobes), but the image clearly shows the Superior Lobes occupying the largest area of the lungs. The answer contradicts the visual content."
+    },
+    {
+      "pid": "827",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Choose the answer for the missing picture.\nChoices:\n(A) A\n(B) B\n(C) C\n(D) D\n(E) E\n(F) F",
+      "gt_answer": "D",
+      "model_response": "The puzzle consists of a 3x3 grid of smaller 3x3 grids. We need to find the pattern to determine the missing grid in the bottom right corner.\n\nLet's analyze the columns. We can assign a number from 1 to 9 to each cell in the small 3x3 grids, reading from left to right, top to bottom:\n1 2 3\n4 5 6\n7 8",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model's answer C is incorrect (correct answer is D). The reasoning contains logical errors and misreads some grid positions, leading to a wrong conclusion."
+    },
+    {
+      "pid": "829",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which matchstick needs to be moved in order to create a square?\nChoices:\n(A) Top\n(B) Bot",
+      "gt_answer": "Left",
+      "model_response": "The image shows a cross shape made of four matchsticks meeting at a central point. To form a square, you need four matchsticks arranged in a closed loop (a cycle of four sides).\n\nCurrently, the matchsticks are arranged in a \"star\" or \"plus\" configuration where all four meet at a single central verte",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model's answer (E) contradicts the ground truth (C - Left). While the reasoning is detailed, the conclusion is incorrect, and the response is informative but produces a wrong final answer inconsistent with the puzzle's solution."
+    },
+    {
+      "pid": "850",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of cars in front of the tiny metal thing less than the number of large mat",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model provided the correct answer A (Yes) matching the ground truth, though without explanation."
+    },
+    {
+      "pid": "855",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find $x$ so that $a ∥ b$.\nChoices:\n(A) 2.5\n(B) 14\n(C) 15\n(D) 16",
+      "gt_answer": "14",
+      "model_response": "The problem asks for the value of $x$ that makes lines $a$ and $b$ parallel.\n\n1.  **Identify the relationship between the angles:**\n    *   The angle labeled $(4x + 11)^\\circ$ is located between lines $a$ and $b$ and below the transversal line.\n    *   The angle labeled $(8x + 1)^\\circ$ is also loca",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the angles as consecutive interior angles, sets up the supplementary equation, solves for x=14, and verifies the answer. All reasoning is consistent with the image and the correct answer (B) is selected."
+    },
+    {
+      "pid": "868",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all big green cylinders. Subtract all rubber cylinders. How many",
+      "gt_answer": "5",
+      "model_response": "The objects present are:\n1.  Blue metal sphere\n2.  Yellow metal sphere\n3.  Purple rubber cylinder\n4.  Blue metal cylinder\n5.  Yellow rubber cube\n6.  Gray rubber cylinder\n7.  Green rubber sphere (partially hidden)\n\nInstructions:\n- Subtract all big green cylinders: There are 0 such objects.\n- Subtract",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model arrives at the correct final answer (5), but the object identification is inconsistent with the image. The image shows: blue metal sphere, yellow metal sphere, purple cylinder, blue small cylinder, yellow cube, gray cylinder, and green sphere. The model incorrectly identifies a 'gray rubber cylinder' and 'purple rubber cylinder' and mentions objects like 'yellow rubber cube' but misses correct enumeration. Despite reaching the right number, the reasoning contains fabricated details about object attributes."
+    },
+    {
+      "pid": "876",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: In the figure, square $ABDC$ is inscribed in $\\odot K$. Find the measure of a central an",
+      "gt_answer": "90",
+      "model_response": "The problem asks for the measure of a central angle for a square inscribed in a circle.\n\n1.  **Identify the geometric setup:** We have a square ($ABDC$) inscribed in a circle. The vertices of the square lie on the circle.\n2.  **Understand central angles:** A central angle is an angle whose vertex is",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the central angle as 90° with clear reasoning. Minor note: it calls the center 'F' (correct per image) but earlier says 'K' from the question; this is consistent with the figure. No hallucination."
+    },
+    {
+      "pid": "883",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Which number is missing?",
+      "gt_answer": "15",
+      "model_response": "The pattern is that the sum of the numbers in each vertical column is constant within each oval.\n\n*   **First Oval:**\n    *   $3 + 17 = 20$\n    *   $9 + 11 = 20$\n    *   $12 + 8 = 20$\n*   **Second Oval:**\n    *   $15 + 7 = 22$\n    *   $10 + 12 = 22$\n    *   $16 + 6 = 22$\n*   **Third Oval:**\n    *   ",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies the pattern (column sums equal a constant within each oval) and arrives at the correct answer of 15, matching the ground truth. The reasoning is sound and grounded in the visible numbers."
+    },
+    {
+      "pid": "888",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all small green shiny balls. Subtract all small metallic things.",
+      "gt_answer": "3",
+      "model_response": "3",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model provides the correct integer answer (3) matching the ground truth, though without explanation."
+    },
+    {
+      "pid": "891",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: How many algorithms have accuracy lower than 8 in at least one dataset?",
+      "gt_answer": "4",
+      "model_response": "The algorithms are \"icy\", \"epic\", and \"saddle\".\n- **icy**: Has accuracy ~2 on 'kick', ~5 on 'python', ~6 on 'brave'. All are lower than 8.\n- **epic**: Has accuracy ~2 on 'kick', ~2 on 'gloom'. These are lower than 8.\n- **saddle**: Has accuracy ~6 on 'kick', ~2 on 'gloom', ~4.5 on 'python', ~6 on 'br",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The question asks how many algorithms (datasets in the legend: icy, epic, saddle) have accuracy lower than 8 in at least one dataset (kick, gloom, python, brave). The model misinterprets the chart structure and arrives at 3, while the correct answer is 4. The reasoning contains errors and the final answer is wrong."
+    },
+    {
+      "pid": "907",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: When the military expenditure value was lower than 0.2%?",
+      "gt_answer": "1970",
+      "model_response": "1",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The answer '1' does not match the year 1970 shown in the chart where expenditure was below 0.2%."
+    },
+    {
+      "pid": "914",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all tiny purple shiny cubes. Subtract all large purple balls. Ho",
+      "gt_answer": "9",
+      "model_response": "9",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 9 matches the ground truth and is correct based on the image."
+    },
+    {
+      "pid": "948",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Some students compared how many blocks they live from school. What is the",
+      "gt_answer": "11",
+      "model_response": "To find the mean, add up all the numbers and divide by the count of numbers.\n\nSum: $14 + 8 + 17 + 17 + 3 + 7 + 5 + 17 = 88$\nCount: 8\nMean: $88 / 8 = 11$\n\n11",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly reads all values from the table, computes the sum (88) and mean (11), matching the ground truth."
+    },
+    {
+      "pid": "955",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图．点O是正五边形ABCDE的中心，⊙O是正五边形的外接圆，∠ADE的度数为（）\nChoices:\n(A) 30°\n(B) 32°\n(C) 36°\n(D) 40°",
+      "gt_answer": "36°",
+      "model_response": "The problem asks for the measure of angle $\\angle ADE$ in a regular pentagon $ABCDE$ inscribed in a circle.\n\n1.  **Identify the properties of the regular pentagon:**\n    *   A regular pentagon has 5 equal sides and 5 equal interior angles.\n    *   The measure of each interior angle is given by the f",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly calculates the interior angle of the pentagon (108°) and uses the isosceles triangle property to find ∠ADE = 36°, matching the ground truth. The reasoning is detailed, accurate, and grounded in the visual content."
+    },
+    {
+      "pid": "965",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: whats the lowest number yard line that you can see?",
+      "gt_answer": "30",
+      "model_response": "30",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer '30' matches the ground truth and is consistent with the visible '30' yard line marking in the image."
+    },
+    {
+      "pid": "979",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What number is shown?",
+      "gt_answer": "9079",
+      "model_response": "The image displays base-10 blocks representing a number.\n-   **Thousands:** There are large cubes. Each large cube represents 1,000.\n    -   Top row: 6 cubes.\n    -   Middle row: 3 cubes.\n    -   Total thousands = 6 + 3 = 9. (Value: 9,000)\n-   **Hundreds:** There are no flat 10x10 squares visible. (",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model miscounts the ones blocks (should be 9, giving 9079) and arrives at 9078, which contradicts the visual content."
+    },
+    {
+      "pid": "984",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of gray cars less than the number of small metallic minivans?\nChoices:\n(A)",
+      "gt_answer": "No",
+      "model_response": "The image contains:\n- A tandem bicycle (purple frame).\n- A cyan/matte car (station wagon/SUV shape).\n- A purple/metallic car (SUV/crossover shape).\n- A gray motorcycle.\n\nAnalysis:\n- **Gray cars**: There are no gray cars. The motorcycle is gray but is not a car. The cyan car is cyan, not gray. The pu",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model arrives at the correct answer (B) No, but the reasoning contains multiple inaccuracies about the image contents (e.g., describing colors and types of objects incorrectly, extensive confused speculation). The reasoning is somewhat informative but includes hallucinated descriptions of the scene."
+    },
+    {
+      "pid": "987",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: A cross-section of an airplane wing is shown. Measurements of the thickne",
+      "gt_answer": "4232",
+      "model_response": "The problem asks to estimate the area of the wing's cross-section using the Midpoint Rule.\nThe total length of the wing is given as 200 cm.\nThe measurements are taken at 20-cm intervals. This means there are data points at $x = 0, 20, 40, \\dots, 200$.\nThere are 11 data points: $5.8, 20.3, 26.7, 29.0",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly applies the Midpoint Rule with proper reasoning and arrives at the correct answer of 4232."
+    },
+    {
+      "pid": "991",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which functions have no zeros?\nChoices:\n(A) green and red\n(B) blue and orange\n(C) purple",
+      "gt_answer": "purple and grey",
+      "model_response": "C",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies option C (purple and grey) as the functions with no zeros, matching the ground truth. The response is brief but accurate."
+    }
+  ]
+}

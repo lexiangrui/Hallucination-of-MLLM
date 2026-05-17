@@ -64,7 +64,6 @@ def call_vision_model(
     prompt: str,
     image_path: Optional[str] = None,
     system_prompt: Optional[str] = None,
-    temperature: float = 0.0,
     timeout: Optional[float] = None,
     require_image: bool = True,
     max_tokens: Optional[int] = None,
@@ -79,15 +78,15 @@ def call_vision_model(
 
     if client.api_method == "chat":
         return _call_chat(client, prompt, image_path, system_prompt,
-                          temperature, timeout, max_tokens)
+                          timeout, max_tokens)
 
     if client.api_method == "responses":
         return _call_responses(client, prompt, image_path, system_prompt,
-                               temperature, timeout, max_tokens)
+                               timeout, max_tokens)
 
     if client.api_method == "messages":
         return _call_messages(client, prompt, image_path, system_prompt,
-                              temperature, timeout, max_tokens)
+                              timeout, max_tokens)
 
     raise ValueError(f"Unknown api_method: {client.api_method!r}")
 
@@ -98,7 +97,6 @@ def call_vision_model_with_retries(
     prompt: str,
     image_path: Optional[str] = None,
     system_prompt: Optional[str] = None,
-    temperature: float = 0.0,
     timeout: Optional[float] = None,
     require_image: bool = True,
     max_tokens: Optional[int] = None,
@@ -111,12 +109,11 @@ def call_vision_model_with_retries(
         try:
             return call_vision_model(
                 client=client, prompt=prompt, image_path=image_path,
-                system_prompt=system_prompt, temperature=temperature,
+                system_prompt=system_prompt,
                 timeout=timeout, require_image=require_image,
                 max_tokens=max_tokens,
             )
         except (openai.APITimeoutError, TimeoutError) as exc:
-            # Don't retry timeouts — the server is unresponsive for this sample
             raise RuntimeError(f"API call timed out after {timeout}s: {exc}") from exc
         except Exception as exc:
             last_error = exc
@@ -131,7 +128,7 @@ def call_vision_model_with_retries(
 
 
 def _call_chat(client: ModelClient, prompt: str, image_path: Optional[str],
-               system_prompt: Optional[str], temperature: float,
+               system_prompt: Optional[str],
                timeout: Optional[float], max_tokens: Optional[int]) -> str:
     messages: list[dict] = []
     if system_prompt:
@@ -145,7 +142,7 @@ def _call_chat(client: ModelClient, prompt: str, image_path: Optional[str],
         })
     messages.append({"role": "user", "content": content})
 
-    kwargs: dict = {"model": client.api_model, "messages": messages, "temperature": temperature}
+    kwargs: dict = {"model": client.api_model, "messages": messages}
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens
     if timeout is not None:
@@ -160,10 +157,8 @@ def _call_chat(client: ModelClient, prompt: str, image_path: Optional[str],
     finish_reason = getattr(choice, "finish_reason", None)
     msg = choice.message
 
-    # Primary: use content field
     text = (msg.content or "").strip()
 
-    # Fallback: reasoning_content (SiliconFlow Qwen thinking mode)
     if not text:
         text = (getattr(msg, "reasoning_content", None) or "").strip()
 
@@ -180,7 +175,7 @@ def _call_chat(client: ModelClient, prompt: str, image_path: Optional[str],
 
 
 def _call_responses(client: ModelClient, prompt: str, image_path: Optional[str],
-                    system_prompt: Optional[str], temperature: float,
+                    system_prompt: Optional[str],
                     timeout: Optional[float], max_tokens: Optional[int]) -> str:
     content: list[dict] = [{"type": "input_text", "text": prompt}]
     if image_path:
@@ -189,7 +184,6 @@ def _call_responses(client: ModelClient, prompt: str, image_path: Optional[str],
     kwargs: dict = {
         "model": client.api_model,
         "input": [{"role": "user", "content": content}],
-        "temperature": temperature,
     }
     if system_prompt:
         kwargs["instructions"] = system_prompt
@@ -211,7 +205,7 @@ def _call_responses(client: ModelClient, prompt: str, image_path: Optional[str],
 
 
 def _call_messages(client: ModelClient, prompt: str, image_path: Optional[str],
-                   system_prompt: Optional[str], temperature: float,
+                   system_prompt: Optional[str],
                    timeout: Optional[float], max_tokens: Optional[int]) -> str:
     content: list[dict] = [{"type": "text", "text": prompt}]
     if image_path:
@@ -221,7 +215,6 @@ def _call_messages(client: ModelClient, prompt: str, image_path: Optional[str],
         "model": client.api_model,
         "max_tokens": max_tokens or 4096,
         "messages": [{"role": "user", "content": content}],
-        "temperature": temperature,
     }
     if system_prompt:
         kwargs["system"] = system_prompt

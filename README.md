@@ -1,6 +1,6 @@
 # MLLM Hallucination Detection
 
-自动化多模态大模型幻觉检测与评估工具。
+自动化多模态大模型幻觉检测与评估。
 
 ## 目录结构
 
@@ -24,7 +24,10 @@
 │   └── run_vqarad.py            # VQA-RAD 评测运行
 ├── scripts/
 │   ├── generate_responses.py # 调用测试模型 API 生成回答 JSON
-│   ├── export_human_eval.py
+│   ├── error_analysis.py     # 阈值分析 + 长度偏差 + 跨模型一致性
+│   ├── judge_consistency.py  # Judge 模型一致性检验（GPT-5.5 vs Claude）
+│   ├── annotate.py           # 人类标注 Web 服务器
+│   ├── export_human_eval.py  # 导出人类对齐标注样本
 │   └── analyze_human_alignment.py
 ├── utils/
 │   ├── api.py                # 模型 API 调用 (OpenAI Chat / Responses / Anthropic Messages)
@@ -48,8 +51,8 @@ pip install openai anthropic Pillow pyarrow pandas python-dotenv
 | api_method | 协议 | SDK | 适用模型 |
 |------------|------|-----|----------|
 | `chat` | OpenAI Chat Completions | `openai` | Qwen3.5-35B-A3B / Qwen3-VL-235B-A22B-Instruct / gemini-2.5-flash |
-| `responses` | OpenAI Responses | `openai` | gpt-5.4-mini |
-| `messages` | Anthropic Messages | `anthropic` | （保留接口，当前未配置模型） |
+| `responses` | OpenAI Responses | `openai` | gpt-5.4-mini / gpt-5.5（Judge） |
+| `messages` | Anthropic Messages | `anthropic` | claude-opus-4-7（Judge 一致性实验） |
 
 `utils/api.py` 通过 `ModelClient` 统一封装四种协议，调用方只需传模型名，无需关心底层差异。图片格式通过 PIL 从文件内容自动检测，兼容扩展名与实际格式不一致的情况。
 
@@ -57,42 +60,38 @@ pip install openai anthropic Pillow pyarrow pandas python-dotenv
 
 下载数据集并放置于对应目录：
 
-- **POPE**: 从 https://github.com/RUCAIBox/POPE 下载，放置于 `data/POPE/`
-- **MathVista**: 从 https://mathvista.github.io/ 下载，放置于 `data/MathVista/`
+- **POPE**: 从 https://huggingface.co/datasets/lmms-lab/POPE 下载，放置于 `data/POPE/`
+- **MathVista**: 从 https://huggingface.co/datasets/AI4Math/MathVista 下载，放置于 `data/MathVista/`
 - **VQA-RAD**: 从 https://huggingface.co/datasets/flaviagiammarino/vqa-rad 下载，放置于 `data/VQA-RAD/`
 
 ### 4. 生成模型回答
 
 先调用测试模型 API 生成回答文件。输出格式为 `{样本ID: 模型回答}`，可直接传给 `main.py`。
 
-POPE 默认按每个 split 随机抽样 1000 条（seed=42，方便复现），下面 POPE 命令显式写出 `--max-samples 1000`。MathVista 默认使用 testmini split（1000 条样本）。VQA-RAD 使用 Hugging Face Parquet 的 test split（451 条样本），无需额外采样。
+POPE 默认按每个 split 随机抽样 1000 条（seed=42），MathVista 默认使用 testmini split（1000 条样本）。VQA-RAD 默认加载 test split（451 条样本），由于总量不足 1000，取全部数据。所有数据集均可通过 `--max-samples` 覆盖默认值。
 
 #### POPE random
 
 ```bash
 python scripts/generate_responses.py --dataset pope --pope-split random \
   --model gpt-5.4-mini \
-  --output responses/gpt5.4-mini_pope_random.json \
-  --max-samples 1000 \
-  --workers 4
+  --output responses/gpt-5.4-mini_pope_random.json \
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split random \
   --model gemini-2.5-flash \
   --output responses/gemini-2.5-flash_pope_random.json \
-  --max-samples 1000 \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split random \
   --model Qwen3.5-35B-A3B \
   --output responses/Qwen3.5-35B-A3B_pope_random.json \
-  --max-samples 1000 \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split random \
   --model Qwen3-VL-235B-A22B-Instruct \
   --output responses/Qwen3-VL-235B-A22B-Instruct_pope_random.json \
-  --max-samples 1000 \
-  --workers 4
+    --workers 10
 ```
 
 #### POPE popular
@@ -100,27 +99,23 @@ python scripts/generate_responses.py --dataset pope --pope-split random \
 ```bash
 python scripts/generate_responses.py --dataset pope --pope-split popular \
   --model gpt-5.4-mini \
-  --output responses/gpt5.4-mini_pope_popular.json \
-  --max-samples 1000 \
-  --workers 4
+  --output responses/gpt-5.4-mini_pope_popular.json \
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split popular \
   --model gemini-2.5-flash \
   --output responses/gemini-2.5-flash_pope_popular.json \
-  --max-samples 1000 \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split popular \
   --model Qwen3.5-35B-A3B \
   --output responses/Qwen3.5-35B-A3B_pope_popular.json \
-  --max-samples 1000 \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split popular \
   --model Qwen3-VL-235B-A22B-Instruct \
   --output responses/Qwen3-VL-235B-A22B-Instruct_pope_popular.json \
-  --max-samples 1000 \
-  --workers 4
+    --workers 10
 ```
 
 #### POPE adversarial
@@ -128,27 +123,23 @@ python scripts/generate_responses.py --dataset pope --pope-split popular \
 ```bash
 python scripts/generate_responses.py --dataset pope --pope-split adversarial \
   --model gpt-5.4-mini \
-  --output responses/gpt5.4-mini_pope_adversarial.json \
-  --max-samples 1000 \
-  --workers 4
+  --output responses/gpt-5.4-mini_pope_adversarial.json \
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split adversarial \
   --model gemini-2.5-flash \
   --output responses/gemini-2.5-flash_pope_adversarial.json \
-  --max-samples 1000 \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split adversarial \
   --model Qwen3.5-35B-A3B \
   --output responses/Qwen3.5-35B-A3B_pope_adversarial.json \
-  --max-samples 1000 \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset pope --pope-split adversarial \
   --model Qwen3-VL-235B-A22B-Instruct \
   --output responses/Qwen3-VL-235B-A22B-Instruct_pope_adversarial.json \
-  --max-samples 1000 \
-  --workers 4
+    --workers 10
 ```
 
 #### MathVista direct
@@ -156,18 +147,18 @@ python scripts/generate_responses.py --dataset pope --pope-split adversarial \
 ```bash
 python scripts/generate_responses.py --dataset mathvista \
   --model gpt-5.4-mini \
-  --output responses/gpt5.4-mini_mathvista.json \
-  --workers 4
+  --output responses/gpt-5.4-mini_mathvista.json \
+  --workers 10
 
 python scripts/generate_responses.py --dataset mathvista \
   --model gemini-2.5-flash \
   --output responses/gemini-2.5-flash_mathvista.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset mathvista \
   --model Qwen3.5-35B-A3B \
   --output responses/Qwen3.5-35B-A3B_mathvista.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset mathvista \
   --model Qwen3-VL-235B-A22B-Instruct \
@@ -181,20 +172,20 @@ python scripts/generate_responses.py --dataset mathvista \
 python scripts/generate_responses.py --dataset mathvista \
   --model gpt-5.4-mini \
   --prompt-mode cot \
-  --output responses/gpt5.4-mini_mathvista_cot.json \
-  --workers 4
+  --output responses/gpt-5.4-mini_mathvista_cot.json \
+  --workers 10
 
 python scripts/generate_responses.py --dataset mathvista \
   --model gemini-2.5-flash \
   --prompt-mode cot \
   --output responses/gemini-2.5-flash_mathvista_cot.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset mathvista \
   --model Qwen3.5-35B-A3B \
   --prompt-mode cot \
   --output responses/Qwen3.5-35B-A3B_mathvista_cot.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset mathvista \
   --model Qwen3-VL-235B-A22B-Instruct \
@@ -208,7 +199,7 @@ python scripts/generate_responses.py --dataset mathvista \
 ```bash
 python scripts/generate_responses.py --dataset vqarad \
   --model gpt-5.4-mini \
-  --output responses/gpt5.4-mini_vqarad.json \
+  --output responses/gpt-5.4-mini_vqarad.json \
   --workers 10
 
 python scripts/generate_responses.py --dataset vqarad \
@@ -248,99 +239,87 @@ POPE 评测同样使用每个 split 1000 条随机样本（seed=42）。评测�
 ```bash
 python main.py --dataset pope --model Qwen3.5-35B-A3B --pope-split random \
   --response-files Qwen3.5-35B-A3B:pope=responses/Qwen3.5-35B-A3B_pope_random.json \
-  --max-samples 1000
-
+  
 python main.py --dataset pope --model Qwen3-VL-235B-A22B-Instruct --pope-split random \
   --response-files Qwen3-VL-235B-A22B-Instruct:pope=responses/Qwen3-VL-235B-A22B-Instruct_pope_random.json \
-  --max-samples 1000
-
+  
 python main.py --dataset pope --model gpt-5.4-mini --pope-split random \
-  --response-files gpt-5.4-mini:pope=responses/gpt5.4-mini_pope_random.json \
-  --max-samples 1000
-
+  --response-files gpt-5.4-mini:pope=responses/gpt-5.4-mini_pope_random.json \
+  
 python main.py --dataset pope --model gemini-2.5-flash --pope-split random \
   --response-files gemini-2.5-flash:pope=responses/gemini-2.5-flash_pope_random.json \
-  --max-samples 1000
-```
+  ```
 
 #### POPE popular
 
 ```bash
 python main.py --dataset pope --model Qwen3.5-35B-A3B --pope-split popular \
   --response-files Qwen3.5-35B-A3B:pope=responses/Qwen3.5-35B-A3B_pope_popular.json \
-  --max-samples 1000
-
+  
 python main.py --dataset pope --model Qwen3-VL-235B-A22B-Instruct --pope-split popular \
   --response-files Qwen3-VL-235B-A22B-Instruct:pope=responses/Qwen3-VL-235B-A22B-Instruct_pope_popular.json \
-  --max-samples 1000
-
+  
 python main.py --dataset pope --model gpt-5.4-mini --pope-split popular \
-  --response-files gpt-5.4-mini:pope=responses/gpt5.4-mini_pope_popular.json \
-  --max-samples 1000
-
+  --response-files gpt-5.4-mini:pope=responses/gpt-5.4-mini_pope_popular.json \
+  
 python main.py --dataset pope --model gemini-2.5-flash --pope-split popular \
   --response-files gemini-2.5-flash:pope=responses/gemini-2.5-flash_pope_popular.json \
-  --max-samples 1000
-```
+  ```
 
 #### POPE adversarial
 
 ```bash
 python main.py --dataset pope --model Qwen3.5-35B-A3B --pope-split adversarial \
   --response-files Qwen3.5-35B-A3B:pope=responses/Qwen3.5-35B-A3B_pope_adversarial.json \
-  --max-samples 1000
-
+  
 python main.py --dataset pope --model Qwen3-VL-235B-A22B-Instruct --pope-split adversarial \
   --response-files Qwen3-VL-235B-A22B-Instruct:pope=responses/Qwen3-VL-235B-A22B-Instruct_pope_adversarial.json \
-  --max-samples 1000
-
+  
 python main.py --dataset pope --model gpt-5.4-mini --pope-split adversarial \
-  --response-files gpt-5.4-mini:pope=responses/gpt5.4-mini_pope_adversarial.json \
-  --max-samples 1000
-
+  --response-files gpt-5.4-mini:pope=responses/gpt-5.4-mini_pope_adversarial.json \
+  
 python main.py --dataset pope --model gemini-2.5-flash --pope-split adversarial \
   --response-files gemini-2.5-flash:pope=responses/gemini-2.5-flash_pope_adversarial.json \
-  --max-samples 1000
-```
+  ```
 
 #### MathVista direct
 
 ```bash
 python main.py --dataset mathvista --model Qwen3.5-35B-A3B \
   --response-files Qwen3.5-35B-A3B:mathvista=responses/Qwen3.5-35B-A3B_mathvista.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset mathvista --model Qwen3-VL-235B-A22B-Instruct \
   --response-files Qwen3-VL-235B-A22B-Instruct:mathvista=responses/Qwen3-VL-235B-A22B-Instruct_mathvista.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset mathvista --model gpt-5.4-mini \
-  --response-files gpt-5.4-mini:mathvista=responses/gpt5.4-mini_mathvista.json \
-  --workers 4
+  --response-files gpt-5.4-mini:mathvista=responses/gpt-5.4-mini_mathvista.json \
+  --workers 10
 
 python main.py --dataset mathvista --model gemini-2.5-flash \
   --response-files gemini-2.5-flash:mathvista=responses/gemini-2.5-flash_mathvista.json \
-  --workers 4
+  --workers 10
 ```
 
 #### MathVista CoT
 
 ```bash
 python main.py --dataset mathvista --model gpt-5.4-mini-cot \
-  --response-files gpt-5.4-mini-cot:mathvista=responses/gpt5.4-mini_mathvista_cot.json \
-  --workers 4
+  --response-files gpt-5.4-mini-cot:mathvista=responses/gpt-5.4-mini_mathvista_cot.json \
+  --workers 10
 
 python main.py --dataset mathvista --model gemini-2.5-flash-cot \
   --response-files gemini-2.5-flash-cot:mathvista=responses/gemini-2.5-flash_mathvista_cot.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset mathvista --model Qwen3.5-35B-A3B-cot \
   --response-files Qwen3.5-35B-A3B-cot:mathvista=responses/Qwen3.5-35B-A3B_mathvista_cot.json \
-  --workers 4
+  --workers 10
 
 python main.py --dataset mathvista --model Qwen3-VL-235B-A22B-Instruct-cot \
   --response-files Qwen3-VL-235B-A22B-Instruct-cot:mathvista=responses/Qwen3-VL-235B-A22B-Instruct_mathvista_cot.json \
-  --workers 5
+  --workers 10
 ```
 
 #### VQA-RAD
@@ -355,7 +334,7 @@ python main.py --dataset vqarad --model Qwen3-VL-235B-A22B-Instruct \
   --workers 10
 
 python main.py --dataset vqarad --model gpt-5.4-mini \
-  --response-files gpt-5.4-mini:vqarad=responses/gpt5.4-mini_vqarad.json \
+  --response-files gpt-5.4-mini:vqarad=responses/gpt-5.4-mini_vqarad.json \
   --workers 10
 
 python main.py --dataset vqarad --model gemini-2.5-flash \
@@ -408,7 +387,7 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 ### GPT Judge (evaluation/judge.py) — MathVista 和 VQA-RAD 专用
 
 使用 GPT-5.5 作为自动化裁判，以图片 + 问题 + 模型回答 + ground truth 作为输入，
-判断回答是否包含幻觉。所有 VQA-RAD 结果和 MathVista CoT 结果均会进一步分类至忠实性/事实性/逻辑性三种类型。
+判断回答是否包含幻觉。所有 VQA-RAD 和 MathVista 结果均会进一步分类至忠实性/事实性/逻辑性三种类型。
 
 **direct 输出格式**：
 ```json
@@ -428,6 +407,50 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
     "reason": "The model describes a cat, but the image shows a dog."
 }
 ```
+
+## 误差分析
+
+### 1. 人类对齐验证
+
+以人工标注为 gold label（40 条 MathVista CoT 样本），评估 GPT Judge 与人类判断的一致性。
+
+```bash
+python scripts/export_human_eval.py --per-group 5   # 导出标注样本
+python scripts/annotate.py                            # 打开 http://localhost:8765 标注
+python scripts/analyze_human_alignment.py             # 生成对齐分析报告
+```
+
+输出：`results/errors_analysis/human_alignment/report.md`
+
+### 2. Judge 模型一致性检验
+
+对比 GPT-5.5 Judge 与 Claude Opus 4.7 Judge 对 100 条 MathVista 样本的评估一致性。
+
+```bash
+python scripts/judge_consistency.py --workers 4
+```
+
+输出：`results/errors_analysis/judge_consistency/`（含 `_gpt.json` 和 `_claude.json`）
+
+### 3. 阈值敏感性分析
+
+遍历 T=0-6 计算 Hallucination Rate，检验核心指标对 `score < 3` 这一阈值的依赖程度。零 API 成本。
+
+### 4. 长度偏差分析
+
+计算回答长度（词数）与 Judge 评分的 Spearman 相关系数，检验 GPT Judge 是否存在系统性长度偏差。零 API 成本。
+
+### 5. 跨模型幻觉一致性分析
+
+统计每条样本被多少模型判定为含幻觉（0-4 个），分析幻觉的重叠模式——是模型特异性的还是数据集固有的。零 API 成本。
+
+三个分析脚本统一执行：
+
+```bash
+python scripts/error_analysis.py
+```
+
+输出：`results/errors_analysis/` 下多个 JSON 文件
 
 ## 评估指标
 
@@ -459,8 +482,8 @@ results/
 ### 添加新数据集
 
 1. 在 `data/` 下新建 loader
-2. 在 `evaluation/detectors/` 中添加对应的检测器或 prompt 模板
-3. 在 `evaluation/runners/` 中添加运行逻辑
+2. 在 `evaluation/` 中添加对应的检测器文件或 prompt 模板
+3. 在 `evaluation/` 中添加运行逻辑（参考 `run_pope.py`、`run_vqarad.py` 等）
 4. 在 `main.py` 中注册分发
 
 ### 添加新模型
@@ -488,6 +511,6 @@ MODELS = [
 
 ### 添加新检测方法
 
-1. 在 `evaluation/detectors/` 下新建检测器
-2. 在 `evaluation/runners/` 中接入数据加载、检测和指标保存
+1. 在 `evaluation/` 下新建检测器文件
+2. 在 `evaluation/` 中接入数据加载、检测和指标保存
 3. 在 `main.py` 中添加分发入口

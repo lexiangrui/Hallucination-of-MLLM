@@ -13,15 +13,15 @@ import urllib.parse
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-HUMAN_EVAL_DIR = REPO_ROOT / "human_eval"
+DATA_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
 
 SAMPLE_FIELDS = [
     "sample_id", "model", "pid", "image", "question",
     "gt_answer", "model_response", "human_label", "human_type",
 ]
 
-CSV_PATH = HUMAN_EVAL_DIR / "annotations.csv"
-HTML_PATH = HUMAN_EVAL_DIR / "index.html"
+CSV_PATH = DATA_DIR / "annotations.csv"
+HTML_PATH = REPO_ROOT / "scripts" / "index.html"
 
 
 TEXT_FIELDS = {"question", "gt_answer", "model_response"}

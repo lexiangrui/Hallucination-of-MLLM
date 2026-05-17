@@ -9,9 +9,9 @@ Sampling strategy (分层抽样):
 - seed=42 固定可复现
 
 Outputs:
-- human_eval/samples.csv      blind annotation sheet
-- human_eval/annotations.csv  editable copy for annotators
-- human_eval/meta.json        GPT Judge predictions keyed by sample_id
+- results/errors_analysis/human_alignment/samples.csv      blind annotation sheet
+- results/errors_analysis/human_alignment/annotations.csv  editable copy for annotators
+- results/errors_analysis/human_alignment/meta.json        GPT Judge predictions keyed by sample_id
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ DEFAULT_RESPONSES = {
     f"{m}-cot": REPO_ROOT / "responses" / f"{m}_mathvista_cot.json"
     for m in MODELS
 }
-DEFAULT_OUT_DIR = REPO_ROOT / "human_eval"
+DEFAULT_OUT_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
 HAL_TYPES = {"faithfulness", "factuality", "logical"}
 
 SAMPLE_FIELDS = [

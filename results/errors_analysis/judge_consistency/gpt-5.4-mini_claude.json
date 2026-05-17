@@ -1,0 +1,1022 @@
+{
+  "model_name": "gpt-5.4-mini",
+  "dataset": "mathvista",
+  "method": "gpt-judge",
+  "metrics": {
+    "total_samples": 100,
+    "completed_samples": 100,
+    "hallucination_rate": 0.44,
+    "avg_score": 3.01,
+    "n_hallucinated": 44,
+    "n_valid": 100,
+    "type_counts": {
+      "faithfulness": 16,
+      "factuality": 3,
+      "logical": 25,
+      "none": 56,
+      "error": 0
+    }
+  },
+  "details": [
+    {
+      "pid": "7",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What time is shown? Answer by typing a time word, not a number. It is (_) after eight.\nC",
+      "gt_answer": "quarter",
+      "model_response": "E",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The clock shows the hour hand near 8 and minute hand at 3, which is quarter past eight (E). However, the ground truth says 'quarter' (A: half... wait, B: quarter). The minute hand points to 3 (15 minutes) and hour hand is past 8, so it's quarter past eight. The model's answer E seems visually correct, but ground truth indicates B (quarter). Given ground truth is 'quarter', the model response contradicts it."
+    },
+    {
+      "pid": "26",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Black greater than Deep Sky Blue?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "no",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that Black is not greater than Deep Sky Blue based on the bar chart, providing the correct option B."
+    },
+    {
+      "pid": "28",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: $\\overline{AB}$ is a diameter, $AC=8$ inches, and $BC=15$ inches. Find the radius of the",
+      "gt_answer": "8.5",
+      "model_response": "C",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer C (8.5) is correct but lacks explanation."
+    },
+    {
+      "pid": "31",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Are there more big red rubber double buss in front of the large red double bus than big ",
+      "gt_answer": "No",
+      "model_response": "B",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer B (No) is correct and consistent with the image, which shows no red double buses but a green car and other objects."
+    },
+    {
+      "pid": "33",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Use a sector paper sheet with a central angle of 120.0 and a radius of 6.0 to roll into ",
+      "gt_answer": "4πcm",
+      "model_response": "C",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly selects C (4π cm), which matches the ground truth."
+    },
+    {
+      "pid": "45",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: An administrator at the Department of Motor Vehicles (DMV) tracked the av",
+      "gt_answer": "-3",
+      "model_response": "-3",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of -3 matches the ground truth, correctly calculating the rate of change from 17 to 14 minutes between August and September."
+    },
+    {
+      "pid": "47",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all rubber balls. Subtract all yellow shiny things. How many obj",
+      "gt_answer": "6",
+      "model_response": "4",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct count is 6 after removing rubber balls and yellow shiny things. The model's answer of 4 is incorrect."
+    },
+    {
+      "pid": "72",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: A real estate agent drove around the neighborhood and counted the number ",
+      "gt_answer": "1",
+      "model_response": "1",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 1 matches the ground truth. The response is brief but correct with no hallucination."
+    },
+    {
+      "pid": "81",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the value of r at theta=3*pi/2?",
+      "gt_answer": "-1",
+      "model_response": "0",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered 0, but the correct answer is -1. The curve appears to be r=sin(θ), so at θ=3π/2, r=-1. The answer contradicts the visual content."
+    },
+    {
+      "pid": "82",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: A square is inscribed in a circle of area 18$\\pi$ square units. Find the length of a sid",
+      "gt_answer": "6",
+      "model_response": "C",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer C (6) is correct: radius=√18=3√2, diagonal=6√2, side=6."
+    },
+    {
+      "pid": "90",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all yellow matte blocks. Subtract all tiny brown cylinders. How ",
+      "gt_answer": "5",
+      "model_response": "4",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The image has 8 objects. Removing the yellow matte block (1) leaves 7. There are no tiny brown cylinders to remove (the brown cylinder is not specified as tiny, but even if removed, answer would be 6). The correct answer is 5 based on ground truth. The model's answer of 4 is incorrect and not informative with reasoning."
+    },
+    {
+      "pid": "95",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, the straight lines AB and CD intersect at point O, OD bisects ∠A",
+      "gt_answer": "80°",
+      "model_response": "B",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is 80° (D), but the model answered B (60°), which is incorrect based on the geometric reasoning."
+    },
+    {
+      "pid": "96",
+      "question": "Hint: Please answer the question requiring a floating-point number with one decimal place and provide the final value, e.g., 1.2, 1.3, 1.4, at the end.\nQuestion: How many times Dissatisfied more than ",
+      "gt_answer": "3.9",
+      "model_response": "3.9",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly calculated 78/20 = 3.9, matching the ground truth and consistent with the chart."
+    },
+    {
+      "pid": "100",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the sum of all the values in the ruling group?",
+      "gt_answer": "12",
+      "model_response": "3",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The ruling group has values 3 (tin) and 9 (ace), summing to 12. The model answered 3, which is incorrect and inconsistent with the chart."
+    },
+    {
+      "pid": "104",
+      "question": "Hint: Please answer the question requiring a floating-point number with one decimal place and provide the final value, e.g., 1.2, 1.3, 1.4, at the end.\nQuestion: What is the fraction of females facing",
+      "gt_answer": "0.8",
+      "model_response": "1.0",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered 1.0, suggesting all females face the camera, but the image shows one person (second from left, appears to be a young male/female) whose gaze direction differs. The ground truth is 0.8, indicating 4 of 5 females face the camera. The response is informative (a specific numeric answer) but inconsistent with the visual evidence."
+    },
+    {
+      "pid": "105",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Does Dark Violet have the minimum area under the curve?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered B (no), but based on the chart, Dark Violet clearly has the minimum area under the curve, making the correct answer A (yes). The response is incorrect and inconsistent with the visual content."
+    },
+    {
+      "pid": "115",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "3",
+      "model_response": "2 years",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "factuality",
+      "reason": "The model's answer of 2 years is incorrect; the correct age gap is 3 years. The response is minimally informative and contains a factual error."
+    },
+    {
+      "pid": "128",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all large metal blocks. Subtract all yellow cylinders. How many ",
+      "gt_answer": "6",
+      "model_response": "4",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The correct count is 6 (removing the large blue metal block and no yellow cylinders present). The model's answer of 4 is inconsistent with the visible objects."
+    },
+    {
+      "pid": "143",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, in the parallelogram ABCD, CE bisects ∠BCD and it intersects the",
+      "gt_answer": "3",
+      "model_response": "C",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer C (3) matches the ground truth, though no reasoning is provided."
+    },
+    {
+      "pid": "160",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find x.\nChoices:\n(A) 10\n(B) 11\n(C) 12\n(D) 13",
+      "gt_answer": "12",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is C (12), computed via Pythagorean theorem: x = √(15² - 9²) = 12. The model answered B (11), which is incorrect."
+    },
+    {
+      "pid": "164",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, in ▱ABCD, CE ⊥ AB, point E is the foot of perpendicular, if ∠D =",
+      "gt_answer": "35°",
+      "model_response": "B",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answers B (35°), matching the ground truth."
+    },
+    {
+      "pid": "167",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the biggest zero of this function?",
+      "gt_answer": "2",
+      "model_response": "The function shown is \\(f(x)=\\frac{x^3+3x^2-6x-8}{4}\\).  \nIts zeros come from \\(x^3+3x^2-6x-8=0\\), which factors as \\((x+4)(x+1)(x-2)=0\\).\n\nSo the zeros are \\(-4, -1, 2\\). The biggest zero is **2**.",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the zeros from the graph and equation, provides accurate factoring, and arrives at the correct answer of 2."
+    },
+    {
+      "pid": "197",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: How many sequences have negative Influence Scores?",
+      "gt_answer": "2",
+      "model_response": "3",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The correct count of negative influence scores is 2, but the model answered 3, which is inconsistent with the chart."
+    },
+    {
+      "pid": "204",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: از سمت راست تصویر درب دوم چند شیشه بدون رنگ داره؟",
+      "gt_answer": "12",
+      "model_response": "12",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 12 matches the ground truth exactly, correctly identifying the number of colorless glass panes on the second door from the right."
+    },
+    {
+      "pid": "215",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Layla went on a camping trip and logged the number of miles she hiked eac",
+      "gt_answer": "8",
+      "model_response": "8",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answered 8, matching the ground truth (range = 10 - 2 = 8). The answer is accurate with no hallucination."
+    },
+    {
+      "pid": "221",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, A, B, C are three points on ⊙O, ∠ACB = 25.0, then the degree of ",
+      "gt_answer": "65°",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model selected B (55°), but the correct answer is D (65°). Since ∠ACB = 25°, ∠AOB = 50°, and triangle AOB is isosceles, so ∠BAO = (180-50)/2 = 65°."
+    },
+    {
+      "pid": "224",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is this a periodic function?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "No",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer B matching ground truth, no hallucination but minimal explanation."
+    },
+    {
+      "pid": "226",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What time is shown? Answer by typing a time word, not a number. It is (_) past three.\nCh",
+      "gt_answer": "quarter",
+      "model_response": "E",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The clock shows 3:15, which is 'quarter past three'. The fill-in-the-blank format 'It is (_) past three' requires 'quarter' (option A). The model answered E ('quarter past'), which doesn't fit the sentence structure and contradicts the correct answer."
+    },
+    {
+      "pid": "229",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What is the highest lysine level given?\nChoices:\n(A) 0.33%\n(B) 0.31%\n(C) 0.29%\n(D) 0.32%",
+      "gt_answer": "0.30%",
+      "model_response": "A",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered A (0.33%), but the highest lysine level shown in the document is 0.30% (option E). The answer is incorrect and inconsistent with the image."
+    },
+    {
+      "pid": "234",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: In the figure shown above, AC = 6. What is the length of segment AB?\nChoices:\n(A) 3\n(B) ",
+      "gt_answer": "6",
+      "model_response": "C",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer C (6) is correct since the triangle is equilateral, but no reasoning is provided."
+    },
+    {
+      "pid": "239",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Sky Blue the minimum?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that Sky Blue is the minimum (option A: yes), which matches the chart showing Sky Blue with the smallest value."
+    },
+    {
+      "pid": "251",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all green balls. Subtract all shiny things. How many objects are",
+      "gt_answer": "4",
+      "model_response": "2",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is 4 (after removing green balls and shiny objects, the brown matte sphere, green cube, cyan matte sphere, and gray cylinder remain). The model's answer of 2 is incorrect and not informative."
+    },
+    {
+      "pid": "271",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find y\nChoices:\n(A) 3\n(B) 4.5\n(C) 5\n(D) 6",
+      "gt_answer": "5",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is C (5), but the model answered B (4.5). The response is a wrong answer with no reasoning."
+    },
+    {
+      "pid": "282",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What percent of the sun is showing?",
+      "gt_answer": "100",
+      "model_response": "100",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer correctly identifies that 100% of the sun is showing, matching the ground truth and the image."
+    },
+    {
+      "pid": "285",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, it is known that AB is the diameter of ⊙O, if the degree of ∠BOC",
+      "gt_answer": "25°",
+      "model_response": "D",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer D (25°) is correct, matching the ground truth. No hallucination, though minimal explanation."
+    },
+    {
+      "pid": "297",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of green buss greater than the number of blue school buss?\nChoices:\n(A) Ye",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 'A' (Yes) matches the ground truth. The response is minimal but correct and contains no hallucination."
+    },
+    {
+      "pid": "301",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which model performs the best overall across the three stages in terms of Messenger trai",
+      "gt_answer": "Dynalang",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer A (Dynalang) is correct and matches the ground truth, but lacks explanation."
+    },
+    {
+      "pid": "345",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: How many kites are there?",
+      "gt_answer": "25",
+      "model_response": "5",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "There are 5 groups of 5 kites each = 25 kites. The model answered 5, likely counting groups instead of kites, which is incorrect."
+    },
+    {
+      "pid": "349",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which capability boasts the highest proportion (%)?\nChoices:\n(A) Rec\n(B) OCR\n(C) Know\n(D",
+      "gt_answer": "Rec",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer A (Rec) matches the highest proportion in the chart."
+    },
+    {
+      "pid": "353",
+      "question": "Hint: Please answer the question requiring a floating-point number with one decimal place and provide the final value, e.g., 1.2, 1.3, 1.4, at the end.\nQuestion: At time $t=0$ a tank contains $Q_0 \\ma",
+      "gt_answer": "130.4",
+      "model_response": "The amount satisfies\n\\[\n\\frac{dQ}{dt}=\\frac r4-\\frac{r}{100}Q,\\qquad Q(0)=Q_0.\n\\]\nSo\n\\[\nQ(t)=25+(Q_0-25)e^{-rt/100},\\quad Q_L=25.\n\\]\n\nWith \\(r=3\\) and \\(Q_0=2Q_L=50\\),\n\\[\nQ(t)-25=25e^{-3t/100}.\n\\]\nWithin \\(2\\%\\) of \\(Q_L\\) means\n\\[\n|Q(t)-25|\\le 0.02(25)=0.5,\n\\]\nso\n\\[\n25e^{-3t/100}\\le 0.5\n\\Rightarrow",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct setup, derivation, and final answer 130.4 matching ground truth."
+    },
+    {
+      "pid": "364",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, AB is the diameter of ⊙O, and points C and D are on ⊙O. If ∠ABD ",
+      "gt_answer": "40°",
+      "model_response": "C",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer C (40°) matches the ground truth."
+    },
+    {
+      "pid": "368",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of yellow matte school buss greater than the number of big yellow metal ca",
+      "gt_answer": "No",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer B matches ground truth, no hallucination but minimal information."
+    },
+    {
+      "pid": "371",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图，在Rt△ABC中，∠ABC＝90°，点D、E、F分别是边AB、BC、CA的中点，若DE+BF＝8，则BF的值为（）\nChoices:\n(A) 3\n(B) 4\n(C) 5\n",
+      "gt_answer": "4",
+      "model_response": "A",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is B (4) since DE=BF as both equal half of AC. The model answered A (3), which is incorrect."
+    },
+    {
+      "pid": "374",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the sum of the accuracies of the algorithms calf and ivory?",
+      "gt_answer": "13",
+      "model_response": "13",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly provides the sum (9+4=13) matching the ground truth, but offers no analysis or explanation."
+    },
+    {
+      "pid": "380",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: For how many years that the percentage value over 4?",
+      "gt_answer": "6",
+      "model_response": "6",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies that 6 years (2005-2010) had percentage values over 4%, matching the ground truth."
+    },
+    {
+      "pid": "388",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Express the ratio of $\\tan M$ as a decimal to the nearest hundredth.\nChoices:\n(A) 0.38\n(",
+      "gt_answer": "0.42",
+      "model_response": "B",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly selected option B (0.42), which matches the ground truth."
+    },
+    {
+      "pid": "390",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Are there fewer jets that are left of the small brown suv than objects right of the big ",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answers A (Yes), matching the ground truth."
+    },
+    {
+      "pid": "430",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: The derivative of f(x) at x=0 is ____ that at x=5\nChoices:\n(A) larger than\n(B) equal to\n",
+      "gt_answer": "smaller than",
+      "model_response": "A",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The derivative at x=0 is -2 and at x=5 is +2, so the derivative at x=0 is smaller (C). The model answered A, which is incorrect."
+    },
+    {
+      "pid": "433",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "5",
+      "model_response": "I can’t determine the age gap from the image alone.",
+      "score": 3,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model honestly admits it cannot determine the age gap from the image, which is not informative but contains no hallucination."
+    },
+    {
+      "pid": "460",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: If there were fewer leaves in this ecosystem, the first organism to experience change as",
+      "gt_answer": "Crickets",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer B (Crickets) matches the ground truth and is correct based on the food chain shown."
+    },
+    {
+      "pid": "465",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Light Green the low median?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "With three values (Coral highest, Light Green middle, Medium Orchid lowest), Light Green is the median, not the low. The correct answer is 'no' (B)... wait, actually the ground truth says 'yes'. The model answered B (no), but ground truth is yes (A). The model's answer contradicts the ground truth, making it incorrect/hallucinated."
+    },
+    {
+      "pid": "471",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Lily and her friends recorded their scores while playing a board game. Wh",
+      "gt_answer": "8",
+      "model_response": "8",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answered 8, matching the ground truth. The response is brief but accurate with no hallucination."
+    },
+    {
+      "pid": "518",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "4",
+      "model_response": "8 years",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "factuality",
+      "reason": "The model's answer of 8 years is incorrect; the actual age gap is 4 years."
+    },
+    {
+      "pid": "550",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the accuracy of the algorithm with highest accuracy?",
+      "gt_answer": "8",
+      "model_response": "8",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answers 8, matching the ground truth. The response is brief but accurate with no hallucination."
+    },
+    {
+      "pid": "559",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: what is the highest number shown on the black outer part of the watch?",
+      "gt_answer": "55",
+      "model_response": "55",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies 55 as the highest number on the black outer bezel, matching the ground truth."
+    },
+    {
+      "pid": "566",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图，已知△ABC≌△DEF，CD平分∠BCA，若∠A＝22°，∠CGF＝88°，则∠E的度数是（）\nChoices:\n(A) 26°\n(B) 28°\n(C) 30°\n(D) ",
+      "gt_answer": "26°",
+      "model_response": "C",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model answered C (30°), but the correct answer is A (26°). The answer is wrong with no reasoning shown."
+    },
+    {
+      "pid": "575",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Lines $l$, $m$, and $n$ are perpendicular bisectors of $\\triangle PQR$ and meet at $T$. ",
+      "gt_answer": "3",
+      "model_response": "B",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is A (3), since z+4 = 7 implies z=3. The model answered B (4), which is incorrect."
+    },
+    {
+      "pid": "592",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the global maximum of this function?",
+      "gt_answer": "4",
+      "model_response": "The graph’s highest y-value is **4**, so the global maximum is **4**.",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The response correctly identifies the global maximum as 4, matching the ground truth and the visible peaks of the function."
+    },
+    {
+      "pid": "604",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Dark Orchid the roughest?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "no",
+      "model_response": "B",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer B (no) matches the ground truth without making false claims."
+    },
+    {
+      "pid": "605",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all large green matte cubes. Subtract all big green blocks. How ",
+      "gt_answer": "6",
+      "model_response": "4",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The image shows 8 objects total. The green cube should be removed (it's the only green block). That leaves 7 objects, but the correct answer is 6, suggesting the count should be 6. The model's answer of 4 is incorrect and not grounded in accurate counting of visible objects."
+    },
+    {
+      "pid": "617",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: The magnitude of the acceleration vector a is $10 \\mathrm{~cm} / \\mathrm{",
+      "gt_answer": "9",
+      "model_response": "The acceleration vector is roughly split into equal tangential and normal parts from the figure, so the normal component is about \\(7 \\text{ cm/s}^2\\).\n\n**7**",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model estimates the normal component as 7 cm/s², but the correct value from the figure is 9 cm/s². The model misreads the figure, claiming roughly equal tangential and normal parts, which is inconsistent with the visual."
+    },
+    {
+      "pid": "619",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the value of f(4)?",
+      "gt_answer": "16",
+      "model_response": "16",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer of 16 matches ground truth, though no explanation provided."
+    },
+    {
+      "pid": "634",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图，直线AB，CD交于点O．射线OE平分∠BOC，若∠AOD＝70°，则∠AOE等于（）\nChoices:\n(A) 35°\n(B) 110°\n(C) 135°\n(D) 145",
+      "gt_answer": "145°",
+      "model_response": "C",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is 145° (D), but the model answered C (135°), which is incorrect."
+    },
+    {
+      "pid": "644",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What is the missing number in the picture?\nChoices:\n(A) 6\n(B) 8\n(C) 10\n(D) 11",
+      "gt_answer": "6",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model answered B (8), but the correct answer is A (6). The answer is incorrect and not informative."
+    },
+    {
+      "pid": "651",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: For an assignment, Johnny looked at which countries got the most Nobel Pr",
+      "gt_answer": "7",
+      "model_response": "7",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 7 matches the ground truth exactly (Canada had 8 winners, Italy had 1, difference is 7)."
+    },
+    {
+      "pid": "655",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the value of Russia has the highest transport?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Russia has 1.97M, the highest value in the chart, so 'Yes' (A) is correct."
+    },
+    {
+      "pid": "666",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all red objects. Subtract all big green things. How many objects",
+      "gt_answer": "4",
+      "model_response": "3",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The image shows 5 objects with no red objects. Removing only the big green cube (cyan is actually cyan, but assuming the big green thing refers to something) leaves 4 objects. The model's answer of 3 is incorrect."
+    },
+    {
+      "pid": "678",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find x\nChoices:\n(A) 21\n(B) 34\n(C) 58\n(D) 67",
+      "gt_answer": "58",
+      "model_response": "C",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly selected C (58), matching the ground truth."
+    },
+    {
+      "pid": "687",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What could happen that would increase the number of krill?\nChoices:\n(A) increase in phyt",
+      "gt_answer": "increase in phytoplankton",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer A is correct and consistent with the food web diagram, though minimal in detail."
+    },
+    {
+      "pid": "693",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the orange larger than the car?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "No",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answered B (No), which matches the ground truth. The response is brief but accurate with no hallucination."
+    },
+    {
+      "pid": "715",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is this a periodic function?\nChoices:\n(A) Yes\n(B) No",
+      "gt_answer": "No",
+      "model_response": "B",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer B matching ground truth, minimal but accurate."
+    },
+    {
+      "pid": "719",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Brenda graphed the daily low temperature for 5 days. What is the range of",
+      "gt_answer": "13",
+      "model_response": "13",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly computed the range (20 - 7 = 13), matching the ground truth."
+    },
+    {
+      "pid": "722",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is Deep Sky Blue the high median?\nChoices:\n(A) yes\n(B) no",
+      "gt_answer": "yes",
+      "model_response": "B",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "Deep Sky Blue is the median value in the chart, so the correct answer is yes (A). The model's answer B is incorrect and inconsistent with the visual data."
+    },
+    {
+      "pid": "734",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Are there fewer double buss that are behind the aeroplane than things on the left side o",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answered A (Yes), matching the ground truth."
+    },
+    {
+      "pid": "748",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: As shown in the figure, PA and PB are tangents of ⊙O, the tangent point of point A and B",
+      "gt_answer": "65°",
+      "model_response": "B",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model answered B (60°), but the correct answer is A (65°). The response is wrong and provides no reasoning."
+    },
+    {
+      "pid": "755",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: What is this function most likely be?\nChoices:\n(A) a polynomial\n(B) a trigonometric func",
+      "gt_answer": "a polynomial",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer A (polynomial) is correct, as a constant function is a polynomial of degree 0. Response is minimal but accurate."
+    },
+    {
+      "pid": "759",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Move the ruler to measure the length of the nail to the nearest inch. The",
+      "gt_answer": "2",
+      "model_response": "2",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer '2' matches the ground truth and is consistent with the image, though it provides no explanation."
+    },
+    {
+      "pid": "760",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of yellow tandem bikes less than the number of big objects?\nChoices:\n(A) Y",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly answers A (Yes), matching the ground truth. The response is minimal but accurate with no hallucination."
+    },
+    {
+      "pid": "778",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Can you find the missing shape in this picture puzzle?\nChoices:\n(A) A\n(B) B\n(C) C\n(D) D",
+      "gt_answer": "A",
+      "model_response": "C",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model answered C, which is incorrect. The correct answer is A. The response is not informative and the conclusion contradicts the visual logic."
+    },
+    {
+      "pid": "782",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Which number is missing?",
+      "gt_answer": "4",
+      "model_response": "9",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model answered 9, which is incorrect. The correct answer is 4 (likely based on a pattern such as 18/2=9 corresponding to ?, and 12/3=4, or similar). The response is informative but inconsistent with the puzzle's logic."
+    },
+    {
+      "pid": "792",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What is the age gap between these two people in image? (Unit: years)",
+      "gt_answer": "7",
+      "model_response": "10 years",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "factuality",
+      "reason": "The model gives an incorrect age gap (10 vs actual 7) without justification, constituting a factual error."
+    },
+    {
+      "pid": "826",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which is the largest part of the lung?\nChoices:\n(A) Inferior lobes\n(B) Cardiac notch\n(C)",
+      "gt_answer": "Superior lobes",
+      "model_response": "A",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered A (Inferior lobes), but the diagram clearly shows the Superior lobes as the largest pink region. The answer contradicts the visual content."
+    },
+    {
+      "pid": "827",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Choose the answer for the missing picture.\nChoices:\n(A) A\n(B) B\n(C) C\n(D) D\n(E) E\n(F) F",
+      "gt_answer": "D",
+      "model_response": "F",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model's answer F is incorrect; the correct answer is D. The response provides no reasoning and gives a wrong answer."
+    },
+    {
+      "pid": "829",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which matchstick needs to be moved in order to create a square?\nChoices:\n(A) Top\n(B) Bot",
+      "gt_answer": "Left",
+      "model_response": "E",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model answered E (Not possible), but the correct answer is C (Left). The response is incorrect and contradicts the visual reasoning required."
+    },
+    {
+      "pid": "850",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of cars in front of the tiny metal thing less than the number of large mat",
+      "gt_answer": "Yes",
+      "model_response": "A",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer A (Yes) matches the ground truth, but lacks any reasoning or analysis."
+    },
+    {
+      "pid": "855",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Find $x$ so that $a ∥ b$.\nChoices:\n(A) 2.5\n(B) 14\n(C) 15\n(D) 16",
+      "gt_answer": "14",
+      "model_response": "C",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model chose C (15) but correct answer is B (14). The answer contradicts the correct solution."
+    },
+    {
+      "pid": "868",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all big green cylinders. Subtract all rubber cylinders. How many",
+      "gt_answer": "5",
+      "model_response": "There are 6 objects total. Big green cylinders: 0. Rubber cylinders: 1. So 6 - 1 = **5**.",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer 5 is correct and matches ground truth. The reasoning identifies the rubber cylinders correctly (purple and gray are rubber cylinders - actually there are 2 rubber cylinders, but the final answer is still 5 because total is 8 minus... let me recount). Image shows 8 objects: blue sphere, yellow sphere, blue cylinder (metal), purple cylinder (rubber), gray cylinder (rubber), green sphere, yellow cube. That's 7. Removing 2 rubber cylinders = 5. The model's reasoning has minor inaccuracy in counting but reaches correct answer."
+    },
+    {
+      "pid": "876",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: In the figure, square $ABDC$ is inscribed in $\\odot K$. Find the measure of a central an",
+      "gt_answer": "90",
+      "model_response": "C",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "Correct answer C (90°), matches ground truth."
+    },
+    {
+      "pid": "883",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Which number is missing?",
+      "gt_answer": "15",
+      "model_response": "10",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The answer 10 is incorrect; the correct answer is 15. The response is definitive but wrong."
+    },
+    {
+      "pid": "888",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all small green shiny balls. Subtract all small metallic things.",
+      "gt_answer": "3",
+      "model_response": "3",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The answer '3' matches the ground truth. While minimal, it is correct and contains no hallucinated content."
+    },
+    {
+      "pid": "891",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: How many algorithms have accuracy lower than 8 in at least one dataset?",
+      "gt_answer": "4",
+      "model_response": "4",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 4 matches the ground truth. The response is correct but minimal with no additional analysis."
+    },
+    {
+      "pid": "907",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: When the military expenditure value was lower than 0.2%?",
+      "gt_answer": "1970",
+      "model_response": "0",
+      "score": 0,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The answer '0' is incorrect and does not match the chart, which shows 1970 as the year with expenditure below 0.2%."
+    },
+    {
+      "pid": "914",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Subtract all tiny purple shiny cubes. Subtract all large purple balls. Ho",
+      "gt_answer": "9",
+      "model_response": "6",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The correct count is 9 objects remaining (no tiny purple shiny cubes or large purple balls to subtract from the 10 visible objects, minus the purple ball = 9). The model's answer of 6 is inconsistent with the visual content."
+    },
+    {
+      "pid": "948",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: Some students compared how many blocks they live from school. What is the",
+      "gt_answer": "11",
+      "model_response": "The numbers are 14, 8, 17, 17, 3, 7, 5, 17. Their sum is 88, and there are 8 students.  \nMean = 88 ÷ 8 = 11.\n\n11",
+      "score": 6,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies all eight values from the table, sums them to 88, divides by 8, and arrives at the correct mean of 11, matching the ground truth."
+    },
+    {
+      "pid": "955",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: 如图．点O是正五边形ABCDE的中心，⊙O是正五边形的外接圆，∠ADE的度数为（）\nChoices:\n(A) 30°\n(B) 32°\n(C) 36°\n(D) 40°",
+      "gt_answer": "36°",
+      "model_response": "C",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model selected C (36°), which matches the ground truth. No hallucination, though no reasoning provided."
+    },
+    {
+      "pid": "965",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: whats the lowest number yard line that you can see?",
+      "gt_answer": "30",
+      "model_response": "30",
+      "score": 5,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model's answer of 30 matches the ground truth and is consistent with the visible yard line marking in the image."
+    },
+    {
+      "pid": "979",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: What number is shown?",
+      "gt_answer": "9079",
+      "model_response": "973",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The correct answer is 9079 (9 thousand-cubes, 0 hundreds, 7 tens, 9 ones). The model's answer 973 is incorrect and inconsistent with the visual."
+    },
+    {
+      "pid": "984",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Is the number of gray cars less than the number of small metallic minivans?\nChoices:\n(A)",
+      "gt_answer": "No",
+      "model_response": "A",
+      "score": 2,
+      "has_hallucination": true,
+      "hallucination_type": "faithfulness",
+      "reason": "The model answered A (Yes), but the correct answer is B (No). The response contradicts the visual evidence."
+    },
+    {
+      "pid": "987",
+      "question": "Hint: Please answer the question requiring an integer answer and provide the final value, e.g., 1, 2, 3, at the end.\nQuestion: A cross-section of an airplane wing is shown. Measurements of the thickne",
+      "gt_answer": "4232",
+      "model_response": "Using the Midpoint Rule with 10 subintervals of width 20 cm, use the 10 midpoint thicknesses:\n\n\\(5.8, 20.3, 26.7, 29.0, 27.6, 27.3, 23.8, 20.5, 15.1, 8.7\\)\n\nSum:\n\\(5.8+20.3+26.7+29.0+27.6+27.3+23.8+20.5+15.1+8.7 = 205.0\\)\n\nArea estimate:\n\\[\nA \\approx 20 \\times 205.0 = 4100\n\\]\n\n4100",
+      "score": 1,
+      "has_hallucination": true,
+      "hallucination_type": "logical",
+      "reason": "The model misapplied the Midpoint Rule. With 11 measurements at 20-cm intervals over 200 cm, midpoint rule should use 5 subintervals of width 40 cm with midpoints being the even-indexed values (20.3, 29.0, 27.3, 20.5, 8.7), giving 40×105.8=4232. The model's answer 4100 is incorrect."
+    },
+    {
+      "pid": "991",
+      "question": "Hint: Please answer the question and provide the correct option letter, e.g., A, B, C, D, at the end.\nQuestion: Which functions have no zeros?\nChoices:\n(A) green and red\n(B) blue and orange\n(C) purple",
+      "gt_answer": "purple and grey",
+      "model_response": "C",
+      "score": 4,
+      "has_hallucination": false,
+      "hallucination_type": "none",
+      "reason": "The model correctly identifies option C (purple and grey) which matches the ground truth. The answer is brief but accurate."
+    }
+  ]
+}

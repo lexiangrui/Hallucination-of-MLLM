@@ -3,11 +3,11 @@
 Analyze human-vs-GPT-Judge alignment for the MathVista human-eval sample.
 
 Inputs:
-- human_eval/annotations.csv
-- human_eval/meta.json
+- results/errors_analysis/human_alignment/annotations.csv
+- results/errors_analysis/human_alignment/meta.json
 
 Output:
-- human_eval/report.md
+- results/errors_analysis/human_alignment/report.md
 """
 
 from __future__ import annotations
@@ -25,7 +25,8 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from evaluation.metrics import cohens_kappa, confusion_matrix
 
-DEFAULT_EVAL_DIR = REPO_ROOT / "human_eval"
+DEFAULT_EVAL_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
 TYPE_ORDER = ["faithfulness", "factuality", "logical"]
 
 
@@ -255,7 +256,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze human alignment annotations.")
     parser.add_argument("--annotations", default=str(DEFAULT_EVAL_DIR / "annotations.csv"))
     parser.add_argument("--meta", default=str(DEFAULT_EVAL_DIR / "meta.json"))
-    parser.add_argument("--output", default=str(DEFAULT_EVAL_DIR / "report.md"))
+    parser.add_argument("--output", default=str(DEFAULT_OUTPUT_DIR / "report.md"))
     args = parser.parse_args()
 
     annotations = _load_annotations(Path(args.annotations))

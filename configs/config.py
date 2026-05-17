@@ -12,7 +12,6 @@ load_dotenv(_PROJECT_ROOT / ".env")
 
 # ==================== GPT Judge ====================
 GPT_JUDGE_MODEL = "gpt-5.5"
-GPT_JUDGE_TEMPERATURE = 0.0
 
 # ==================== Model API Configs ====================
 MODEL_API_CONFIGS = {
@@ -43,6 +42,13 @@ MODEL_API_CONFIGS = {
         "base_url": "https://yunwu.ai/v1",
         "api_method": "chat",
         "api_model": "gemini-2.5-flash-all",
+    },
+    "claude-opus-4-7": {
+        "api_key": os.environ.get("ANTHROPIC_API_KEY", ""),
+        "base_url": "https://api-cc.freemodel.dev",
+        "api_method": "messages",
+        "api_model": "claude-opus-4-7",
+        "max_tokens": 4096,
     },
 }
 

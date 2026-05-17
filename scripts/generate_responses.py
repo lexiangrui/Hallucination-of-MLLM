@@ -105,7 +105,6 @@ def _generate_one(args, client: ModelClient, dataset: str, id_key: str, sample: 
         client=client,
         prompt=prompt,
         image_path=sample["image"],
-        temperature=args.temperature,
         retries=args.retries,
         timeout=args.timeout,
         max_tokens=client.max_tokens,
@@ -145,7 +144,6 @@ def main():
     parser.add_argument("--pope-split", default="random", choices=["random", "popular", "adversarial"])
     parser.add_argument("--max-samples", type=int, default=1000)
     parser.add_argument("--prompt-mode", default="direct", choices=["direct", "cot"])
-    parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--retries", type=int, default=3)
     parser.add_argument("--timeout", type=float, default=180)
     parser.add_argument("--workers", type=int, default=1)
