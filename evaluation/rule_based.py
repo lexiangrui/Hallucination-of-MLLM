@@ -13,7 +13,7 @@ def normalize_pope_answer_rule(text: str) -> str:
     - split by spaces
     - if one of {"No", "not", "no"} appears, predict "no"; otherwise "yes"
     """
-    if text.find(".") != -1:
+    if "." in text:
         text = text.split(".")[0]
     text = text.replace(",", "")
     words = text.split()

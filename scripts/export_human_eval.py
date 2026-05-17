@@ -28,19 +28,16 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from configs.config import MODELS
+
+# Default sources derived from config.MODELS — add "-cot" suffix for the COT evaluation variant.
 DEFAULT_RESULTS = [
-    ("gpt-5.4-mini-cot",  REPO_ROOT / "results" / "gpt-5.4-mini-cot_mathvista.json"),
-    ("gemini-2.5-flash-cot", REPO_ROOT / "results" / "gemini-2.5-flash-cot_mathvista.json"),
-    ("Qwen3.5-35B-A3B-cot", REPO_ROOT / "results" / "Qwen3.5-35B-A3B-cot_mathvista.json"),
-    ("Qwen3-VL-235B-A22B-Instruct-cot",
-     REPO_ROOT / "results" / "Qwen3-VL-235B-A22B-Instruct-cot_mathvista.json"),
+    (f"{m}-cot", REPO_ROOT / "results" / f"{m}-cot_mathvista.json")
+    for m in MODELS
 ]
 DEFAULT_RESPONSES = {
-    "gpt-5.4-mini-cot":          REPO_ROOT / "responses" / "gpt5.4-mini_mathvista_cot.json",
-    "gemini-2.5-flash-cot":      REPO_ROOT / "responses" / "gemini-2.5-flash_mathvista_cot.json",
-    "Qwen3.5-35B-A3B-cot":       REPO_ROOT / "responses" / "Qwen3.5-35B-A3B_mathvista_cot.json",
-    "Qwen3-VL-235B-A22B-Instruct-cot":
-                                 REPO_ROOT / "responses" / "Qwen3-VL-235B-A22B-Instruct_mathvista_cot.json",
+    f"{m}-cot": REPO_ROOT / "responses" / f"{m}_mathvista_cot.json"
+    for m in MODELS
 }
 DEFAULT_OUT_DIR = REPO_ROOT / "human_eval"
 HAL_TYPES = {"faithfulness", "factuality", "logical"}

@@ -11,7 +11,7 @@ import random
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Callable, TypeVar
+from typing import Callable, Optional, TypeVar
 
 from PIL import Image
 
@@ -93,6 +93,35 @@ def load_text_map(path: str) -> dict[str, str]:
     """Load a JSON object as a string-to-string mapping."""
     data = load_json_object(path)
     return {str(k): "" if v is None else str(v) for k, v in data.items()}
+
+
+def normalize_choices(choices):
+    """Convert pyarrow array choices to a plain Python list, handling None/scalar."""
+    if choices is None:
+        return None
+    if hasattr(choices, "tolist"):
+        return choices.tolist()
+    if not isinstance(choices, (list, tuple)):
+        return [choices]
+    return choices
+
+
+def read_parquet_dir(data_dir: str, prefix: Optional[str] = None) -> "pyarrow.Table":
+    """Read all parquet files in a directory and return a concatenated table."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    files = sorted(
+        os.path.join(data_dir, f) for f in os.listdir(data_dir)
+        if f.endswith(".parquet") and (prefix is None or f.startswith(prefix))
+    )
+    if not files:
+        desc = f"split '{prefix}' in {data_dir}" if prefix else data_dir
+        raise FileNotFoundError(f"No parquet files found for {desc}")
+    table = pq.read_table(files[0], memory_map=True)
+    for f in files[1:]:
+        table = pa.concat_tables([table, pq.read_table(f, memory_map=True)])
+    return table
 
 
 def load_existing_details(filepath: str, id_field: str, allowed_ids: set[str]) -> dict[str, dict]:

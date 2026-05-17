@@ -14,7 +14,7 @@ import os
 from typing import Optional
 
 from configs import config
-from evaluation.runners import run_mathvista, run_pope, run_vqarad
+from evaluation import run_mathvista, run_pope, run_vqarad
 
 
 METHOD_MAP = {"pope": "规则判断法", "mathvista": "gpt-judge", "vqarad": "gpt-judge"}
@@ -144,8 +144,8 @@ Examples:
     parser.add_argument(
         "--max-samples",
         type=int,
-        default=None,
-        help="Limit samples; POPE defaults to 1000 random samples with seed 42",
+        default=1000,
+        help="每个数据集最多使用的样本数（默认 1000，seed=42 随机采样）",
     )
     parser.add_argument("--pope-split", default="random",
                         choices=["random", "popular", "adversarial"],

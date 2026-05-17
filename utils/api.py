@@ -189,8 +189,8 @@ def _call_responses(client: ModelClient, prompt: str, image_path: Optional[str],
     kwargs: dict = {
         "model": client.api_model,
         "input": [{"role": "user", "content": content}],
+        "temperature": temperature,
     }
-    kwargs["temperature"] = temperature
     if system_prompt:
         kwargs["instructions"] = system_prompt
     if max_tokens is not None:

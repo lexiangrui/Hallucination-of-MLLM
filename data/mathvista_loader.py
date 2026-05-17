@@ -9,13 +9,9 @@ HF parquet schema:
 """
 
 import math
-import os
 from typing import Optional
 
-import pyarrow as pa
-import pyarrow.parquet as pq
-
-from utils.batch import hf_image_to_tempfile
+from utils.batch import hf_image_to_tempfile, normalize_choices, read_parquet_dir
 
 
 def load_mathvista(
@@ -23,44 +19,23 @@ def load_mathvista(
     question_types: Optional[list[str]] = None,
     split: str = "testmini",
 ) -> list[dict]:
-    """
-    Load MathVista dataset from Hugging Face parquet files.
-
-    Args:
-        max_samples: Maximum number of samples to load
-        question_types: Filter by question types
-        split: Dataset split to load ("testmini" or "test"). Default is "testmini" (1000 samples).
-    """
     from configs.config import MATHVISTA_DATA_DIR
 
-    files = sorted(
-        os.path.join(MATHVISTA_DATA_DIR, f) for f in os.listdir(MATHVISTA_DATA_DIR)
-        if f.endswith(".parquet") and f.startswith(split)
-    )
-    if not files:
-        raise FileNotFoundError(
-            f"No parquet files found for split '{split}' in {MATHVISTA_DATA_DIR}"
-        )
-
-    tables = [pq.read_table(f) for f in files]
-    table = pa.concat_tables(tables) if len(tables) > 1 else tables[0]
-    df = table.to_pandas()
+    df = read_parquet_dir(MATHVISTA_DATA_DIR, prefix=split).to_pandas()
 
     has_decoded = "decoded_image" in df.columns
     data = []
 
-    for _, row in df.iterrows():
+    for row in df.to_dict("records"):
+        if max_samples is not None and len(data) >= max_samples:
+            break
+
         q_type = row["question_type"]
         if question_types and q_type not in question_types:
             continue
 
         image_path = hf_image_to_tempfile(row.get("decoded_image")) if has_decoded else ""
-
-        choices = row.get("choices")
-        if choices is not None and hasattr(choices, "tolist"):
-            choices = choices.tolist()
-        elif choices is not None and not isinstance(choices, (list, tuple)):
-            choices = [choices]
+        choices = normalize_choices(row.get("choices"))
 
         query = row.get("query", "")
         question = str(query) if query else str(row.get("question", ""))
@@ -88,8 +63,5 @@ def load_mathvista(
             "unit": unit,
             "choices": choices,
         })
-
-    if max_samples is not None:
-        data = data[:max_samples]
 
     return data

@@ -16,7 +16,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from data import load_mathvista, load_pope_by_split, load_vqarad
 from utils.api import ModelClient, call_vision_model_with_retries, create_model_client
-from utils.batch import load_text_map, run_resumable_batch, save_json_atomic, sort_json_keys
+from utils.batch import load_text_map, normalize_choices, run_resumable_batch, save_json_atomic, sort_json_keys
 
 LOGGER = logging.getLogger(__name__)
 
@@ -65,16 +65,10 @@ def _build_prompt(sample: dict, dataset: str, prompt_mode: str) -> str:
             "Please provide a detailed answer based on what you observe in the medical image."
         )
 
-    choices = sample.get("choices")
+    choices = normalize_choices(sample.get("choices"))
     choices_text = ""
-    if choices is not None:
-        if hasattr(choices, "tolist"):
-            choices = choices.tolist()
-        elif not isinstance(choices, (list, tuple)):
-            choices = [choices]
-        choices = [c for c in choices if c is not None]
-        if choices:
-            choices_text = "\nChoices: " + ", ".join(str(c) for c in choices)
+    if choices:
+        choices_text = "\nChoices: " + ", ".join(str(c) for c in choices)
 
     format_instruction = _mathvista_format_instruction(sample)
     if prompt_mode == "cot":
@@ -149,7 +143,7 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--output", default=None)
     parser.add_argument("--pope-split", default="random", choices=["random", "popular", "adversarial"])
-    parser.add_argument("--max-samples", type=int, default=None)
+    parser.add_argument("--max-samples", type=int, default=1000)
     parser.add_argument("--prompt-mode", default="direct", choices=["direct", "cot"])
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--retries", type=int, default=3)

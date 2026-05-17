@@ -89,8 +89,6 @@ POPE_DATA_DIR = str(_PROJECT_ROOT / "data" / "POPE" / "data")
 MATHVISTA_DATA_DIR = str(_PROJECT_ROOT / "data" / "MathVista" / "data")
 VQARAD_DATA_DIR = str(_PROJECT_ROOT / "data" / "VQA-RAD" / "data")
 
-POPE_DEFAULT_MAX_SAMPLES = 1000
-POPE_SAMPLE_SEED = 42
 
 # ==================== Models to Evaluate ====================
 MODELS = [

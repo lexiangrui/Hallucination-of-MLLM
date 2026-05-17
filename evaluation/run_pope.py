@@ -8,8 +8,8 @@ from typing import Optional
 
 from configs import config
 from data import load_pope_by_split
-from evaluation.detectors.rule_based import detect_pope_hallucination
 from evaluation.metrics import compute_pope_metrics
+from evaluation.rule_based import detect_pope_hallucination
 from utils.batch import load_response_subset, save_json_atomic
 
 LOGGER = logging.getLogger(__name__)
@@ -21,13 +21,9 @@ def run_pope(
     max_samples: Optional[int] = None,
     pope_split: str = "random",
 ) -> dict:
-    """
-    Run POPE rule-based hallucination detection.
-    """
     LOGGER.info("[1/2] Loading POPE dataset (%s)...", pope_split)
     samples = load_pope_by_split(split=pope_split, max_samples=max_samples)
-    total = len(samples)
-    LOGGER.info("  Loaded %s samples", total)
+    LOGGER.info("  Loaded %s samples", len(samples))
 
     LOGGER.info("[2/2] Running rule-based detection...")
     responses, samples = load_response_subset(
@@ -55,7 +51,7 @@ def run_pope(
 
         details.append({
             "question_id": sid,
-            "question": sample["question"],
+            "question": sample["question"][:200],
             "gt_answer": gt_answer,
             "model_response": response[:200],
             "predicted": predicted,
@@ -83,10 +79,7 @@ def run_pope(
         total,
     )
 
-    out_path = os.path.join(
-        config.OUTPUT_DIR,
-        f"{model_name}_pope_{pope_split}.json",
-    )
+    out_path = os.path.join(config.OUTPUT_DIR, f"{model_name}_pope_{pope_split}.json")
     save_json_atomic({
         "model_name": model_name,
         "dataset": "pope",

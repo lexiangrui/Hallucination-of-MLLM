@@ -84,11 +84,16 @@ def compute_pope_metrics(label_list: list[str], pred_list: list[str]) -> dict:
     tp, fp, tn, fn = cm["TP"], cm["FP"], cm["TN"], cm["FN"]
     total = tp + fp + tn + fn
 
+    denom_p = tp + fp
+    denom_r = tp + fn
+    p = tp / denom_p if denom_p else 0.0
+    r = tp / denom_r if denom_r else 0.0
+
     return {
-        "accuracy": accuracy(y_true, y_pred),
-        "precision": precision(y_true, y_pred),
-        "recall": recall(y_true, y_pred),
-        "f1": f1_score(y_true, y_pred),
+        "accuracy": (tp + tn) / total if total else 0.0,
+        "precision": p,
+        "recall": r,
+        "f1": 2 * p * r / (p + r) if p + r else 0.0,
         "yes_ratio": y_pred.count(1) / len(y_pred) if y_pred else 0.0,
         "object_hallucination_rate": fp / total if total else 0.0,
         "n_object_hallucinated": fp,
@@ -100,8 +105,6 @@ def compute_pope_metrics(label_list: list[str], pred_list: list[str]) -> dict:
 def hallucination_rate(gpt_flags: list[int | None]) -> float:
     """
     Hallucination Rate — defined in MMHal-Bench (Sun et al., 2024).
-
-    Hallucination Rate = N_{score<3} / N_total
 
     GPT-4 rates each response on a 0-6 Likert scale. Scores < 3 (i.e.,
     0/1/2) indicate "with hallucination", scores >= 3 "no hallucination".
@@ -128,9 +131,40 @@ def hallucination_rate(gpt_flags: list[int | None]) -> float:
     return sum(valid) / len(valid)
 
 
+_GPT_JUDGE_TYPE_COUNTS_INIT = {"faithfulness": 0, "factuality": 0, "logical": 0, "none": 0, "error": 0}
+
+
+def compute_gpt_judge_summary(details: list[dict], total: int) -> tuple[dict, list[int]]:
+    """Aggregate GPT Judge results into metrics. Used by all GPT-judge runners."""
+    scores: list[float] = []
+    hallucination_flags: list[int] = []
+    type_counts = dict(_GPT_JUDGE_TYPE_COUNTS_INIT)
+
+    for detail in details:
+        score = detail.get("score")
+        has_h = detail.get("has_hallucination")
+        htype = detail.get("hallucination_type", "error")
+        if htype not in type_counts:
+            htype = "error"
+        if score is not None:
+            scores.append(score)
+        if has_h is not None:
+            hallucination_flags.append(1 if has_h else 0)
+        type_counts[htype] += 1
+
+    metrics = {
+        "total_samples": total,
+        "completed_samples": len(details),
+        "hallucination_rate": hallucination_rate(hallucination_flags) if hallucination_flags else 0.0,
+        "avg_score": sum(scores) / len(scores) if scores else 0.0,
+        "n_hallucinated": sum(hallucination_flags),
+        "n_valid": len(hallucination_flags),
+        "type_counts": type_counts,
+    }
+    return metrics, hallucination_flags
+
+
 # ==================== Human Alignment Metrics ====================
-# These are used specifically in human-as-judge experiments to compare
-# automated detection results against human-annotated gold labels.
 
 def cohens_kappa(y_true: list[int], y_pred: list[int]) -> float:
     """
@@ -153,17 +187,10 @@ def cohens_kappa(y_true: list[int], y_pred: list[int]) -> float:
     if n == 0:
         return 0.0
 
-    # Confusion matrix as counts
-    tp = sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 1)
-    tn = sum(1 for t, p in zip(y_true, y_pred) if t == 0 and p == 0)
-    fp = sum(1 for t, p in zip(y_true, y_pred) if t == 0 and p == 1)
-    fn = sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 0)
+    cm = confusion_matrix(y_true, y_pred)
+    tp, tn, fp, fn = cm["TP"], cm["TN"], cm["FP"], cm["FN"]
 
-    # Observed agreement
     p_o = (tp + tn) / n
-
-    # Expected agreement
-    # P(judge says positive) * P(true is positive) + P(judge says negative) * P(true is negative)
     p_positive_judge = (tp + fp) / n
     p_positive_true = (tp + fn) / n
     p_negative_judge = (tn + fn) / n
@@ -182,9 +209,6 @@ def pearson_correlation(x: list[float], y: list[float]) -> float:
     between two sets of scores (e.g., GPT scores vs. human scores).
 
     r = Σ((x_i - x̄)(y_i - ȳ)) / sqrt(Σ(x_i - x̄)² * Σ(y_i - ȳ)²)
-
-    Used in human-alignment experiments to assess whether automated
-    scores track human judgments.
     """
     n = len(x)
     if n == 0:
@@ -209,27 +233,32 @@ def human_alignment_report(
     human_scores: list[float] | None = None,
     detector_scores: list[float] | None = None,
 ) -> dict:
-    """
-    Compute human-alignment metrics for automated detection vs. human gold labels.
+    """Compute human-alignment metrics for automated detection vs. human gold labels."""
+    cm = confusion_matrix(human_labels, detector_labels)
+    tp, tn, fp, fn = cm["TP"], cm["TN"], cm["FP"], cm["FN"]
+    total = tp + tn + fp + fn
 
-    Args:
-        human_labels: Binary hallucination labels from human annotators.
-        detector_labels: Binary hallucination labels from automated detector.
-        human_scores: Optional continuous scores from human annotators.
-        detector_scores: Optional continuous scores from automated detector.
+    denom_p = tp + fp
+    denom_r = tp + fn
+    p = tp / denom_p if denom_p else 0.0
+    r = tp / denom_r if denom_r else 0.0
 
-    Returns:
-        Dict with accuracy, f1, kappa, and optionally pearson_r.
-    """
+    n = len(human_labels)
+    p_o = (tp + tn) / n if n else 0.0
+    p_positive_judge = (tp + fp) / n if n else 0.0
+    p_positive_true = (tp + fn) / n if n else 0.0
+    p_negative_judge = (tn + fn) / n if n else 0.0
+    p_negative_true = (tn + fp) / n if n else 0.0
+    p_e = (p_positive_judge * p_positive_true) + (p_negative_judge * p_negative_true)
+    kappa = 1.0 if p_e == 1.0 else (p_o - p_e) / (1.0 - p_e) if n else 0.0
+
     report = {
-        "accuracy": accuracy(human_labels, detector_labels),
-        "precision": precision(human_labels, detector_labels),
-        "recall": recall(human_labels, detector_labels),
-        "f1": f1_score(human_labels, detector_labels),
-        "cohens_kappa": cohens_kappa(human_labels, detector_labels),
+        "accuracy": (tp + tn) / total if total else 0.0,
+        "precision": p,
+        "recall": r,
+        "f1": 2 * p * r / (p + r) if p + r else 0.0,
+        "cohens_kappa": kappa,
     }
-
     if human_scores is not None and detector_scores is not None:
         report["pearson_r"] = pearson_correlation(human_scores, detector_scores)
-
     return report

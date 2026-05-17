@@ -61,7 +61,7 @@ pip install openai anthropic Pillow pyarrow pandas python-dotenv
 
 先调用测试模型 API 生成回答文件。输出格式为 `{样本ID: 模型回答}`，可直接传给 `main.py`。
 
-POPE 默认按每个 split 随机抽样 1000 条（seed=42，方便复现），下面 POPE 命令显式写出 `--max-samples 1000`。MathVista 默认使用 testmini split（1000 条样本）。
+POPE 默认按每个 split 随机抽样 1000 条（seed=42，方便复现），下面 POPE 命令显式写出 `--max-samples 1000`。MathVista 默认使用 testmini split（1000 条样本）。VQA-RAD 同样从全量数据中随机抽样 1000 条（seed=42，方便复现），下面命令显式写出 `--max-samples 1000`。
 
 #### POPE random
 
@@ -205,17 +205,17 @@ python scripts/generate_responses.py --dataset mathvista \
 python scripts/generate_responses.py --dataset vqarad \
   --model gpt-5.4-mini \
   --output responses/gpt5.4-mini_vqarad.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset vqarad \
   --model gemini-2.5-flash \
   --output responses/gemini-2.5-flash_vqarad.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset vqarad \
   --model Qwen3.5-35B-A3B \
   --output responses/Qwen3.5-35B-A3B_vqarad.json \
-  --workers 4
+  --workers 10
 
 python scripts/generate_responses.py --dataset vqarad \
   --model Qwen3-VL-235B-A22B-Instruct \
