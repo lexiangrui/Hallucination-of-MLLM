@@ -10,9 +10,9 @@ env/
 .env
 
 # Data — large image datasets, do not commit
-data/pope/coco/
-data/mathvista/images/
-data/mathvista/*.parquet
+data/MathVista/data
+data/POPE/data
+data/vqa-rad/data
 
 # Output
 report/
@@ -25,6 +25,3 @@ report/
 .idea/
 .claude/
 
-# Temp files from atomic saves
-*.tmp
-data/*/
