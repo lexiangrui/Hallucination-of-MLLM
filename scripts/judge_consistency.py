@@ -20,8 +20,8 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from configs.config import MODELS
 from data import load_mathvista
-from evaluation.judge import run_gpt_judge
-from evaluation.metrics import cohens_kappa, compute_gpt_judge_summary
+from evaluation.judge import run_mllm_judge
+from evaluation.metrics import cohens_kappa, compute_mllm_judge_summary
 from utils.batch import load_response_subset, save_json_atomic, load_json_object
 
 LOGGER = logging.getLogger(__name__)
@@ -88,7 +88,7 @@ def main():
         sampled_ids = {str(s["pid"]) for s in aligned}
         filtered = [d for d in gpt_details if str(d.get("pid", "")) in sampled_ids]
         if filtered:
-            gpt_metrics, _ = compute_gpt_judge_summary(filtered, len(filtered))
+            gpt_metrics, _ = compute_mllm_judge_summary(filtered, len(filtered))
             gpt_out = os.path.join(OUTPUT_DIR, f"{model_name}_gpt.json")
             save_json_atomic({"model_name": model_name, "dataset": "mathvista",
                                "metrics": gpt_metrics, "details": filtered}, gpt_out)
@@ -104,7 +104,7 @@ def main():
     claude_details_by_model = {}
     for model_name, samples in all_samples.items():
         LOGGER.info("[%s]", model_name)
-        result = run_gpt_judge(
+        result = run_mllm_judge(
             model_name=model_name,
             dataset_name="mathvista",
             response_file=all_responses[model_name],
