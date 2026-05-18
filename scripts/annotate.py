@@ -18,6 +18,7 @@ DATA_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
 SAMPLE_FIELDS = [
     "sample_id", "model", "pid", "image", "question",
     "gt_answer", "model_response", "human_label", "human_type",
+    "detection_method",
 ]
 
 CSV_PATH = DATA_DIR / "annotations.csv"
