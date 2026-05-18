@@ -6,14 +6,14 @@ Metrics:
 - Precision — TP / (TP + FP)
 - Recall    — TP / (TP + FN)
 - F1        — 2 * P * R / (P + R)
-- Hallucination Rate  — proportion flagged as hallucinatory by GPT Judge
+- Hallucination Rate  — proportion flagged as hallucinatory by MLLM Judge
 
 Hallucination detection is treated as a binary classification:
 - Positive class = hallucination detected
 - Ground truth label comes from:
   - Rule-based: comparison with dataset ground truth
   - Human annotation: gold labels
-- For GPT Judge vs. ground truth comparison, we treat GPT Judge
+- For MLLM Judge vs. ground truth comparison, we treat MLLM Judge
   predictions as the detection result and ground truth as the label.
 """
 
@@ -131,14 +131,14 @@ def hallucination_rate(gpt_flags: list[int | None]) -> float:
     return sum(valid) / len(valid)
 
 
-_GPT_JUDGE_TYPE_COUNTS_INIT = {"faithfulness": 0, "factuality": 0, "logical": 0, "none": 0, "error": 0}
+_MLLM_JUDGE_TYPE_COUNTS_INIT = {"faithfulness": 0, "factuality": 0, "logical": 0, "none": 0, "error": 0}
 
 
-def compute_gpt_judge_summary(details: list[dict], total: int) -> tuple[dict, list[int]]:
-    """Aggregate GPT Judge results into metrics. Used by all GPT-judge runners."""
+def compute_mllm_judge_summary(details: list[dict], total: int) -> tuple[dict, list[int]]:
+    """Aggregate MLLM Judge results into metrics. Used by all GPT-judge runners."""
     scores: list[float] = []
     hallucination_flags: list[int] = []
-    type_counts = dict(_GPT_JUDGE_TYPE_COUNTS_INIT)
+    type_counts = dict(_MLLM_JUDGE_TYPE_COUNTS_INIT)
 
     for detail in details:
         score = detail.get("score")

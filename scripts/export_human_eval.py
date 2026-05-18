@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-Export a blind human-alignment annotation sheet for MathVista COT + POPE random.
+Export a blind human-alignment annotation sheet for MathVista COT.
 
 Sampling strategy (分层抽样):
-- MathVista: 模型 × 有幻觉/无幻觉 (×2) × 每格抽样数 (默认 5, 覆盖 3 种类型)
-- POPE: 按模型取所有可用幻觉样本 (最多 4/模型) + 随机补充至 n_pope
-- 总样本数 = n_mathvista + n_pope, seed=42 固定可复现
+- 模型: gpt-5.4-mini, gemini-2.5-flash, Qwen3.5-35B-A3B, Qwen3-VL-235B-A22B (×4)
+- MLLM Judge 判定: 有幻觉 / 无幻觉 (×2)
+- 每组每模型抽样数可配 (默认 5)，覆盖全部 3 类幻觉类型 (faithfulness / factuality / logical)
+- seed=42 固定可复现
 
 Outputs:
 - results/errors_analysis/human_alignment/samples.csv      blind annotation sheet
 - results/errors_analysis/human_alignment/annotations.csv  editable copy for annotators
-- results/errors_analysis/human_alignment/meta.json        predictions keyed by sample_id
+- results/errors_analysis/human_alignment/meta.json        MLLM Judge predictions keyed by sample_id
 """
 
 from __future__ import annotations
@@ -38,14 +39,6 @@ DEFAULT_RESPONSES = {
     f"{m}-cot": REPO_ROOT / "responses" / f"{m}_mathvista_cot.json"
     for m in MODELS
 }
-DEFAULT_POPE_RESULTS = [
-    (m, REPO_ROOT / "results" / f"{m}_pope_random.json")
-    for m in MODELS
-]
-DEFAULT_POPE_RESPONSES = {
-    m: REPO_ROOT / "responses" / f"{m}_pope_random.json"
-    for m in MODELS
-}
 DEFAULT_OUT_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
 HAL_TYPES = {"faithfulness", "factuality", "logical"}
 
@@ -59,7 +52,6 @@ SAMPLE_FIELDS = [
     "model_response",
     "human_label",
     "human_type",
-    "detection_method",
 ]
 
 
@@ -83,82 +75,6 @@ def _load_mathvista_lookup() -> dict[str, dict[str, Any]]:
     from data import load_mathvista
 
     return {str(sample["pid"]): sample for sample in load_mathvista()}
-
-
-def _load_pope_lookup(split: str = "random") -> dict[str, dict[str, Any]]:
-    from data import load_pope_by_split
-
-    pope_by_qid = {}
-    for sample in load_pope_by_split(split=split):
-        pope_by_qid[str(sample["question_id"])] = sample
-    return pope_by_qid
-
-
-def _flatten_pope_records(
-    sources: list[tuple[str, Path]],
-    response_paths: dict[str, Path],
-    pope_split: str = "random",
-) -> list[dict[str, Any]]:
-    pope_by_qid = _load_pope_lookup(split=pope_split)
-    records = []
-
-    for model, result_path in sources:
-        data = _load_json(result_path)
-        if model not in response_paths:
-            raise ValueError(f"Missing response path for model: {model}")
-        responses = _load_response_map(response_paths[model])
-
-        for detail in data.get("details", []):
-            qid = str(detail.get("question_id", ""))
-            if qid not in pope_by_qid:
-                continue
-            if qid not in responses:
-                continue
-
-            sample = pope_by_qid[qid]
-            sample_id = f"{_safe_model_name(model)}__pope_{qid}"
-            is_oh = detail.get("is_object_hallucination", False)
-
-            records.append({
-                "sample_id": sample_id,
-                "model": model,
-                "pid": f"pope_{qid}",
-                "image": sample["image"],
-                "question": sample["question"],
-                "gt_answer": sample["answer"],
-                "model_response": responses[qid],
-                "gpt_has_h": 1 if is_oh else 0,
-                "gpt_type": "faithfulness",
-                "gpt_score": None,
-            })
-
-    return records
-
-
-def _sample_pope(
-    records: list[dict[str, Any]],
-    n_total: int,
-    seed: int,
-) -> list[dict[str, Any]]:
-    rng = random.Random(seed)
-    by_model = defaultdict(list)
-    for r in records:
-        by_model[r["model"]].append(r)
-
-    chosen = []
-    for model in sorted(by_model):
-        group = by_model[model]
-        hal = [r for r in group if r["gpt_has_h"] == 1]
-        n_hal = min(4, len(hal))
-        if n_hal > 0:
-            chosen.extend(rng.sample(hal, n_hal))
-
-    needed = n_total - len(chosen)
-    if needed > 0:
-        pool = [r for r in records if r not in chosen]
-        chosen.extend(rng.sample(pool, min(needed, len(pool))))
-
-    return chosen[:n_total]
 
 
 def _parse_result_source(entry: str) -> tuple[str, Path]:
@@ -300,7 +216,6 @@ def _write_meta_json(records: list[dict[str, Any]], path: Path) -> None:
             "gpt_score": record["gpt_score"],
             "gpt_has_h": record["gpt_has_h"],
             "gpt_type": record["gpt_type"],
-            "detection_method": record["detection_method"],
         }
         for record in records
     }
@@ -309,84 +224,39 @@ def _write_meta_json(records: list[dict[str, Any]], path: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Export blind human-eval samples for MathVista COT + POPE random."
-    )
+    parser = argparse.ArgumentParser(description="Export blind human-eval samples for MathVista COT.")
     parser.add_argument("--result", action="append", default=None,
-                        help="MathVista result source in model=path.json form; can be repeated")
-    parser.add_argument("--pope-result", action="append", default=None,
-                        help="POPE result source in model=path.json form; can be repeated")
-    parser.add_argument("--pope-split", default="random",
-                        help="POPE split to use (default: random)")
+                        help="Result source in model=path.json form; can be repeated")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--per-cell", type=int, default=5,
-                        help="Samples per (model, has_hallucination) stratum for MathVista")
-    parser.add_argument("--n-mathvista", type=int, default=30,
-                        help="Total MathVista samples to include (default: 30)")
-    parser.add_argument("--n-pope", type=int, default=30,
-                        help="Total POPE samples to include (default: 30)")
+                        help="Samples per (model, has_hallucination) stratum")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     if args.per_cell <= 0:
         raise ValueError("--per-cell must be positive")
-    if args.n_mathvista <= 0 or args.n_pope <= 0:
-        raise ValueError("--n-mathvista and --n-pope must be positive")
 
-    out_dir = Path(args.out_dir)
-
-    # ---- MathVista (MLLM Judge) ----
-    mv_sources = (
+    sources = (
         [_parse_result_source(item) for item in args.result]
         if args.result
         else DEFAULT_RESULTS
     )
-    mv_records = _flatten_records(mv_sources, DEFAULT_RESPONSES)
-    for r in mv_records:
-        r["detection_method"] = "mllm_judge"
-    mv_selected = _sample_records(mv_records, per_cell=args.per_cell, seed=args.seed)
-    if len(mv_selected) > args.n_mathvista:
-        rng = random.Random(args.seed)
-        mv_selected = rng.sample(mv_selected, args.n_mathvista)
+    out_dir = Path(args.out_dir)
 
-    # ---- POPE (Rule-based) ----
-    pope_sources = (
-        [_parse_result_source(item) for item in args.pope_result]
-        if args.pope_result
-        else DEFAULT_POPE_RESULTS
-    )
-    pope_records = _flatten_pope_records(
-        pope_sources, DEFAULT_POPE_RESPONSES, pope_split=args.pope_split,
-    )
-    for r in pope_records:
-        r["detection_method"] = "rule_based"
-    pope_selected = _sample_pope(pope_records, n_total=args.n_pope, seed=args.seed)
-
-    # ---- Merge ----
-    merged = sorted(
-        mv_selected + pope_selected,
-        key=lambda row: (
-            row.get("detection_method", ""),
-            row.get("model", ""),
-            str(row.get("pid", "")),
-        ),
-    )
+    records = _flatten_records(sources, DEFAULT_RESPONSES)
+    selected = _sample_records(records, per_cell=args.per_cell, seed=args.seed)
 
     samples_path = out_dir / "samples.csv"
     annotations_path = out_dir / "annotations.csv"
     meta_path = out_dir / "meta.json"
 
-    _write_samples_csv(merged, samples_path)
-    _write_samples_csv(merged, annotations_path)
-    _write_meta_json(merged, meta_path)
+    _write_samples_csv(selected, samples_path)
+    _write_samples_csv(selected, annotations_path)
+    _write_meta_json(selected, meta_path)
 
-    n_models_mv = len(set(r["model"] for r in mv_selected))
-    n_models_pope = len(set(r["model"] for r in pope_selected))
-    print(f"MathVista models: {n_models_mv}")
-    print(f"POPE models:      {n_models_pope}")
-    print(f"MathVista samples:{len(mv_selected)}")
-    print(f"POPE samples:     {len(pope_selected)}")
-    print(f"Total samples:    {len(merged)}")
+    n_models = len(set(r["model"] for r in selected))
+    print(f"Models:       {n_models}")
+    print(f"Total samples:{len(selected)}")
     print(f"Samples  →   {samples_path}")
     print(f"Annotations → {annotations_path}")
     print(f"Meta     →   {meta_path}")

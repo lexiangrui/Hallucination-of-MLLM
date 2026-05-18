@@ -1,12 +1,12 @@
 """
-MathVista GPT Judge evaluation runner.
+MathVista MLLM Judge evaluation runner.
 """
 
 import logging
 from typing import Optional
 
 from data import load_mathvista
-from evaluation.judge import run_gpt_judge
+from evaluation.judge import run_mllm_judge
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def run_mathvista(
     samples = load_mathvista(max_samples=max_samples)
     LOGGER.info("  Loaded %s samples", len(samples))
 
-    return run_gpt_judge(
+    return run_mllm_judge(
         model_name=model_name,
         dataset_name="mathvista",
         response_file=response_file,

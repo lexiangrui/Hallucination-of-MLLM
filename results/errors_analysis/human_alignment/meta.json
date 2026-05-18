@@ -1,482 +1,282 @@
 {
-  "Qwen3_VL_235B_A22B_Instruct_cot__115": {
+  "Qwen3_VL_235B_A22B_Instruct_cot__30": {
     "model": "Qwen3-VL-235B-A22B-Instruct-cot",
-    "pid": "115",
-    "gpt_score": 1,
-    "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
+    "pid": "30",
+    "gpt_score": 5,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
   },
   "Qwen3_VL_235B_A22B_Instruct_cot__149": {
     "model": "Qwen3-VL-235B-A22B-Instruct-cot",
     "pid": "149",
     "gpt_score": 5,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
-  },
-  "Qwen3_VL_235B_A22B_Instruct_cot__208": {
-    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
-    "pid": "208",
-    "gpt_score": 1,
-    "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
-  },
-  "Qwen3_VL_235B_A22B_Instruct_cot__30": {
-    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
-    "pid": "30",
-    "gpt_score": 5,
-    "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
   "Qwen3_VL_235B_A22B_Instruct_cot__369": {
     "model": "Qwen3-VL-235B-A22B-Instruct-cot",
     "pid": "369",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
+  },
+  "Qwen3_VL_235B_A22B_Instruct_cot__871": {
+    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
+    "pid": "871",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
+  },
+  "Qwen3_VL_235B_A22B_Instruct_cot__1000": {
+    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
+    "pid": "1000",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
+  },
+  "Qwen3_VL_235B_A22B_Instruct_cot__115": {
+    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
+    "pid": "115",
+    "gpt_score": 1,
+    "gpt_has_h": 1,
+    "gpt_type": "logical"
+  },
+  "Qwen3_VL_235B_A22B_Instruct_cot__208": {
+    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
+    "pid": "208",
+    "gpt_score": 1,
+    "gpt_has_h": 1,
+    "gpt_type": "logical"
   },
   "Qwen3_VL_235B_A22B_Instruct_cot__395": {
     "model": "Qwen3-VL-235B-A22B-Instruct-cot",
     "pid": "395",
     "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
+    "gpt_type": "faithfulness"
   },
   "Qwen3_VL_235B_A22B_Instruct_cot__652": {
     "model": "Qwen3-VL-235B-A22B-Instruct-cot",
     "pid": "652",
     "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "factuality",
-    "detection_method": "mllm_judge"
+    "gpt_type": "factuality"
   },
-  "Qwen3_5_35B_A3B_cot__10": {
-    "model": "Qwen3.5-35B-A3B-cot",
-    "pid": "10",
+  "Qwen3_VL_235B_A22B_Instruct_cot__815": {
+    "model": "Qwen3-VL-235B-A22B-Instruct-cot",
+    "pid": "815",
     "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
+    "gpt_type": "faithfulness"
   },
-  "Qwen3_5_35B_A3B_cot__130": {
+  "Qwen3_5_35B_A3B_cot__111": {
     "model": "Qwen3.5-35B-A3B-cot",
-    "pid": "130",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
+    "pid": "111",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
   },
-  "Qwen3_5_35B_A3B_cot__366": {
+  "Qwen3_5_35B_A3B_cot__666": {
     "model": "Qwen3.5-35B-A3B-cot",
-    "pid": "366",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
-  },
-  "Qwen3_5_35B_A3B_cot__53": {
-    "model": "Qwen3.5-35B-A3B-cot",
-    "pid": "53",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
+    "pid": "666",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
   },
   "Qwen3_5_35B_A3B_cot__719": {
     "model": "Qwen3.5-35B-A3B-cot",
     "pid": "719",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
-  },
-  "Qwen3_5_35B_A3B_cot__745": {
-    "model": "Qwen3.5-35B-A3B-cot",
-    "pid": "745",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "factuality",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
   "Qwen3_5_35B_A3B_cot__820": {
     "model": "Qwen3.5-35B-A3B-cot",
     "pid": "820",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
   "Qwen3_5_35B_A3B_cot__898": {
     "model": "Qwen3.5-35B-A3B-cot",
     "pid": "898",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
-  "gemini_2_5_flash_cot__332": {
-    "model": "gemini-2.5-flash-cot",
-    "pid": "332",
-    "gpt_score": 6,
-    "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+  "Qwen3_5_35B_A3B_cot__10": {
+    "model": "Qwen3.5-35B-A3B-cot",
+    "pid": "10",
+    "gpt_score": 2,
+    "gpt_has_h": 1,
+    "gpt_type": "logical"
+  },
+  "Qwen3_5_35B_A3B_cot__53": {
+    "model": "Qwen3.5-35B-A3B-cot",
+    "pid": "53",
+    "gpt_score": 2,
+    "gpt_has_h": 1,
+    "gpt_type": "faithfulness"
+  },
+  "Qwen3_5_35B_A3B_cot__130": {
+    "model": "Qwen3.5-35B-A3B-cot",
+    "pid": "130",
+    "gpt_score": 2,
+    "gpt_has_h": 1,
+    "gpt_type": "faithfulness"
+  },
+  "Qwen3_5_35B_A3B_cot__366": {
+    "model": "Qwen3.5-35B-A3B-cot",
+    "pid": "366",
+    "gpt_score": 2,
+    "gpt_has_h": 1,
+    "gpt_type": "faithfulness"
+  },
+  "Qwen3_5_35B_A3B_cot__745": {
+    "model": "Qwen3.5-35B-A3B-cot",
+    "pid": "745",
+    "gpt_score": 2,
+    "gpt_has_h": 1,
+    "gpt_type": "factuality"
   },
   "gemini_2_5_flash_cot__41": {
     "model": "gemini-2.5-flash-cot",
     "pid": "41",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
-  "gemini_2_5_flash_cot__438": {
+  "gemini_2_5_flash_cot__332": {
     "model": "gemini-2.5-flash-cot",
-    "pid": "438",
-    "gpt_score": 1,
-    "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
-  },
-  "gemini_2_5_flash_cot__711": {
-    "model": "gemini-2.5-flash-cot",
-    "pid": "711",
-    "gpt_score": 1,
-    "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
+    "pid": "332",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
   },
   "gemini_2_5_flash_cot__713": {
     "model": "gemini-2.5-flash-cot",
     "pid": "713",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
   "gemini_2_5_flash_cot__789": {
     "model": "gemini-2.5-flash-cot",
     "pid": "789",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
+  },
+  "gemini_2_5_flash_cot__852": {
+    "model": "gemini-2.5-flash-cot",
+    "pid": "852",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
+  },
+  "gemini_2_5_flash_cot__53": {
+    "model": "gemini-2.5-flash-cot",
+    "pid": "53",
+    "gpt_score": 2,
+    "gpt_has_h": 1,
+    "gpt_type": "factuality"
+  },
+  "gemini_2_5_flash_cot__438": {
+    "model": "gemini-2.5-flash-cot",
+    "pid": "438",
+    "gpt_score": 1,
+    "gpt_has_h": 1,
+    "gpt_type": "logical"
+  },
+  "gemini_2_5_flash_cot__711": {
+    "model": "gemini-2.5-flash-cot",
+    "pid": "711",
+    "gpt_score": 1,
+    "gpt_has_h": 1,
+    "gpt_type": "logical"
   },
   "gemini_2_5_flash_cot__796": {
     "model": "gemini-2.5-flash-cot",
     "pid": "796",
     "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
+    "gpt_type": "logical"
   },
   "gemini_2_5_flash_cot__859": {
     "model": "gemini-2.5-flash-cot",
     "pid": "859",
     "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
+    "gpt_type": "faithfulness"
   },
-  "gpt_5_4_mini_cot__222": {
+  "gpt_5_4_mini_cot__13": {
     "model": "gpt-5.4-mini-cot",
-    "pid": "222",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
+    "pid": "13",
+    "gpt_score": 6,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
   },
   "gpt_5_4_mini_cot__263": {
     "model": "gpt-5.4-mini-cot",
     "pid": "263",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
-  "gpt_5_4_mini_cot__448": {
+  "gpt_5_4_mini_cot__424": {
     "model": "gpt-5.4-mini-cot",
-    "pid": "448",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "mllm_judge"
-  },
-  "gpt_5_4_mini_cot__541": {
-    "model": "gpt-5.4-mini-cot",
-    "pid": "541",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "logical",
-    "detection_method": "mllm_judge"
+    "pid": "424",
+    "gpt_score": 5,
+    "gpt_has_h": 0,
+    "gpt_type": "none"
   },
   "gpt_5_4_mini_cot__693": {
     "model": "gpt-5.4-mini-cot",
     "pid": "693",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
-  },
-  "gpt_5_4_mini_cot__864": {
-    "model": "gpt-5.4-mini-cot",
-    "pid": "864",
-    "gpt_score": 2,
-    "gpt_has_h": 1,
-    "gpt_type": "factuality",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
   "gpt_5_4_mini_cot__922": {
     "model": "gpt-5.4-mini-cot",
     "pid": "922",
     "gpt_score": 6,
     "gpt_has_h": 0,
-    "gpt_type": "none",
-    "detection_method": "mllm_judge"
+    "gpt_type": "none"
   },
-  "Qwen3_VL_235B_A22B_Instruct__pope_2490": {
-    "model": "Qwen3-VL-235B-A22B-Instruct",
-    "pid": "pope_2490",
-    "gpt_score": null,
+  "gpt_5_4_mini_cot__222": {
+    "model": "gpt-5.4-mini-cot",
+    "pid": "222",
+    "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
+    "gpt_type": "faithfulness"
   },
-  "Qwen3_VL_235B_A22B_Instruct__pope_2892": {
-    "model": "Qwen3-VL-235B-A22B-Instruct",
-    "pid": "pope_2892",
-    "gpt_score": null,
+  "gpt_5_4_mini_cot__325": {
+    "model": "gpt-5.4-mini-cot",
+    "pid": "325",
+    "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
+    "gpt_type": "faithfulness"
   },
-  "Qwen3_VL_235B_A22B_Instruct__pope_996": {
-    "model": "Qwen3-VL-235B-A22B-Instruct",
-    "pid": "pope_996",
-    "gpt_score": null,
+  "gpt_5_4_mini_cot__448": {
+    "model": "gpt-5.4-mini-cot",
+    "pid": "448",
+    "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
+    "gpt_type": "faithfulness"
   },
-  "Qwen3_5_35B_A3B__pope_1062": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_1062",
-    "gpt_score": null,
+  "gpt_5_4_mini_cot__541": {
+    "model": "gpt-5.4-mini-cot",
+    "pid": "541",
+    "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
+    "gpt_type": "logical"
   },
-  "Qwen3_5_35B_A3B__pope_1320": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_1320",
-    "gpt_score": null,
+  "gpt_5_4_mini_cot__864": {
+    "model": "gpt-5.4-mini-cot",
+    "pid": "864",
+    "gpt_score": 2,
     "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_1353": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_1353",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_1466": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_1466",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_1938": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_1938",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_240": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_240",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_2626": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_2626",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_2822": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_2822",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_2844": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_2844",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_707": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_707",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "Qwen3_5_35B_A3B__pope_919": {
-    "model": "Qwen3.5-35B-A3B",
-    "pid": "pope_919",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gemini_2_5_flash__pope_1062": {
-    "model": "gemini-2.5-flash",
-    "pid": "pope_1062",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gemini_2_5_flash__pope_2122": {
-    "model": "gemini-2.5-flash",
-    "pid": "pope_2122",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gemini_2_5_flash__pope_2234": {
-    "model": "gemini-2.5-flash",
-    "pid": "pope_2234",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gemini_2_5_flash__pope_2308": {
-    "model": "gemini-2.5-flash",
-    "pid": "pope_2308",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gemini_2_5_flash__pope_2334": {
-    "model": "gemini-2.5-flash",
-    "pid": "pope_2334",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_1106": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_1106",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_1132": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_1132",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_188": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_188",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_2000": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_2000",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_2395": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_2395",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_2677": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_2677",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_2702": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_2702",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_2853": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_2853",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_2892": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_2892",
-    "gpt_score": null,
-    "gpt_has_h": 1,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_309": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_309",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
-  },
-  "gpt_5_4_mini__pope_355": {
-    "model": "gpt-5.4-mini",
-    "pid": "pope_355",
-    "gpt_score": null,
-    "gpt_has_h": 0,
-    "gpt_type": "faithfulness",
-    "detection_method": "rule_based"
+    "gpt_type": "factuality"
   }
 }

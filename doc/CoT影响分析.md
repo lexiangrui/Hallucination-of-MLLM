@@ -7,10 +7,10 @@
 
   三个根本原因：
 
-  1. CoT 暴露推理过程 → GPT Judge 更容易检测到错误
+  1. CoT 暴露推理过程 → MLLM Judge 更容易检测到错误
 
-  Direct 模式下模型只需输出 "B"，GPT Judge 给 4-5 分；CoT
-  模式下模型展开详细推理，如果推理中任何一步出错，GPT Judge
+  Direct 模式下模型只需输出 "B"，MLLM Judge 给 4-5 分；CoT
+  模式下模型展开详细推理，如果推理中任何一步出错，MLLM Judge
   一眼就能看到。即便最终答案正确，推理中的错误描述也会被扣到 score 2。典型例子：
   - PID 34：两个模型都回答 B（正确），但 CoT 推理中说 "overstating the smoothness" → 被 judge 判为
   score 2

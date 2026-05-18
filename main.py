@@ -4,8 +4,8 @@ Hallucination detection for MLLMs.
 
 Dataset → Method mapping:
   POPE      → 规则判断法
-  MathVista → GPT Judge
-  VQA-RAD   → GPT Judge
+  MathVista → MLLM Judge
+  VQA-RAD   → MLLM Judge
 """
 
 import argparse
@@ -17,7 +17,7 @@ from configs import config
 from evaluation import run_mathvista, run_pope, run_vqarad
 
 
-METHOD_MAP = {"pope": "规则判断法", "mathvista": "gpt-judge", "vqarad": "gpt-judge"}
+METHOD_MAP = {"pope": "规则判断法", "mathvista": "mllm-judge", "vqarad": "mllm-judge"}
 LOGGER = logging.getLogger(__name__)
 
 
@@ -125,8 +125,8 @@ def main():
         epilog="""
 Dataset → Method:
   POPE      → 规则判断法
-  MathVista → GPT Judge
-  VQA-RAD   → GPT Judge
+  MathVista → MLLM Judge
+  VQA-RAD   → MLLM Judge
 
 Examples:
   python main.py --dataset pope --model gpt-5.4 --response-files gpt-5.4:pope=responses/gpt54_pope_random.json
@@ -151,7 +151,7 @@ Examples:
                         choices=["random", "popular", "adversarial"],
                         help="POPE sampling setting to evaluate")
     parser.add_argument("--workers", type=int, default=1,
-                        help="Number of concurrent GPT Judge requests for MathVista")
+                        help="Number of concurrent MLLM Judge requests for MathVista")
     parser.add_argument("--output-dir", default=None)
 
     args = parser.parse_args()

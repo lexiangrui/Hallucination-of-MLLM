@@ -16,7 +16,7 @@
 │   └── vqarad_loader.py      # VQA-RAD 数据集加载
 ├── evaluation/
 │   ├── __init__.py              # 导出 judge / run_* 接口
-│   ├── judge.py                 # GPT Judge 裁判逻辑
+│   ├── judge.py                 # MLLM Judge 裁判逻辑
 │   ├── metrics.py               # 检测指标计算
 │   ├── rule_based.py            # POPE 规则判断法
 │   ├── run_mathvista.py         # MathVista 评测运行
@@ -232,7 +232,7 @@ python scripts/generate_responses.py --dataset vqarad \
 
 ### 5. 运行检测
 
-POPE 评测同样使用每个 split 1000 条随机样本（seed=42）。评测会自动只使用回答文件中已有的样本；MathVista 和 VQA-RAD 会调用 GPT Judge，POPE 不需要裁判模型 API。
+POPE 评测同样使用每个 split 1000 条随机样本（seed=42）。评测会自动只使用回答文件中已有的样本；MathVista 和 VQA-RAD 会调用 MLLM Judge，POPE 不需要裁判模型 API。
 
 #### POPE random
 
@@ -342,15 +342,15 @@ python main.py --dataset vqarad --model gemini-2.5-flash \
   --workers 10
 ```
 
-生成回答和 GPT Judge 检测都通过 `utils/api.py` 的 `create_model_client()` 统一解析模型配置；命令行只需指定模型名，脚本自动从 `configs/config.py` 获取 API key、base URL 和调用协议。评测只使用回答文件中已有的样本；GPT Judge 默认断点续跑，每 10 条自动保存一次；并发度通过 `--workers` 控制。
+生成回答和 MLLM Judge 检测都通过 `utils/api.py` 的 `create_model_client()` 统一解析模型配置；命令行只需指定模型名，脚本自动从 `configs/config.py` 获取 API key、base URL 和调用协议。评测只使用回答文件中已有的样本；MLLM Judge 默认断点续跑，每 10 条自动保存一次；并发度通过 `--workers` 控制。
 
 ## 数据集与检测方法
 
 | 数据集 | 检测方法 | 原因 |
 |--------|----------|------|
 | **POPE** | 规则判断法 | 二元 Yes/No 对象存在性问题，参考 POPE 官方评估代码归一化回答并计算二分类指标 |
-| **MathVista** | GPT Judge | 数学视觉推理题型多样，使用 GPT-5.5 作为自动化裁判综合判断 |
-| **VQA-RAD** | GPT Judge | 医学放射科 VQA，使用 GPT-5.5 作为自动化裁判，额外按 closed/open 答案类型分层统计幻觉率 |
+| **MathVista** | MLLM Judge | 数学视觉推理题型多样，使用 GPT-5.5 作为自动化裁判综合判断 |
+| **VQA-RAD** | MLLM Judge | 医学放射科 VQA，使用 GPT-5.5 作为自动化裁判，额外按 closed/open 答案类型分层统计幻觉率 |
 
 ### POPE (Polling-based Object Probing Evaluation)
 
@@ -370,7 +370,7 @@ python main.py --dataset vqarad --model gemini-2.5-flash \
 
 - **用途**：评估医学放射科 VQA 中的幻觉 —— 检测 MLLM 在 X-ray、CT、MRI 图像问答中的视觉误判与知识错误
 - **题型**：closed（yes/no）和 open-ended 两类，共 451 条 QA 对（使用 Hugging Face test split），覆盖放射科图像
-- **检测方式**：以图片 + 问题 + 模型回答 + ground truth 为输入，使用 GPT Judge 判断幻觉；额外按 closed/open 分层统计幻觉率
+- **检测方式**：以图片 + 问题 + 模型回答 + ground truth 为输入，使用 MLLM Judge 判断幻觉；额外按 closed/open 分层统计幻觉率
 
 ## 检测方法详情
 
@@ -384,7 +384,7 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 | 二分类评估 | `yes` 为正类，计算 TP / FP / TN / FN、Accuracy、Precision、Recall、F1、Yes Ratio |
 | 对象幻觉判定 | `label=no` 但模型回答 `yes`，即 FP，记为对象幻觉 |
 
-### GPT Judge (evaluation/judge.py) — MathVista 和 VQA-RAD 专用
+### MLLM Judge (evaluation/judge.py) — MathVista 和 VQA-RAD 专用
 
 使用 GPT-5.5 作为自动化裁判，以图片 + 问题 + 模型回答 + ground truth 作为输入，
 判断回答是否包含幻觉。所有 VQA-RAD 和 MathVista 结果均会进一步分类至忠实性/事实性/逻辑性三种类型。
@@ -412,7 +412,7 @@ POPE 部分使用规则判断法。回答归一化规则参考 RUCAIBox/POPE 官
 
 ### 1. 人类对齐验证
 
-以人工标注为 gold label（40 条 MathVista CoT 样本），评估 GPT Judge 与人类判断的一致性。
+以人工标注为 gold label（40 条 MathVista CoT 样本），评估 MLLM Judge 与人类判断的一致性。
 
 ```bash
 python scripts/export_human_eval.py --per-group 5   # 导出标注样本
@@ -438,7 +438,7 @@ python scripts/judge_consistency.py --workers 4
 
 ### 4. 长度偏差分析
 
-计算回答长度（词数）与 Judge 评分的 Spearman 相关系数，检验 GPT Judge 是否存在系统性长度偏差。零 API 成本。
+计算回答长度（词数）与 Judge 评分的 Spearman 相关系数，检验 MLLM Judge 是否存在系统性长度偏差。零 API 成本。
 
 ### 5. 跨模型幻觉一致性分析
 
@@ -462,7 +462,7 @@ python scripts/error_analysis.py
 | **F1 Score** | 2PR / (P + R) | Precision 与 Recall 的调和平均 |
 | **Yes Ratio** | N_{pred=yes} / N_total | POPE 官方报告指标，用于观察模型是否倾向回答 yes |
 | **Object Hallucination Rate** | FP / N_total | POPE 中 `label=no` 但模型回答 `yes` 的比例 |
-| **Hallucination Rate** | N_{score<3} / N_total | MathVista / VQA-RAD GPT Judge 指标。参考 MMHal-Bench (Sun et al., ACL Findings 2024, Table 6) 的 0-6 评分协议，使用 GPT-5.5 评分；score < 3 为含幻觉，score >= 3 为无幻觉，值越低越好 |
+| **Hallucination Rate** | N_{score<3} / N_total | MathVista / VQA-RAD MLLM Judge 指标。参考 MMHal-Bench (Sun et al., ACL Findings 2024, Table 6) 的 0-6 评分协议，使用 GPT-5.5 评分；score < 3 为含幻觉，score >= 3 为无幻觉，值越低越好 |
 
 > 注：幻觉检测视为二分类问题 —— Positive = 存在幻觉。
 
@@ -473,8 +473,8 @@ python scripts/error_analysis.py
 ```
 results/
 ├── gpt-5.4-mini_pope_random.json  # POPE 规则检测结果
-├── gpt-5.4-mini_mathvista.json    # MathVista GPT Judge 结果
-└── gpt-5.4-mini_vqarad.json       # VQA-RAD GPT Judge 结果（含 closed/open 分层）
+├── gpt-5.4-mini_mathvista.json    # MathVista MLLM Judge 结果
+└── gpt-5.4-mini_vqarad.json       # VQA-RAD MLLM Judge 结果（含 closed/open 分层）
 ```
 
 ## 扩展指南

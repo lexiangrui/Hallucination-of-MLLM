@@ -1,19 +1,19 @@
 """
-VQA-RAD GPT Judge evaluation runner.
+VQA-RAD MLLM Judge evaluation runner.
 """
 
 import logging
 from typing import Optional
 
 from data import load_vqarad
-from evaluation.judge import run_gpt_judge
-from evaluation.metrics import compute_gpt_judge_summary
+from evaluation.judge import run_mllm_judge
+from evaluation.metrics import compute_mllm_judge_summary
 
 LOGGER = logging.getLogger(__name__)
 
 
 def _compute_vqarad_summary(details: list[dict], total: int) -> tuple[dict, list[int]]:
-    metrics, hallucination_flags = compute_gpt_judge_summary(details, total)
+    metrics, hallucination_flags = compute_mllm_judge_summary(details, total)
 
     answer_type_stats = {"closed": {"n": 0, "n_hall": 0}, "open": {"n": 0, "n_hall": 0}}
     for detail in details:
@@ -51,7 +51,7 @@ def run_vqarad(
     samples = load_vqarad(max_samples=max_samples)
     LOGGER.info("  Loaded %s samples", len(samples))
 
-    return run_gpt_judge(
+    return run_mllm_judge(
         model_name=model_name,
         dataset_name="vqarad",
         response_file=response_file,

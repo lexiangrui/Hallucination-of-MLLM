@@ -17,7 +17,7 @@
 | 维度 | POPE | MathVista | VQA-RAD |
 |------|------|-----------|---------|
 | 任务类型 | Yes/No 二分类 | 数学推理 | 医学放射科 VQA |
-| 检测方法 | 规则法 | GPT Judge | GPT Judge |
+| 检测方法 | 规则法 | MLLM Judge | MLLM Judge |
 | 幻觉触发点 | 对象存在性 | 推理过程 | **医学视觉误判 + 知识错误** |
 | 答案形式 | yes/no | 数值/选项 | closed（yes/no）+ open（自由文本） |
 
@@ -64,7 +64,7 @@ HuggingFace Parquet 格式，每条包含：
 
 ## 3. 幻觉类型适配
 
-**核心原则：沿用现有三分类体系**（Faithfulness / Factuality / Logical），在 GPT Judge prompt 中做医学场景特化。
+**核心原则：沿用现有三分类体系**（Faithfulness / Factuality / Logical），在 MLLM Judge prompt 中做医学场景特化。
 
 ### 3.1 医学 VQA 场景 → 现有类型映射
 
@@ -80,14 +80,14 @@ HuggingFace Parquet 格式，每条包含：
 
 ## 4. 检测方法
 
-### 4.1 主检测：GPT Judge
+### 4.1 主检测：MLLM Judge
 
 复用现有 **MMHal-Bench 0-6 评分协议** \cite{sunAligningLargeMultimodal2023}（`evaluation/judge.py`），针对医学场景做 prompt 特化：
 
 - **任务描述**：提示 Judge 当前是放射科医学 VQA，要求关注视觉内容与医学知识的一致性
 - **幻觉类型分类**：始终启用三分类（faithfulness / factuality / logical）
 
-GPT Judge 的 task_desc（`build_judge_prompt`，`dataset="vqarad"`）：
+MLLM Judge 的 task_desc（`build_judge_prompt`，`dataset="vqarad"`）：
 
 ```
 The question is about medical visual question answering based on a radiology image
@@ -128,7 +128,7 @@ hallucination-of-mllm/
 │   └── VQA-RAD/data/          # HF Parquet 文件（需下载）
 │
 ├── evaluation/
-│   ├── judge.py               # GPT Judge 裁判逻辑
+│   ├── judge.py               # MLLM Judge 裁判逻辑
 │   └── run_vqarad.py          # VQA-RAD 评估 runner
 │
 ├── configs/
@@ -148,7 +148,7 @@ list[dict]  # id, image, question, answer, answer_type
     ↓
 evaluation/run_vqarad.py
     ├─ load_response_subset()  → 过滤有模型回答的样本
-    ├─ GPTJudge.judge()        → 逐条评估（医学特化 prompt）
+    ├─ MLLMJudge.judge()        → 逐条评估（医学特化 prompt）
     └─ run_resumable_batch()   → 批处理 + 断点续跑
     ↓
 results/{model}_vqarad.json   # 评估结果（含分层统计）
@@ -186,9 +186,9 @@ You are an expert radiologist.
 Please provide a detailed answer based on what you observe in the medical image.
 ```
 
-参考 HALT-MedVQA \cite{panditHALTMedVQAHallucinationAware2025} 的角色设定策略，使用专家角色引导模型输出详细的医学推理，便于 GPT Judge 判断三类幻觉。
+参考 HALT-MedVQA \cite{panditHALTMedVQAHallucinationAware2025} 的角色设定策略，使用专家角色引导模型输出详细的医学推理，便于 MLLM Judge 判断三类幻觉。
 
-### 6.3 运行 GPT Judge 评估
+### 6.3 运行 MLLM Judge 评估
 
 ```bash
 python main.py \

@@ -1,5 +1,5 @@
 """
-GPT Judge hallucination detection — single-sample scoring and batch runner.
+MLLM Judge hallucination detection — single-sample scoring and batch runner.
 
 Scoring protocol: MMHal-Bench 0-6 Likert scale (Sun et al., ACL Findings 2024).
   score < 3  → hallucination
@@ -12,7 +12,7 @@ import os
 from typing import Callable, Literal, Optional
 
 from configs import config
-from evaluation.metrics import compute_gpt_judge_summary
+from evaluation.metrics import compute_mllm_judge_summary
 from utils.api import call_vision_model_with_retries, create_model_client
 from utils.batch import load_existing_details, load_response_subset, run_resumable_batch, save_json_atomic
 
@@ -106,15 +106,15 @@ Ground Truth Answer: {ground_truth}
 Please rate the model's response on the 0-6 scale."""
 
 
-class GPTJudge:
-    """GPT-based hallucination judge following MMHal-Bench protocol."""
+class MLLMJudge:
+    """MLLM-based hallucination judge following MMHal-Bench protocol."""
 
     def __init__(
         self,
         model: Optional[str] = None,
         hallucination_threshold: int = 3,
     ):
-        self.model = model if model is not None else config.GPT_JUDGE_MODEL
+        self.model = model if model is not None else config.MLLM_JUDGE_MODEL
         self.client = create_model_client(self.model)
         self.hallucination_threshold = hallucination_threshold
 
@@ -205,7 +205,7 @@ def _save_snapshot(
     save_json_atomic({
         "model_name": model_name,
         "dataset": dataset_name,
-        "method": "gpt-judge",
+        "method": "mllm-judge",
         "metrics": metrics,
         "details": details,
     }, out_path)
@@ -214,7 +214,7 @@ def _save_snapshot(
 def _judge_one(
     sample: dict,
     responses: dict[str, str],
-    judge: GPTJudge,
+    judge: MLLMJudge,
     id_key: str,
     dataset_name: str,
     extra_detail_fields: Callable[[dict], dict],
@@ -245,7 +245,7 @@ def _judge_one(
     return sid, detail
 
 
-def run_gpt_judge(
+def run_mllm_judge(
     *,
     model_name: str,
     dataset_name: str,
@@ -261,15 +261,15 @@ def run_gpt_judge(
     log_extra: Optional[Callable[[dict], None]] = None,
 ) -> dict:
     """
-    Run GPT Judge hallucination detection on a dataset.
+    Run MLLM Judge hallucination detection on a dataset.
 
     Args:
-        compute_summary:      fn(details, total) -> (metrics, flags). Defaults to compute_gpt_judge_summary.
+        compute_summary:      fn(details, total) -> (metrics, flags). Defaults to compute_mllm_judge_summary.
         extra_detail_fields:  fn(sample) -> dict of extra fields to merge into each detail record.
         log_extra:            fn(metrics) -> None, for dataset-specific log lines after standard output.
     """
     if compute_summary is None:
-        compute_summary = compute_gpt_judge_summary
+        compute_summary = compute_mllm_judge_summary
     if extra_detail_fields is None:
         extra_detail_fields = lambda _: {}
 
@@ -279,11 +279,11 @@ def run_gpt_judge(
     )
     total = len(samples)
 
-    LOGGER.info("[3/4] Initializing GPT Judge...")
-    judge = GPTJudge(model=judge_model or config.GPT_JUDGE_MODEL)
-    LOGGER.info("  GPT Judge ready (model: %s, api_method: %s)", judge.model, judge.client.api_method)
+    LOGGER.info("[3/4] Initializing MLLM Judge...")
+    judge = MLLMJudge(model=judge_model or config.MLLM_JUDGE_MODEL)
+    LOGGER.info("  MLLM Judge ready (model: %s, api_method: %s)", judge.model, judge.client.api_method)
 
-    LOGGER.info("[4/4] Running GPT Judge (%s samples)...", total)
+    LOGGER.info("[4/4] Running MLLM Judge (%s samples)...", total)
     out_dir = output_dir or config.OUTPUT_DIR
     out_path = os.path.join(out_dir, output_name or f"{model_name}_{dataset_name}.json")
     sample_ids = [str(s.get(id_key, "")) for s in samples]
@@ -310,7 +310,7 @@ def run_gpt_judge(
     metrics, hallucination_flags = compute_summary(details, total)
 
     LOGGER.info("\n%s", "=" * 60)
-    LOGGER.info("Results: %s on %s (GPT Judge)", model_name, dataset_name)
+    LOGGER.info("Results: %s on %s (MLLM Judge)", model_name, dataset_name)
     LOGGER.info("=" * 60)
     LOGGER.info(
         "  Hallucination Rate: %.4f (%s/%s)",
