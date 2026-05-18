@@ -345,7 +345,9 @@ def main() -> None:
     for r in mv_records:
         r["detection_method"] = "mllm_judge"
     mv_selected = _sample_records(mv_records, per_cell=args.per_cell, seed=args.seed)
-    mv_selected = mv_selected[:args.n_mathvista]
+    if len(mv_selected) > args.n_mathvista:
+        rng = random.Random(args.seed)
+        mv_selected = rng.sample(mv_selected, args.n_mathvista)
 
     # ---- POPE (Rule-based) ----
     pope_sources = (
