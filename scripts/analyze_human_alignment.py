@@ -70,6 +70,7 @@ def _join_rows(rows: list[dict[str, str]], meta: dict[str, dict[str, Any]]) -> l
         record["human_label"] = human_label
         record["human_type"] = human_type if human_type in TYPE_ORDER else "none"
         record["gpt_has_h"] = int(record["gpt_has_h"])
+        record["detection_method"] = str(row.get("detection_method", "mllm_judge")).strip()
         joined.append(record)
 
     return joined
@@ -142,11 +143,13 @@ def _type_confusion(records: list[dict[str, Any]]) -> tuple[list[list[int]], flo
 
 
 def _format_type_confusion(records: list[dict[str, Any]]) -> list[str]:
-    matrix, agreement = _type_confusion(records)
+    # Only MLLM Judge samples have meaningful type variation
+    filtered = [r for r in records if r.get("detection_method", "mllm_judge") == "mllm_judge"]
+    matrix, agreement = _type_confusion(filtered)
     lines = [
-        "### 幻觉类型一致性",
+        "### 幻觉类型一致性（MLLM Judge）",
         "",
-        f"Type agreement: {agreement:.4f} （仅限人和 GPT 均判定有幻觉的样本）",
+        f"Type agreement: {agreement:.4f} （仅限人和 GPT 均判定有幻觉的 MathVista 样本）",
         "",
         "| Human \\ GPT | faithfulness | factuality | logical |",
         "|-------------|-------------:|----------:|--------:|",
@@ -167,13 +170,13 @@ def _format_mismatches(records: list[dict[str, Any]]) -> list[str]:
         "",
         f"Total mismatches: {len(mismatches)}",
         "",
-        "| sample_id | model | pid | human_label | gpt_has_h | human_type | gpt_type | notes |",
-        "|-----------|-------|-----|------------:|----------:|------------|----------|-------|",
+        "| sample_id | model | detection_method | pid | human_label | gpt_has_h | human_type | gpt_type | notes |",
+        "|-----------|-------|-----------------|-----|------------:|----------:|------------|----------|-------|",
     ]
     for row in mismatches:
         notes = str(row.get("notes", "")).replace("\n", " ").replace("|", "\\|")
         lines.append(
-            f"| {row['sample_id']} | {row['model']} | {row['pid']} | "
+            f"| {row['sample_id']} | {row['model']} | {row.get('detection_method', 'mllm_judge')} | {row['pid']} | "
             f"{row['human_label']} | {row['gpt_has_h']} | {row['human_type']} | "
             f"{row['gpt_type']} | {notes} |"
         )
@@ -183,11 +186,13 @@ def _format_mismatches(records: list[dict[str, Any]]) -> list[str]:
 
 def _format_breakdowns(records: list[dict[str, Any]]) -> list[str]:
     lines = []
+    by_method = defaultdict(list)
     by_model = defaultdict(list)
     by_model_type = defaultdict(list)
     by_model_gpt_type = defaultdict(list)
 
     for row in records:
+        by_method[row.get("detection_method", "mllm_judge")].append(row)
         by_model[row["model"]].append(row)
         by_model_type[(row["model"], row["human_type"])].append(row)
         by_model_gpt_type[(row["model"], row["gpt_type"])].append(row)
@@ -196,6 +201,30 @@ def _format_breakdowns(records: list[dict[str, Any]]) -> list[str]:
         "整体与按模型指标",
         [("overall", records)] + [(model, by_model[model]) for model in sorted(by_model)],
     ))
+
+    mv_records = by_method.get("mllm_judge", [])
+    rb_records = by_method.get("rule_based", [])
+    lines.extend(_format_metrics_table(
+        "按检测方法",
+        [
+            ("MLLM Judge (MathVista)", mv_records),
+            ("规则判断法 (POPE)", rb_records),
+        ],
+    ))
+
+    if mv_records:
+        lines.extend(_format_metrics_table(
+            "按模型指标 — MLLM Judge (MathVista)",
+            [(model, [r for r in mv_records if r["model"] == model])
+             for model in sorted({r["model"] for r in mv_records})],
+        ))
+
+    if rb_records:
+        lines.extend(_format_metrics_table(
+            "按模型指标 — 规则判断法 (POPE)",
+            [(model, [r for r in rb_records if r["model"] == model])
+             for model in sorted({r["model"] for r in rb_records})],
+        ))
 
     lines.extend(_format_metrics_table(
         "按模型 × Human Type",
@@ -225,13 +254,14 @@ def _format_error_mode_template() -> list[str]:
         "",
         "该表用于人工复核 mismatch 后填写。",
         "",
-        "| 模式 | 样本数 | 说明 | 典型样例 ID |",
-        "|------|-------:|------|------------|",
-        "| GPT Judge 漏检 |  |  |  |",
-        "| GPT Judge 过判 |  |  |  |",
-        "| 类型错位 |  |  |  |",
-        "| 图像/问题歧义 |  |  |  |",
-        "| 其他 |  |  |  |",
+        "| 模式 | 检测方法 | 样本数 | 说明 | 典型样例 ID |",
+        "|------|---------|-------:|------|------------|",
+        "| MLLM Judge 漏检 | mllm_judge |  |  |  |",
+        "| MLLM Judge 过判 | mllm_judge |  |  |  |",
+        "| 规则法误判 | rule_based |  |  |  |",
+        "| 类型错位 | mllm_judge |  |  |  |",
+        "| 图像/问题歧义 | — |  |  |  |",
+        "| 其他 | — |  |  |  |",
         "",
     ]
 
