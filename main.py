@@ -194,7 +194,7 @@ Examples:
             metrics = result["metrics"]
             if result["dataset"] == "pope":
                 LOGGER.info(
-                    "  %s: F1=%.4f, Acc=%.4f, Yes Ratio=%.4f, Obj-HR=%.4f",
+                    "  %s: F1=%.4f, Acc=%.4f, Yes Ratio=%.4f, HR=%.4f",
                     key,
                     metrics.get("f1", 0),
                     metrics.get("accuracy", 0),

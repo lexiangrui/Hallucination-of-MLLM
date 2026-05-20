@@ -1,0 +1,39 @@
+\begin{abstract}
+Multimodal Large Language Models (MLLMs) have demonstrated strong capabilities
+in visual question answering and image-text reasoning,
+yet they remain susceptible to hallucinations,
+where generated outputs are inconsistent with visual inputs,
+contradict established world knowledge,
+or contain flawed reasoning.
+This report presents a systematic framework
+for detecting and evaluating hallucinations in MLLMs.
+We propose a three-category taxonomy
+covering faithfulness, factuality, and logical hallucinations,
+and evaluate four representative models
+(GPT-5.4-mini, Gemini~2.5~Flash, Qwen3.5-35B-A3B, Qwen3-VL-235B-A22B)
+across three benchmarks:
+POPE for object existence probing,
+MathVista for mathematical visual reasoning,
+and VQA-RAD for medical radiology VQA.
+Two detection methods are employed:
+a rule-based approach for binary probing tasks
+and an MLLM Judge protocol based on the MMHal-Bench 0--6 Likert scale
+for open-ended evaluation.
+Key findings include:
+(1)~model rankings shift substantially across task domains,
+with no single model dominating all scenarios;
+(2)~Chain-of-Thought prompting significantly reduces hallucinations
+in weaker-baseline models
+but introduces additional risks for stronger ones
+through exposure effects and commitment errors;
+and (3)~faithfulness hallucinations account for over 96\%
+in medical VQA,
+indicating that fine-grained visual perception
+remains the primary bottleneck in specialized domains.
+Comprehensive error analyses,
+including human alignment verification (Cohen's $\kappa = 0.70$),
+cross-judge consistency checks,
+threshold sensitivity analysis,
+and length bias assessment,
+confirm the robustness of our evaluation framework.
+\end{abstract}

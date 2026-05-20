@@ -1,0 +1,261 @@
+\section{Experiment 1: POPE Object Hallucination Detection}
+
+\subsection{Results}
+
+\Cref{tab:pope_results} reports all evaluation metrics
+for the four models across the three POPE splits.
+Columns are grouped by split,
+each containing Accuracy, Precision, Recall, F1, Yes Ratio,
+Hallucination Rate (HR),
+and the four confusion matrix entries (TP/TN/FP/FN).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Comprehensive POPE results across three splits.
+    Best values per metric are underlined.}
+  \label{tab:pope_results}
+  \small
+  \begin{tabular}{ll cccc}
+    \toprule
+    Split & Metric
+      & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B-A3B & Qwen3-VL-235B \\
+    \midrule
+    \multirow{7}{*}{Random}
+      & Accuracy  & 0.9010 & 0.9160 & \underline{0.9260} & 0.9200 \\
+      & Precision & 0.9831 & 0.9814 & 0.9754 & \underline{0.9929} \\
+      & Recall    & 0.8156 & 0.8477 & \underline{0.8737} & 0.8457 \\
+      & F1        & 0.8916 & 0.9097 & \underline{0.9218} & 0.9134 \\
+      & Yes Ratio & 0.414  & 0.431  & 0.447  & 0.425 \\
+      & HR        & 0.70\% & 0.80\% & 1.10\% & \underline{0.30\%} \\
+      & TP/TN/FP/FN & 407/494/7/92 & 423/493/8/76
+        & 436/490/11/63 & 422/498/3/77 \\
+    \midrule
+    \multirow{7}{*}{Popular}
+      & Accuracy  & 0.8570 & 0.8620 & 0.8730 & \underline{0.8970} \\
+      & Precision & 0.8836 & 0.8800 & 0.8750 & \underline{0.9459} \\
+      & Recall    & 0.8216 & 0.8377 & \underline{0.8697} & 0.8417 \\
+      & F1        & 0.8515 & 0.8583 & 0.8724 & \underline{0.8908} \\
+      & Yes Ratio & 0.464  & 0.475  & 0.496  & 0.444 \\
+      & HR        & 5.40\% & 5.70\% & 6.20\% & \underline{2.40\%} \\
+      & TP/TN/FP/FN & 410/447/54/89 & 418/444/57/81
+        & 434/439/62/65 & 420/477/24/79 \\
+    \midrule
+    \multirow{7}{*}{Adversarial}
+      & Accuracy  & 0.8280 & 0.8730 & 0.8520 & \underline{0.8750} \\
+      & Precision & 0.8385 & 0.8924 & 0.8318 & \underline{0.8979} \\
+      & Recall    & 0.8116 & 0.8477 & \underline{0.8818} & 0.8457 \\
+      & F1        & 0.8248 & 0.8695 & 0.8560 & \underline{0.8710} \\
+      & Yes Ratio & 0.483  & 0.474  & 0.529  & 0.470 \\
+      & HR        & 7.80\% & 5.10\% & 8.90\% & \underline{4.80\%} \\
+      & TP/TN/FP/FN & 405/423/78/94 & 423/450/51/76
+        & 440/412/89/59 & 422/453/48/77 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{fig1_pope_hr_bar.pdf}
+  \caption{Hallucination rates of four MLLMs
+    across the three POPE splits
+    (Random, Popular, Adversarial).}
+  \label{fig:pope_hr_bar}
+\end{figure}
+
+\subsection{Result Analysis}
+
+\subsubsection{Difficulty Gradient Validation}
+
+From Random to Popular to Adversarial,
+the Hallucination Rate of all four models increases monotonically
+(\Cref{tab:pope_results}),
+confirming the effectiveness
+of POPE's three-tier negative sampling strategy.
+In the Random split, where negative samples are drawn at random,
+all four models achieve HR between 0.30\% and 1.10\%,
+indicating strong rejection capability for irrelevant objects.
+In the Popular split,
+where negative samples are high-frequency co-occurring objects
+that are absent from the current image,
+HR jumps to 2.40\%--6.20\%, roughly 5--10$\times$ higher than Random.
+This surge reveals a clear linguistic prior bias:
+when the queried object frequently co-occurs with the scene
+but is not actually present,
+models tend to rely on statistical associations
+from training data rather than strictly attend to visual input.
+In the Adversarial split,
+where negative samples are semantically similar to objects in the image,
+HR rises further to 4.80\%--8.90\%.
+This split poses the greatest difficulty
+because the model must perform fine-grained semantic discrimination
+and cannot rely on coarse scene-level associations.
+
+\subsubsection{Cross-Model Comparison}
+
+Qwen3-VL-235B achieves the best overall performance,
+attaining the lowest HR (0.30\%, 2.40\%, 4.80\%)
+and the highest F1 (0.9134, 0.8908, 0.8710) across all three splits.
+Its 235B-parameter MoE architecture with 22B activated parameters
+provides stronger visual encoding,
+yielding more precise object recognition and existence judgments.
+
+GPT-5.4-mini exhibits a distinctive conservative strategy.
+Its Yes Ratio is the lowest among all models
+(0.414 in Random, where the true Yes ratio is 0.500),
+indicating a systematic tendency to answer No.
+This strategy produces two symmetric consequences:
+very high Precision (0.9831 in Random, 0.8836 in Popular),
+meaning that when the model does answer Yes it is almost always correct,
+but low Recall (0.8156 in Random, 0.8116 in Adversarial),
+meaning that many truly present objects are missed.
+The hallucinations of GPT-5.4-mini thus manifest primarily
+as omissions rather than fabrications:
+it does not lie, but selectively ignores objects in the scene.
+This may be preferable in safety-critical scenarios
+(better to remain silent than to be wrong),
+at the cost of reduced information coverage.
+
+Gemini 2.5 Flash displays an unusual robustness pattern.
+From Popular (5.70\%) to Adversarial (5.10\%),
+its HR decreases,
+contrary to the upward trend observed in all other models.
+This suggests that Gemini's object detection mechanism
+is more robust to semantically similar negatives
+than to high-frequency co-occurrence negatives,
+and its visual perception is less influenced
+by scene-level statistical associations.
+
+Qwen3.5-35B-A3B shows the most pronounced difficulty sensitivity
+despite moderate overall performance.
+Its HR increases from 1.10\% (Random) to 6.20\% (Popular)
+to 8.90\% (Adversarial),
+with the total increase of 7.8 percentage points
+being the largest among all models.
+This indicates that the lightweight visual encoder,
+with only 3B activated parameters,
+degrades more substantially under more challenging negative samples.
+
+\subsection{Failure Case Analysis}
+
+\subsubsection{Case 1: Semantic Granularity Confusion}
+
+\Cref{tab:pope_case1,fig:pope_case1} present a sample from the Adversarial split.
+The image (COCO\_val2014\_000000567886) contains
+a teddy bear, a person, and a book.
+The question asks whether there is a bear in the image,
+and the ground truth is No.
+All four models answer Yes,
+indicating a systematic error rather than an individual model deficiency.
+
+\begin{table}[htbp]
+  \centering
+  \begin{minipage}[t]{0.5\textwidth}
+    \centering
+    \caption{POPE Case 1: sample information and model responses.}
+    \label{tab:pope_case1}
+    \small
+    \begin{tabular}{@{}ll@{}}
+      \toprule
+      \multicolumn{2}{c}{\textbf{Sample Information}} \\
+      \midrule
+      Image & COCO\_val2014\_000000567886 \\
+      Objects present & teddy bear, person, book \\
+      Objects absent & bear, car, tv \\
+      Question & Is there a bear in the image? \\
+      Ground Truth & No \\
+      \midrule
+      \multicolumn{2}{c}{\textbf{Model Responses}} \\
+      \midrule
+      GPT-5.4-mini & Yes \checkmark \\
+      Gemini 2.5 Flash & Yes \checkmark \\
+      Qwen3.5-35B-A3B & Yes \checkmark \\
+      Qwen3-VL-235B & Yes \checkmark \\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.45\textwidth}
+    \centering
+    \vspace{0pt}
+    \includegraphics[width=0.9\textwidth]{pope_000000567886.jpg}
+    \captionof{figure}{POPE Case 1: a teddy bear on a couch.}
+    \label{fig:pope_case1}
+  \end{minipage}
+\end{table}
+
+The root cause is semantic granularity confusion.
+The image contains a teddy bear,
+an independent category in the COCO label set
+\citep{linMicrosoftCOCOCommon2015},
+while the question asks about a bear (a real animal).
+All four models associate ``teddy bear'' with ``bear''
+at the semantic level,
+triggering a positive judgment upon seeing the toy.
+This is essentially conceptual hierarchy confusion:
+models conflate visually similar objects with semantically identical ones.
+This error cannot be resolved
+by increasing model scale or improving visual encoder resolution,
+as it concerns the clarity of conceptual boundaries
+in semantic representations
+rather than the discriminability of low-level visual features.
+
+\subsubsection{Case 2: Linguistic Prior Bias}
+
+\Cref{tab:pope_case2,fig:pope_case2} present a sample from the Popular split.
+The image (COCO\_val2014\_000000569839) shows
+a person eating a sandwich and a hot dog outdoors.
+The question asks whether there is a backpack in the image,
+and the ground truth is No.
+Again, all four models answer Yes.
+
+\begin{table}[htbp]
+  \centering
+  \begin{minipage}[t]{0.6\textwidth}
+    \centering
+    \caption{POPE Case 2: sample information and model responses.}
+    \label{tab:pope_case2}
+    \small
+    \begin{tabular}{@{}ll@{}}
+      \toprule
+      \multicolumn{2}{c}{\textbf{Sample Information}} \\
+      \midrule
+      Image & COCO\_val2014\_000000569839 \\
+      Objects present & person, sandwich, hot dog \\
+      Objects absent & car, bottle, backpack \\
+      Question & Is there a backpack in the image? \\
+      Ground Truth & No \\
+      \midrule
+      \multicolumn{2}{c}{\textbf{Model Responses}} \\
+      \midrule
+      GPT-5.4-mini & Yes \checkmark \\
+      Gemini 2.5 Flash & Yes \checkmark \\
+      Qwen3.5-35B-A3B & Yes \checkmark \\
+      Qwen3-VL-235B & Yes \checkmark \\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.35\textwidth}
+    \centering
+    \vspace{0pt}
+    \includegraphics[width=0.9\textwidth]{pope_000000569839.jpg}
+    \captionof{figure}{POPE Case 2: an outdoor dining scene.}
+    \label{fig:pope_case2}
+  \end{minipage}
+\end{table}
+
+The root cause is linguistic prior bias.
+In outdoor scenes with people eating,
+``backpack'' is a high-frequency co-occurring object.
+The statistical prior in the language module
+(outdoor + person + eating $\to$ high backpack probability)
+overrides the visual module's actual perception,
+causing the model to produce an affirmative answer.
+This is precisely the mechanism that the Popular split exploits:
+models fill visual uncertainty
+with linguistic priors from training data.
+The contrast between the two cases further confirms
+that the Popular and Adversarial splits
+target distinct error mechanisms,
+with Popular primarily exploiting linguistic priors
+and Adversarial primarily testing semantic discrimination.

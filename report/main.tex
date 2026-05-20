@@ -1,0 +1,60 @@
+% !TEX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{siunitx}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\graphicspath{{figures/}}
+\sisetup{detect-all}
+
+\lstset{
+  basicstyle=\small\ttfamily,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+  columns=fullflexible,
+  keepspaces=true,
+}
+
+\title{\textbf{Hallucination Detection and Evaluation\\in Multimodal Large Language Models}}
+\author{Xiangrui Yue}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\input{chapter/00_abstract}
+
+\tableofcontents
+\clearpage
+
+\input{chapter/01_introduction}
+\input{chapter/02_hallucination_taxonomy}
+\input{chapter/03_experimental_design}
+\input{chapter/04_pope_object_hallucination}
+\input{chapter/05_mathvista_reasoning}
+\input{chapter/06_vqarad_medical_vqa}
+\input{chapter/07_error_analysis}
+\input{chapter/08_limitations_future_work}
+\input{chapter/09_references}
+
+\appendix
+\input{chapter/appendix}
+
+\end{document}

@@ -1,0 +1,349 @@
+\section{Dataset Details and Prompt Templates}
+\label{sec:appendix}
+
+\subsection{Dataset Details}
+
+POPE (Polling-based Object Probing Evaluation)
+is a benchmark built on the COCO dataset
+\citep{linMicrosoftCOCOCommon2015}
+that converts object hallucination evaluation
+into a binary existence probing task
+\citep{liEvaluatingObjectHallucination2023}.
+The paradigm was originally proposed
+by \citet{rohrbachObjectHallucinationImage2018}
+for image captioning hallucination
+and later systematized by \citet{liEvaluatingObjectHallucination2023}.
+Given an image, the benchmark constructs binary questions
+asking whether a candidate object exists.
+Three negative sampling strategies create
+an increasing difficulty gradient:
+Random (random negatives, easiest),
+Popular (high-frequency co-occurring but absent objects),
+and Adversarial (semantically similar but absent objects, hardest).
+This experiment uses all three splits,
+1{,}000 items each, totaling 3{,}000 per model.
+
+MathVista is a comprehensive benchmark
+for evaluating mathematical reasoning
+of foundation models in visual contexts
+\citep{luMathVistaEvaluatingMathematical2024}.
+Questions span chart interpretation, geometry, numerical computation,
+and function analysis,
+in both multiple-choice and free-response formats.
+The task requires simultaneous visual perception,
+mathematical knowledge, and multi-step reasoning,
+making it well suited to trigger and analyze all three hallucination types.
+This experiment uses the testmini subset
+(approximately 1{,}000 samples).
+
+VQA-RAD is a standard medical VQA benchmark
+\citep{lauDatasetClinicallyGenerated2018}
+containing 2{,}244 clinically generated question-answer pairs
+over 314 radiology images (X-ray, CT, MRI).
+Answers are either closed-ended (yes/no, approximately 56\%)
+or open-ended (free-text diagnosis, approximately 44\%).
+This experiment uses the test split (451 samples).
+
+%% ===================================================================
+\subsection{POPE Response Generation Prompt}
+
+The model prompt for POPE concatenates the question
+with a fixed format instruction.
+\Cref{fig:pope_prompt_example} shows a concrete example.
+
+\begin{figure}[htbp]
+  \begin{minipage}{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{pope_chair_sample.jpg}
+  \end{minipage}\hfill
+  \begin{minipage}{0.65\textwidth}
+    Prompt sent to the model:
+\begin{lstlisting}
+Is there a chair in the image?
+Please answer YES or NO without
+an explanation.
+\end{lstlisting}
+  \end{minipage}
+  \caption{POPE prompt example
+    (COCO image with a chair-related probing question).}
+  \label{fig:pope_prompt_example}
+\end{figure}
+
+%% ===================================================================
+\subsection{MathVista Response Generation Prompt}
+
+MathVista prompts are dynamically constructed from sample metadata.
+The format instruction varies by question type:
+``Answer with the option letter only.'' for multiple-choice,
+``Answer with an integer.'' for integer answers,
+``Answer with a number rounded to $k$ decimal place(s).'' for float answers,
+and ``Keep your answer concise.'' as the default.
+If choices are present, they are appended on a separate line.
+
+In Direct mode, the prompt structure is:
+
+\begin{lstlisting}
+Question: {query}
+
+{format_instruction}
+Choices: {choices}
+\end{lstlisting}
+
+In CoT mode, a step-by-step reasoning preamble is prepended:
+
+\begin{lstlisting}
+Please generate a step-by-step answer,
+base your reasoning strictly on what is
+visible in the image, and avoid speculating
+about details that are unclear or not
+present. End with the final answer on a
+separate line starting with 'Final answer:'.
+
+Question: {query}
+
+{format_instruction}
+Choices: {choices}
+\end{lstlisting}
+
+\Cref{fig:mathvista_prompt_example} shows
+a concrete CoT-mode example using a geometry problem
+from MathVista testmini (pid=5, question\_type=multi\_choice).
+
+\begin{figure}[htbp]
+  \begin{minipage}{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{mathvista_pid5.jpg}
+  \end{minipage}\hfill
+  \begin{minipage}{0.65\textwidth}
+    CoT prompt sent to the model:
+\begin{lstlisting}
+Please generate a step-by-step answer,
+base your reasoning strictly on what is
+visible in the image, and avoid speculating
+about details that are unclear or not
+present. End with the final answer on a
+separate line starting with 'Final answer:'.
+
+Question: Find $m\angle H$
+
+Answer with the option letter only.
+Choices: 97, 102, 107, 122
+\end{lstlisting}
+  \end{minipage}
+  \caption{MathVista CoT prompt example
+    (geometry problem, pid=5).}
+  \label{fig:mathvista_prompt_example}
+\end{figure}
+
+%% ===================================================================
+\subsection{VQA-RAD Response Generation Prompt}
+
+The VQA-RAD prompt adopts an expert role preamble
+following the strategy of
+\citet{panditHALTMedVQAHallucinationAware2025}.
+\Cref{fig:vqarad_prompt_example} shows a concrete example.
+
+\begin{figure}[htbp]
+  \begin{minipage}{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{vqarad_sample.jpg}
+  \end{minipage}\hfill
+  \begin{minipage}{0.65\textwidth}
+    Prompt sent to the model:
+\begin{lstlisting}
+You are an expert radiologist.
+
+Is there evidence of an aortic aneurysm?
+Please provide a detailed answer based on
+what you observe in the medical image.
+\end{lstlisting}
+  \end{minipage}
+  \caption{VQA-RAD prompt example (chest X-ray).}
+  \label{fig:vqarad_prompt_example}
+\end{figure}
+
+%% ===================================================================
+\subsection{MLLM Judge System Prompt}
+
+The judge system prompt consists of three parts:
+a rating scale definition,
+few-shot examples with an important reminder,
+and a hallucination type classification with output format.
+The complete text is reproduced below.
+
+\begin{lstlisting}
+You are an impartial evaluator for multimodal
+language models. Your task is to rate a model's
+response to a visual question on a 0-6 scale,
+jointly considering informativeness and
+hallucination.
+
+## Rating Scale (0-6)
+- 6: Very informative, with good
+     analysis/reasoning, NO hallucination
+- 5: Very informative, NO hallucination
+- 4: Somewhat informative, NO hallucination
+- 3: Not informative (e.g., "I don't know"),
+     but NO hallucination
+- 2: Very informative, WITH hallucination
+- 1: Somewhat informative, WITH hallucination
+- 0: Not informative, WITH hallucination
+
+## Hallucination Definition
+Hallucination refers to situations where the
+response includes information not present or
+implied in the image, or makes claims
+inconsistent with the visual content.
+A response that honestly admits inability to
+answer (e.g., "I cannot determine") has NO
+hallucination (score 3).
+
+## Few-Shot Examples
+
+Example 1 - Hallucination (Score 2):
+Image shows two cats. Question: "How many cats
+are in the image?" Model response: "There is
+one cat in the image." The response is
+informative but miscounts a visible object.
+Score: 2.
+
+Example 2 - No Hallucination (Score 5):
+Image shows a panda sitting on a tree branch
+with green leaves. Question: "What is the
+panda doing?" Model response: "The panda is
+sitting on a tree branch, surrounded by
+leaves." The response is accurate and makes no
+false claims. Score: 5.
+
+Example 3 - Hallucination (Score 2):
+Image shows a dog holding an umbrella, with no
+water in sight. Question: "Describe the scene."
+Model response: "A dog holding an umbrella,
+positioned near the water." The response
+fabricates "water" which is not in the image.
+Score: 2.
+
+Example 4 - No Hallucination (Score 3):
+Image shows a complex diagram or chart.
+Question: "Explain the economic trend." Model
+response: "I cannot determine the specific
+trend from this image. The chart appears to
+show some data over time." The response
+honestly admits uncertainty without making
+false claims. Score: 3.
+
+Example 5 - No Hallucination (Score 6):
+Image shows industrial smokestacks. Question:
+"What environmental concerns does this image
+raise?" Model response provides a detailed
+analysis of potential emissions, air quality
+impacts, and relevant environmental
+regulations, all grounded in visible evidence.
+Score: 6.
+
+## Important Reminder
+The standard human-generated answer may only
+contain factual information without detailed
+analysis, and may not be fully comprehensive.
+A model response that provides detailed
+reasoning or analysis grounded in the visual
+evidence should be encouraged, not penalized.
+Only penalize claims that are clearly
+inconsistent with or absent from the image.
+
+## Hallucination Types (only when score < 3)
+- faithfulness: Visual inconsistency -
+  describes objects/attributes/relations not
+  in the image
+- factuality: Contradiction with established
+  world knowledge
+- logical: Reasoning error - conclusion does
+  not follow from evidence or
+  self-contradiction
+
+## Output Format
+Reply in JSON only:
+{"score": 0-6, "has_hallucination": true/false,
+ "hallucination_type": "faithfulness" |
+   "factuality" | "logical" | "none",
+ "reason": "Brief explanation in English"}
+\end{lstlisting}
+
+%% ===================================================================
+\subsection{MLLM Judge User Prompt}
+
+For each evaluation, the judge receives a user prompt
+constructed from the task description, question,
+model response, and ground truth.
+The task description varies by dataset:
+
+\begin{lstlisting}
+# POPE
+The question is a Yes/No object existence
+query.
+
+# MathVista
+The question requires mathematical visual
+reasoning (chart, diagram, or geometry).
+
+# VQA-RAD
+The question is about medical visual question
+answering based on a radiology image (X-ray,
+CT, or MRI). Carefully check whether the
+model's response is consistent with the
+visual content of the image and with
+established medical and anatomical knowledge.
+\end{lstlisting}
+
+The user prompt template is:
+
+\begin{lstlisting}
+{task_desc}
+
+Question: {question}
+Model Response: {model_response}
+Ground Truth Answer: {ground_truth}
+
+Please rate the model's response on the
+0-6 scale.
+\end{lstlisting}
+
+\Cref{fig:judge_prompt_example} shows
+a concrete example using the MathVista geometry problem (pid=5),
+where GPT-5.4-mini produced a correct CoT response (score 6).
+
+\begin{figure}[htbp]
+  \begin{minipage}{0.30\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{mathvista_pid5.jpg}
+  \end{minipage}\hfill
+  \begin{minipage}{0.65\textwidth}
+    User prompt sent to the judge:
+\begin{lstlisting}
+The question requires mathematical visual
+reasoning (chart, diagram, or geometry).
+
+Question: Find $m\angle H$
+Choices: 97, 102, 107, 122
+Model Response: The figure shows a
+pentagon with interior angles labeled:
+angle E = x, angle F = (x+20),
+angle G = (x+5), angle H = (x-5),
+angle J = (x+10). For a pentagon, the
+sum of interior angles is 540. So
+x + (x+20) + (x+5) + (x-5) + (x+10)
+= 540, 5x + 30 = 540, x = 102.
+Then m angle H = x - 5 = 97.
+Final answer: A
+Ground Truth Answer: 97
+
+Please rate the model's response on the
+0-6 scale.
+\end{lstlisting}
+  \end{minipage}
+  \caption{MLLM Judge user prompt example (MathVista pid=5).
+    The judge returns
+    \texttt{\{"score": 6, "has\_hallucination": false,
+    "hallucination\_type": "none", "reason": "..."\}}.}
+  \label{fig:judge_prompt_example}
+\end{figure}

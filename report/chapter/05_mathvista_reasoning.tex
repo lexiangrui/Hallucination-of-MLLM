@@ -1,0 +1,424 @@
+\section{Experiment 2: MathVista Mathematical Reasoning Hallucination Detection}
+
+\subsection{Direct Mode Baseline Results}
+
+\Cref{tab:mathvista_direct} reports the MathVista evaluation results
+for all four models in Direct mode.
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Direct mode results.
+    Best values are underlined.}
+  \label{tab:mathvista_direct}
+  \begin{tabular}{l cccc}
+    \toprule
+    Metric
+      & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B-A3B & Qwen3-VL-235B \\
+    \midrule
+    Hallucination Rate & 45.1\% & 34.3\% & \underline{13.3\%} & 16.3\% \\
+    Average Score      & 3.31   & 4.46   & \underline{5.00}   & 4.85 \\
+    $n_{\text{hallucinated}}$ & 451 & 343 & \underline{133} & 163 \\
+    \quad Faithfulness & 189 & 278 & \underline{98}  & 113 \\
+    \quad Factuality   & 14  & 13  & \underline{5}   & 6 \\
+    \quad Logical      & 248 & 52  & \underline{30}  & 44 \\
+    None               & 549 & 657 & \underline{867} & 837 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig4_mathvista_pie.pdf}
+  \caption{Hallucination type composition across models
+    in MathVista Direct mode.
+    ``None'' denotes non-hallucinated samples.}
+  \label{fig:mathvista_pie}
+\end{figure}
+
+\subsubsection{Direct Mode Analysis}
+
+The gap in hallucination rates across models is substantial.
+From the worst performer GPT-5.4-mini (45.1\%)
+to the best Qwen3.5-35B-A3B (13.3\%),
+HR differs by a factor of 3.4,
+far exceeding the cross-model gap observed in POPE
+(where the HR range is approximately 5 percentage points).
+This indicates that MathVista's mathematical visual reasoning task
+provides much higher discriminative power across model capabilities,
+as it simultaneously tests visual perception,
+mathematical knowledge, and multi-step reasoning,
+amplifying any capability shortcomings.
+
+The dominant hallucination types reveal distinct model weaknesses.
+GPT-5.4-mini is dominated by logical hallucinations
+(55.0\%, 248 out of 451).
+In Direct mode this model typically outputs only an option letter
+(e.g., ``B'') with a median response length of just one word,
+providing no reasoning process for the judge to assess.
+Many incorrect answers are thus directly classified as logical hallucinations,
+reflecting both weak mathematical reasoning
+and an ultra-short response style
+that offers no reasoning chain to earn partial credit.
+
+Gemini 2.5 Flash is dominated by faithfulness hallucinations
+(81.0\%, 278 out of 343).
+This model produces highly detailed responses
+(median 242 words) with extensive visual descriptions,
+but the descriptions contain visual misreadings,
+such as incorrectly reporting chart values, colors, or labels.
+Gemini's weakness lies not in reasoning (only 52 logical cases)
+but in imprecise visual perception:
+describing too much leads to getting too much wrong.
+
+Both Qwen models achieve hallucination rates
+less than one-third of GPT-5.4-mini.
+Qwen3.5-35B-A3B (13.3\%) and Qwen3-VL-235B (16.3\%)
+also show a more balanced distribution
+across the three hallucination types,
+with no obvious single weakness.
+This contrasts with POPE results,
+where the smaller Qwen3.5 (3B activated) trails
+the 235B model slightly,
+but on MathVista's mathematical reasoning it leads by a small margin,
+suggesting higher efficiency in mathematical reasoning
+despite its smaller activated parameter count.
+
+\subsection{CoT Mode Results and Direct Comparison}
+
+\Cref{tab:mathvista_cot_comparison} compares
+the core metrics between Direct and CoT modes,
+including overall performance changes and per-type hallucination breakdowns.
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Direct vs.\ CoT comparison with per-type hallucination changes.}
+  \label{tab:mathvista_cot_comparison}
+  \small
+  \begin{tabular}{l cc c cc c}
+    \toprule
+    \multicolumn{7}{c}{\textbf{Overall Performance Comparison}} \\
+    \midrule
+    Model & Direct HR & CoT HR & $\Delta$HR
+      & Direct Avg & CoT Avg & $\Delta$Avg \\
+    \midrule
+    GPT-5.4-mini     & 45.1\% & 34.4\% & $\downarrow$10.7pp & 3.31 & 4.35 & +1.04 \\
+    Gemini 2.5 Flash & 34.3\% & 27.6\% & $\downarrow$6.7pp  & 4.46 & 4.81 & +0.35 \\
+    Qwen3.5-35B-A3B  & 13.3\% & 15.5\% & $\uparrow$2.2pp    & 5.00 & 5.34 & +0.34 \\
+    Qwen3-VL-235B    & 16.3\% & 24.0\% & $\uparrow$7.7pp    & 4.85 & 4.94 & +0.09 \\
+    \midrule
+    \multicolumn{7}{c}{\textbf{Per-Type Hallucination Changes}} \\
+    \midrule
+    Model & \multicolumn{2}{c}{$\Delta$ Faithfulness} & $\Delta$ Factuality
+      & \multicolumn{2}{c}{$\Delta$ Logical} & Net improvement \\
+    \midrule
+    GPT-5.4-mini     & \multicolumn{2}{c}{+8}   & $-$10 & \multicolumn{2}{c}{$-$105} & +107 \\
+    Gemini 2.5 Flash & \multicolumn{2}{c}{$-$66} & $-$8  & \multicolumn{2}{c}{+7}     & +67  \\
+    Qwen3.5-35B-A3B  & \multicolumn{2}{c}{+26}  & $-$3  & \multicolumn{2}{c}{$-$1}   & $-$22 \\
+    Qwen3-VL-235B    & \multicolumn{2}{c}{+41}  & 0     & \multicolumn{2}{c}{+36}    & $-$77 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.5em}
+
+  \small
+  \textit{Note:} Net improvement denotes the net change in sample count (positive = improvement, negative = degradation).
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{fig2_mathvista_direct_cot_bar.pdf}
+  \caption{Comparison of hallucination rates
+    between Direct and CoT modes.
+    $\Delta$ values indicate the change.}
+  \label{fig:mathvista_cot_bar}
+\end{figure}
+
+\subsection{CoT Effect Analysis}
+
+\subsubsection{Overview}
+
+CoT produces sharply divergent effects across the four models
+(\Cref{tab:mathvista_cot_comparison,fig:mathvista_cot_bar}).
+The dividing line is the Direct-mode baseline:
+the weaker the baseline, the greater the improvement from CoT;
+the stronger the baseline,
+the more likely CoT introduces additional risk.
+
+\subsubsection{CoT Beneficiaries: Weaker Baselines}
+
+CoT significantly improves weaker-baseline models.
+GPT-5.4-mini is the largest beneficiary:
+HR drops by 10.7 percentage points
+and average score increases by 1.04,
+both the largest improvements among all models.
+The improvement comes primarily
+from a sharp reduction in logical hallucinations
+(248 $\to$ 143, $-$42.3\%),
+as shown in \Cref{tab:mathvista_cot_comparison}.
+In Direct mode this model outputs only option letters
+(median one word),
+exposing incorrect answers directly to the judge
+without any reasoning evidence.
+CoT forces the model to organize its mathematical derivation
+step by step,
+correcting many errors that a reasoning chain can catch.
+Sample-level analysis shows that 209 Direct-mode hallucinations
+are corrected under CoT,
+while only 102 cases exhibit reverse degradation,
+yielding a net improvement of 107 samples.
+
+Gemini 2.5 Flash improves through a different pathway:
+the benefit comes primarily from reduced faithfulness hallucinations
+(278 $\to$ 212, $-$23.7\%).
+CoT requires the model to explicitly cite visual evidence
+during reasoning,
+forcing more careful examination of chart content
+and reducing visual misreadings.
+Notably, Gemini's Direct-mode responses are already highly detailed
+(median 242 words),
+and its CoT responses are actually slightly shorter
+(median 228 words),
+indicating that CoT does not force longer output
+but rather improves accuracy
+by constraining reasoning to image-visible evidence.
+
+\subsubsection{CoT Risks: Stronger Baselines}
+
+CoT introduces additional risk for stronger-baseline models.
+Both Qwen models exhibit a polarization pattern:
+6-score and 2-score bins both grow
+while intermediate 4--5 scores collapse,
+indicating that CoT pushes responses toward the extremes
+of either perfect correctness or detailed incorrectness.
+
+Qwen3.5-35B-A3B exhibits a paradoxical pattern
+where HR increases by 2.2 percentage points
+yet average score rises from 5.00 to 5.34.
+This apparent contradiction stems from score polarization:
+under CoT the count of 6-score samples rises from 488 to 810
+(more perfect answers raise the average),
+while 2-score samples also increase from 125 to 154
+(more detailed but incorrect reasoning is strictly penalized,
+pushing up HR).
+Since this model already possesses strong mathematical reasoning
+in Direct mode (only 30 logical cases),
+CoT yields little marginal benefit
+and instead exposes blind spots in visual perception
+by forcing explicit visual description,
+causing faithfulness hallucinations to increase
+from 98 to 124 (+26 cases, +26.5\%).
+
+Qwen3-VL-235B shows a more extreme pattern:
+HR jumps from 16.3\% to 24.0\% (+7.7pp),
+with a net degradation of 77 samples.
+Of these, 116 Direct-mode correct samples
+produce hallucinations under CoT,
+while only 39 improve in the reverse direction.
+The polarization effect is equally stark:
+6-score samples surge from 452 to 723,
+but 2-score samples increase from 142 to 194
+and 0-score cases appear (0 $\to$ 8),
+while intermediate 4--5 scores nearly vanish
+(93 $\to$ 6 and 291 $\to$ 30 respectively).
+Faithfulness hallucinations increase from 136 to 185 (+49 cases, +36.3\%),
+indicating that forcing explicit visual description
+systematically exposes perceptual weaknesses.
+
+\subsubsection{Underlying Mechanisms}
+
+This phenomenon aligns with recent findings.
+\citet{liuMoreThinkingLess2025} show through attention analysis
+that as reasoning chains grow longer,
+the model's attention to visual input weakens (attention drift),
+gradually shifting from image content to linguistic priors,
+leading to ``more thinking, less seeing.''
+\citet{kanchetiChainThoughtDegrades2025} report,
+after evaluating 17 models,
+that CoT consistently degrades visual spatial reasoning,
+with models ``hallucinating visual details from textual priors.''
+The substantial increase in faithfulness hallucinations for both Qwen models
+is consistent with both observations.
+
+CoT introduces hallucinations through two complementary mechanisms.
+
+\begin{description}
+  \item[Exposure effect.] Visual perception errors that remain hidden in Direct mode
+    are explicitly described in the CoT reasoning chain
+    and captured by the MLLM Judge.
+    Even when the final answer is correct,
+    visual misreadings in intermediate steps lower the score.
+    This mechanism explains why stronger-baseline models
+    see increased HR despite high final-answer accuracy.
+
+  \item[Commitment error.] CoT forces the model to make explicit visual or mathematical assertions
+    early in the reasoning process.
+    Once an intermediate step goes wrong,
+    the model continues reasoning around the incorrect premise,
+    producing ``informative but wrong'' responses (score 2).
+    The Multimodal Hallucination Snowballing framework
+    proposed by \citet{zhongInvestigatingMitigatingMultimodal2024}
+    directly corresponds to this mechanism:
+    once the model produces a hallucination early in reasoning,
+    it elaborates coherently around the erroneous premise,
+    causing the error to propagate and amplify along the chain.
+\end{description}
+
+These two mechanisms work in tandem:
+the exposure effect reveals latent perceptual errors,
+while the commitment error transforms them into cascading reasoning failures.
+Together they explain why CoT can simultaneously improve weaker models
+(by catching logical errors through structured reasoning)
+and degrade stronger models
+(by forcing explicit articulation of visual misperceptions
+that would otherwise remain implicit and harmless).
+
+\subsection{Failure Case Analysis}
+
+This section presents two typical failure cases,
+each corresponding to one of the two core CoT side-effect mechanisms.
+
+\subsubsection{Case 1: CoT Commitment Error Leading to Logical Hallucination
+  (GPT-5.4-mini, PID=30)}
+
+\Cref{tab:mathvista_case1_info} presents the sample information,
+and \Cref{fig:mathvista_case1} shows the accompanying image.
+The question is a circle geometry problem:
+two chords $AB$ and $CD$ intersect at $E$,
+with $\angle D = 35^\circ$ and $\angle AEC = 105^\circ$;
+the task is to find $\angle C$.
+The correct answer is $70^\circ$ (option B).
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Case 1: sample information.}
+  \label{tab:mathvista_case1_info}
+  \begin{tabular}{ll}
+    \toprule
+    Field & Content \\
+    \midrule
+    Question type & Geometry reasoning (multiple choice) \\
+    Question & Two chords $AB$, $CD$ intersect at $E$; $\angle D = 35^\circ$. Find $\angle C$. \\
+    Ground Truth & $70^\circ$ (B) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.25\textwidth]{mathvista_pid30.jpg}
+  \caption{MathVista Case 1: intersecting chords in a circle.}
+  \label{fig:mathvista_case1}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Case 1: responses under two modes.}
+  \label{tab:mathvista_case1_answers}
+  \begin{tabular}{llcc}
+    \toprule
+    Mode & Response & Score & Type \\
+    \midrule
+    Direct & B ($70^\circ$) & 5 & none \\
+    CoT    & Flawed reasoning, arrives at $80^\circ$ (C) & 1 & logical \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+In Direct mode the model outputs the correct option B ($70^\circ$)
+without showing any reasoning, and the judge assigns score 5.
+In CoT mode the model attempts step-by-step reasoning
+but commits to an incorrect premise in the first step,
+treating $\angle E = 105^\circ$ as a given condition
+and applying the triangle angle-sum formula
+to obtain $\angle C = 180^\circ - 105^\circ - 35^\circ = 40^\circ$.
+Finding that $40^\circ$ is not among the choices,
+the model then fabricates a supplementary-angle argument
+to produce $80^\circ$ and selects option C.
+This exhibits the snowballing hallucination pattern
+described by \citet{zhongInvestigatingMitigatingMultimodal2024}:
+once an incorrect premise is locked in,
+subsequent steps build upon it,
+and each step appears plausible in isolation
+while the entire chain rests on a false initial assumption.
+
+The correct approach uses the inscribed angle theorem:
+$\angle AEC$ is the vertical angle of $\angle DEB$,
+and $\angle C = \angle AEC - \angle D = 105^\circ - 35^\circ = 70^\circ$.
+In Direct mode the model retrieves this result directly,
+but CoT forces it to articulate intermediate steps
+where it selects an incorrect decomposition strategy.
+This demonstrates that CoT can convert a correct intuition
+into a wrong answer when the model lacks
+the precise geometric knowledge to sustain a valid reasoning chain.
+
+\subsubsection{Case 2: CoT Exposure of Visual Perception Error
+  Leading to Faithfulness Hallucination
+  (Qwen3-VL-235B, PID=15)}
+
+\Cref{tab:mathvista_case2_info} presents the sample information,
+and \Cref{fig:mathvista_case2} shows the accompanying image.
+The question asks which organism would be most affected
+if algae were eliminated from a food web.
+The correct answer is Common water flea (option B).
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Case 2: sample information.}
+  \label{tab:mathvista_case2_info}
+  \begin{tabular}{ll}
+    \toprule
+    Field & Content \\
+    \midrule
+    Question type & Biology food web reasoning (multiple choice) \\
+    Question & Which organism will be most affected if algae is eliminated? \\
+    Ground Truth & Common water flea (B) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.35\textwidth]{mathvista_pid15.jpg}
+  \caption{MathVista Case 2: food web diagram.}
+  \label{fig:mathvista_case2}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Case 2: responses under two modes.}
+  \label{tab:mathvista_case2_answers}
+  \begin{tabular}{llcc}
+    \toprule
+    Mode & Response & Score & Type \\
+    \midrule
+    Direct & B (correct answer) & 5 & none \\
+    CoT    & B (correct, but reasoning contains visual error) & 2 & faithfulness \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+In Direct mode the model outputs the correct answer
+and receives score 5 (no hallucination).
+In CoT mode the model provides a detailed food web analysis
+but incorrectly claims that ``Algae has arrows pointing to Tilapia''
+when in fact Tilapia obtains energy
+from Common water flea and Water plant, not directly from Algae.
+This is a typical exposure effect:
+in Direct mode the model may reach the correct answer
+through some shortcut (linguistic prior or partial visual perception)
+while its visual perception is not fully accurate.
+CoT forces the model to explicitly describe
+the arrow relationships in the image,
+exposing the visual misreading to the MLLM Judge
+and causing the score to drop from 5 to 2.
+
+This case reveals an important phenomenon in CoT evaluation:
+a correct answer does not imply correct reasoning.
+Under CoT the MLLM Judge evaluates both the reasoning process
+and the final answer;
+even when the answer is correct,
+visual inconsistencies in the reasoning lower the score.
+This explains why Qwen3-VL-235B
+sees faithfulness hallucinations increase from 113 to 154 under CoT:
+a substantial portion are cases
+where the answer is correct but the reasoning contains visual errors,
+errors that are hidden in Direct mode but exposed under CoT.

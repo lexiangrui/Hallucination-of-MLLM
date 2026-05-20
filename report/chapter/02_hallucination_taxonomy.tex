@@ -1,0 +1,193 @@
+\section{Hallucination Definition and Taxonomy}
+
+Hallucination is one of the central challenges facing MLLMs.
+While different studies adopt varying perspectives on definition and categorization,
+a broad consensus has emerged.
+This section reviews three representative surveys
+and then presents the taxonomy adopted in this work
+\citep{baiHallucinationMultimodalLarge2025,
+       chenSurveyMultimodalHallucination2026,
+       liuSurveyHallucinationLarge2024}.
+
+\citet{baiHallucinationMultimodalLarge2025} define hallucination in MLLMs
+as generated textual responses that are inconsistent
+with the corresponding visual content,
+emphasizing cross-modal inconsistency.
+They also trace the concept back to LLMs,
+distinguishing factual hallucinations (deviations from real-world facts)
+from faithfulness hallucinations
+(deviations from input context or self-consistency).
+Their object-centric taxonomy comprises three levels:
+category (fabricating or misidentifying objects),
+attribute (correct category but wrong properties such as color, shape, or count),
+and relation (correct objects and attributes
+but incorrect spatial or interactive relations).
+
+\citet{chenSurveyMultimodalHallucination2026} propose a broader unified definition,
+treating hallucination as any inconsistency
+between generated content and either the input conditions
+or established world knowledge.
+Their taxonomy extends the faithfulness-factuality dichotomy:
+faithfulness hallucinations are stratified by visual granularity
+into object-level, attribute-level, and scene-level errors,
+forming a progression from shallow perception to deep understanding;
+factuality hallucinations are divided into commonsense errors
+and domain-specific errors.
+
+\citet{liuSurveyHallucinationLarge2024} restrict hallucination
+to the visual domain,
+defining it as inconsistency between factual visual content in the image
+and the corresponding generated text.
+They adopt a dual-perspective taxonomy:
+a cognitive perspective distinguishing judgment hallucinations
+(yes/no contradictions with visual facts)
+from descriptive hallucinations
+(unfaithful free-form generation),
+and a semantic perspective distinguishing object, attribute,
+and relation hallucinations.
+
+Synthesizing these frameworks and considering that our experiments
+primarily target visual question answering and image-text reasoning tasks,
+we adopt the following definition and three-category taxonomy.
+
+\begin{quote}
+\textit{We define MLLM hallucination as a model response
+that is inconsistent with the input visual content,
+contradicts verifiable real-world knowledge,
+or contains errors in the reasoning process.}
+\end{quote}
+
+\noindent The three categories are detailed below.
+
+\subsection{Faithfulness Hallucination (Visual Inconsistency)}
+
+Faithfulness hallucination refers to generated text
+that is inconsistent with the visual content of the input image.
+Depending on the level of visual granularity,
+this category is further divided into three levels.
+
+At the object level,
+the model claims the presence of objects that do not exist in the image,
+omits objects that are actually present,
+or misidentifies object categories.
+The POPE benchmark systematically detects this type of hallucination
+through binary probing questions
+(\Cref{fig:faith_object}).
+
+At the attribute level,
+the model correctly identifies the object category
+but incorrectly describes its properties
+such as color, shape, material, or pose
+(\Cref{fig:faith_attr}).
+
+At the scene level,
+spatial relations, interactive events,
+or other scene-level descriptions are inconsistent with the image,
+even though all individual objects are correctly identified
+(\Cref{fig:faith_scene}).
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{faith_object.pdf}
+    \caption{Object level.}
+    \label{fig:faith_object}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{faith_attr.pdf}
+    \caption{Attribute level.}
+    \label{fig:faith_attr}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{faith_scene.pdf}
+    \caption{Scene level.}
+    \label{fig:faith_scene}
+  \end{subfigure}
+  \caption{Faithfulness hallucination examples at three levels of visual granularity.}
+  \label{fig:faith_examples}
+\end{figure}
+
+The central detection question for this category is:
+is the output consistent with the image?
+
+\subsection{Factuality Hallucination (Factual Inconsistency)}
+
+Factuality hallucination refers to generated outputs
+that contradict established, verifiable real-world knowledge.
+
+At the commonsense level,
+the error involves everyday knowledge,
+where the model's visual perception is roughly correct
+but the output contradicts well-known facts
+(\Cref{fig:fact_common}).
+
+At the domain-specific level,
+the error involves specialized professional knowledge.
+Such hallucinations are particularly common
+in the VQA-RAD dataset
+(\Cref{fig:fact_domain}).
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{fact_common.pdf}
+    \caption{Commonsense level.}
+    \label{fig:fact_common}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{fact_attr.pdf}
+    \caption{Domain-specific level.}
+    \label{fig:fact_domain}
+  \end{subfigure}
+  \caption{Factuality hallucination examples
+    at the commonsense and domain-specific levels.}
+  \label{fig:fact_examples}
+\end{figure}
+
+The central detection question for this category is:
+is the output consistent with world knowledge?
+
+\subsection{Logical Hallucination (Reasoning Error)}
+
+Logical hallucination refers to errors in the reasoning process,
+where the model's conclusion does not logically follow
+from the visual evidence or from its own established premises.
+
+In deductive reasoning errors,
+the model correctly reads the visual information
+but arrives at a contradictory conclusion.
+Such numerical reasoning errors
+are the primary source of logical hallucinations in MathVista
+(\Cref{fig:logic_deductive}).
+
+In causal reasoning errors,
+the model infers causal relationships
+that contradict the visual evidence
+(\Cref{fig:logic_causal}).
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{logic_deductive.pdf}
+    \caption{Deductive reasoning.}
+    \label{fig:logic_deductive}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{logic_causal.pdf}
+    \caption{Causal reasoning.}
+    \label{fig:logic_causal}
+  \end{subfigure}
+  \caption{Logical hallucination examples
+    in deductive and causal reasoning.}
+  \label{fig:logic_examples}
+\end{figure}
+
+The central detection question for this category is:
+is the reasoning valid?

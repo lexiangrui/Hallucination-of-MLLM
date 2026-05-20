@@ -1,0 +1,161 @@
+\section{Experimental Design}
+
+\subsection{Datasets, Detection Methods, and Evaluation Metrics}
+
+\subsubsection{POPE: Object Existence Hallucination Detection}
+
+The detection method for POPE is rule-based matching.
+During response generation,
+the model receives a prompt containing only the question
+and an instruction to answer Yes or No,
+ensuring concise and parseable responses
+(the complete prompt template is provided in \Cref{sec:appendix}).
+The answer post-processing algorithm follows
+the official evaluation script from the
+RUCAIBox/POPE repository;\footnote{\url{https://github.com/RUCAIBox/POPE/blob/main/evaluate.py}}
+its pseudocode is given in \Cref{alg:pope_normalize}.
+
+\begin{algorithm}[htbp]
+  \caption{POPE answer normalization}
+  \label{alg:pope_normalize}
+  \begin{algorithmic}[1]
+    \Procedure{NormalizePOPEAnswer}{response}
+      \State sentence $\gets$ first sentence of response (split by ``.'')
+      \State remove all commas from sentence
+      \State words $\gets$ split sentence by spaces
+      \If{``No'' $\in$ words \textbf{or} ``not'' $\in$ words \textbf{or} ``no'' $\in$ words}
+        \State \Return ``no''
+      \EndIf
+      \State \Return ``yes''
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+Hallucination is defined following the POPE protocol:
+a sample is counted as an object hallucination (false positive)
+when the model answers ``yes'' but the ground truth label is ``no,''
+corresponding to object-level faithfulness hallucination.
+
+Evaluation metrics treat ``yes'' (object present) as the positive class,
+so object hallucination corresponds to false positives.
+The core metrics are summarized in \Cref{tab:pope_metrics}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{POPE evaluation metrics.}
+  \label{tab:pope_metrics}
+  \begin{tabular}{lll}
+    \toprule
+    Metric & Formula & Description \\
+    \midrule
+    Accuracy          & $(TP+TN)/N$        & Overall correctness \\
+    Precision         & $TP/(TP+FP)$       & Accuracy when predicting Yes \\
+    Recall            & $TP/(TP+FN)$       & Detection rate for actual Yes \\
+    F1                & $2PR/(P+R)$        & Harmonic mean of Precision and Recall \\
+    Yes Ratio         & $N_{\text{yes}}/N$ & Response bias indicator \\
+    Hallucination Rate & $FP/N$            & Core metric; equals object hallucination rate \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{MathVista: Mathematical Reasoning Hallucination Detection}
+
+The detection method for MathVista employs an MLLM Judge
+following the MMHal-Bench evaluation protocol
+\citep{sunAligningLargeMultimodal2023},
+which adopts a 0--6 Likert scale that jointly assesses
+the informativeness and hallucination level of each response,
+using a threshold of 3 (scores below 3 indicate hallucination).
+In our implementation, GPT-5.5 serves as the judge model.
+The judge's system prompt defines the scoring rubric,
+hallucination criteria,
+and a three-way hallucination type classification,
+accompanied by five few-shot examples to ensure consistency.
+When the judge assigns a score below 3,
+it additionally labels the hallucination type
+(faithfulness, factuality, or logical).
+The complete prompt templates for both model response generation
+and judge scoring are provided in \Cref{sec:appendix}.
+
+During response generation,
+prompts are dynamically constructed from sample metadata
+to produce format-specific instructions.
+In Direct mode,
+the prompt consists of the question text
+concatenated with format instructions.
+In CoT mode,
+the prompt further requires step-by-step reasoning
+with the final answer marked by ``Final answer:''.
+Both modes are evaluated
+to analyze the effect of explicit reasoning on hallucination behavior.
+
+The evaluation metrics are shown in \Cref{tab:mathvista_metrics}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista evaluation metrics.}
+  \label{tab:mathvista_metrics}
+  \begin{tabular}{lll}
+    \toprule
+    Metric & Definition & Description \\
+    \midrule
+    Hallucination Rate & $N_{\text{score}<3} / N_{\text{total}}$ & Lower is better \\
+    Average Score & $\sum \text{score}_i / N$ & Overall response quality \\
+    Type-specific count & By faithfulness/factuality/logical & Hallucination source breakdown \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{VQA-RAD: Medical Visual Question Answering Hallucination Detection}
+
+The detection method for VQA-RAD follows the same MLLM Judge protocol
+(0--6 Likert scale, threshold 3)
+with domain-specific prompt adaptations for medical scenarios
+(see \Cref{sec:appendix}).
+The judge's task description is replaced
+with a radiology-specific scenario description
+that requires the judge to verify consistency
+with both the image's visual content
+and established medical and anatomical knowledge.
+During response generation,
+a radiologist expert role prompt is adopted
+following the role-setting strategy
+of \citet{panditHALTMedVQAHallucinationAware2025}.
+The three-way hallucination type classification
+(faithfulness, factuality, logical) is always enabled,
+and hallucination rates are additionally stratified
+by closed-ended and open-ended answer types.
+
+The evaluation metrics include Hallucination Rate, Average Score,
+type-specific hallucination counts,
+and stratified metrics for closed-ended and open-ended questions.
+
+\subsection{Experimental Conditions}
+
+All four models are accessed through APIs
+with a unified random seed of 42.
+Temperature is kept at each platform's default,
+and maximum token length is uncapped.
+POPE samples 1{,}000 items per split,
+MathVista uses the full testmini set (approximately 1{,}000 items),
+and VQA-RAD uses the test split (451 items).
+The MLLM Judge is GPT-5.5.
+
+\Cref{tab:method_dataset_overview} summarizes
+the correspondence among detection methods, datasets, and metrics.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Overview of method--dataset--metric correspondence.}
+  \label{tab:method_dataset_overview}
+  \begin{tabular}{llll}
+    \toprule
+    Dataset   & Detection Method & Hallucination Types  & Core Metrics \\
+    \midrule
+    POPE      & Rule-based       & Faithfulness         & HR, F1 \\
+    MathVista & MLLM Judge       & All three types      & HR, Avg Score \\
+    VQA-RAD   & MLLM Judge       & All three types      & HR, Avg Score, Closed/Open HR \\
+    Human     & Manual annotation & All three types     & Kappa, Pearson $r$, F1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

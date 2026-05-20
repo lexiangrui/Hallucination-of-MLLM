@@ -13,9 +13,30 @@ env/
 data/MathVista/data
 data/POPE/data
 data/vqa-rad/data
+doc/
 
 # Output
-report/
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.blg
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.nav
+*.snm
+*.vrb
+*.run.xml
+*.bcf
+*.dvi
+*.ps
+*.xdv
 
 # macOS
 .DS_Store

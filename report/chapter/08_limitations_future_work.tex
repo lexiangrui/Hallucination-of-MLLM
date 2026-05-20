@@ -1,0 +1,75 @@
+\section{Limitations and Future Work}
+
+\subsection{Limitations of the Current Evaluation}
+
+The MLLM Judge itself introduces bias.
+Although human alignment verification yields
+a substantial agreement ($\kappa = 0.70$),
+systematic discrepancies remain.
+The judge consistency check (\Cref{tab:judge_consistency})
+shows that different judge models diverge
+on certain response types,
+particularly long and ambiguous answers.
+The human alignment experiment further reveals
+the ``reasonable refusal over-judgment'' issue:
+the scoring rubric lacks a slot
+for moderately informative, hallucination-free responses,
+causing safe refusals to be misclassified.
+
+The hallucination detection granularity is limited.
+The three-way type classification relies on a single judge
+without multi-judge voting or confidence calibration.
+When a response contains multiple hallucination types
+(e.g., a visual misreading that leads to flawed reasoning),
+the judge labels only one type,
+losing information about mixed hallucinations.
+
+The human annotation is limited in scale.
+Only 40 samples are annotated,
+with a single annotator
+and no inter-annotator agreement measurement.
+The annotator must judge hallucination
+from a static image and text
+without interactive follow-up,
+which may introduce annotation bias.
+
+The dataset coverage is limited.
+Although three task types are covered
+(object probing, mathematical reasoning, medical VQA),
+broader image-text tasks such as OCR,
+remote sensing, and free-form image captioning
+are not included.
+The MLLM Judge protocol may require
+further adaptation for these tasks.
+
+\subsection{Future Directions}
+
+Detection methods can be improved
+by introducing multi-judge voting
+(e.g., GPT-5.5 + Claude + Gemini majority vote)
+to reduce single-judge bias,
+redesigning the scoring rubric
+to add a slot for reasonable refusals,
+and exploring fine-grained visual grounding methods
+that align model responses
+with specific image regions.
+
+Human evaluation can be strengthened
+by scaling to at least 100 samples,
+introducing multiple annotators with cross-validation
+to compute inter-annotator agreement,
+and conducting separate human alignment experiments
+for each domain (general, medical, chart).
+
+Cross-task generalization analysis can be extended
+to OCR, remote sensing, and video understanding,
+examining whether a model's hallucination tendency
+is consistent across tasks.
+
+Hallucination mitigation strategies can be explored
+based on the findings of this report,
+such as visual-anchored reasoning,
+uncertainty-aware decoding,
+and type-specific mitigation methods
+tailored to the distinct mechanisms
+of faithfulness, factuality, and logical hallucinations.

@@ -1,0 +1,168 @@
+\section{Extension Experiment: VQA-RAD Medical VQA Hallucination Detection}
+
+Medical visual question answering is a representative application
+of MLLMs in high-stakes domains.
+Compared with general VQA and mathematical reasoning,
+medical VQA imposes higher demands on both visual perception
+and domain knowledge,
+requiring models to correctly identify anatomical structures
+and pathological findings in X-ray, CT, and MRI images,
+understand the clinical semantics of questions,
+and provide diagnosis-related answers grounded in visual evidence.
+This section evaluates the four models
+on VQA-RAD \citep{lauDatasetClinicallyGenerated2018},
+a standard radiology VQA benchmark.
+
+\subsection{Dataset and Detection Method}
+
+The VQA-RAD test split contains 451 samples,
+of which 251 (55.7\%) are closed-ended (yes/no)
+and 200 (44.3\%) are open-ended (free-text),
+with random seed 42 for sampling.
+The detection method follows the same MLLM Judge protocol
+(0--6 Likert scale, threshold 3, MMHal-Bench)
+with the judge prompt adapted for radiology
+(see \Cref{sec:appendix}).
+Hallucination rates are reported both overall
+and stratified by closed/open answer types.
+
+\subsection{Results}
+
+\Cref{tab:vqarad_results} reports the overall evaluation results
+and hallucination rates stratified by answer type.
+
+\begin{table}[htbp]
+  \centering
+  \caption{VQA-RAD evaluation results. Best values are underlined.}
+  \label{tab:vqarad_results}
+  \small
+  \begin{tabular}{l cccc}
+    \toprule
+    \multicolumn{5}{c}{\textbf{Overall Results}} \\
+    \midrule
+    Metric
+      & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B-A3B & Qwen3-VL-235B \\
+    \midrule
+    Hallucination Rate & \underline{33.26\%} & 66.30\% & 39.25\% & 58.31\% \\
+    Average Score      & \underline{4.52}    & 2.68    & 4.20    & 3.57 \\
+    $n_{\text{hallucinated}}$ & \underline{150} & 299 & 177 & 263 \\
+    \quad Faithfulness & 145 (96.7\%) & 296 (99.0\%) & 171 (96.6\%) & 257 (97.7\%) \\
+    \quad Factuality   & 1 (0.7\%)    & 2 (0.7\%)    & 4 (2.3\%)    & 5 (1.9\%) \\
+    \quad Logical      & 4 (2.7\%)    & 1 (0.3\%)    & 2 (1.1\%)    & 1 (0.4\%) \\
+    None               & 301 & 152 & 274 & 188 \\
+    \midrule
+    \multicolumn{5}{c}{\textbf{Stratified by Answer Type}} \\
+    \midrule
+    Answer Type ($N$)
+      & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B-A3B & Qwen3-VL-235B \\
+    \midrule
+    Closed (yes/no, 251)   & \underline{28.69\%} & 61.75\% & 31.87\% & 50.20\% \\
+    Open (free-text, 200)  & \underline{39.00\%} & 72.00\% & 48.50\% & 68.50\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig6_vqarad_pie.pdf}
+  \caption{Hallucination type composition for VQA-RAD.
+    Faithfulness dominates ($>$96\%) across all models.}
+  \label{fig:vqarad_pie}
+\end{figure}
+
+\subsection{Analysis}
+
+The VQA-RAD results reveal a performance landscape
+that differs sharply from both MathVista and POPE.
+
+GPT-5.4-mini leads overall
+with the lowest HR (33.26\%) and highest average score (4.52)
+across both closed and open questions.
+However, its score distribution is bimodal:
+142 samples receive score 2
+(informative but visually incorrect)
+while 193 receive score 6 (perfect),
+with very few intermediate scores.
+Rather than being uniformly strong,
+this model follows an ``all or nothing'' pattern
+consistent with its conservative response strategy.
+
+The model ranking undergoes a fundamental reversal.
+Qwen3-VL-235B (HR = 58.31\%), which leads on POPE,
+and Qwen3.5-35B-A3B (HR = 39.25\%), which leads on MathVista,
+both regress substantially in the medical domain.
+Conversely, GPT-5.4-mini, which ranks last on POPE and MathVista,
+performs best here.
+This reversal indicates that medical VQA demands
+fundamentally different capabilities from general VQA
+and mathematical reasoning:
+it depends more on domain-specific medical knowledge
+than on general visual perception or reasoning ability,
+and general-purpose MLLMs have insufficient coverage
+of medical imaging in their training data.
+
+Faithfulness hallucinations dominate overwhelmingly ($>$96\%),
+in stark contrast with MathVista
+where all three types are well represented.
+Virtually all hallucinations stem from visual misreadings
+rather than logical or factual errors.
+The core challenge of medical VQA lies in precise identification
+of anatomical structures and pathological findings:
+whether the aorta is widened on a chest X-ray,
+or whether a CT image shows the abdomen or the cranium.
+When the model misjudges the anatomical content of the image,
+all subsequent answers based on the incorrect premise
+are classified as faithfulness hallucinations by the judge.
+
+\subsection{Failure Case Analysis}
+
+\subsubsection{Case 1: Conservative Refusal Leading to Aortic Aneurysm
+  Missed Diagnosis (Closed Question, ID=0)}
+
+\Cref{tab:vqarad_case1_answers} and \Cref{fig:vqarad_case1}
+present this case.
+The question asks whether there is evidence
+of an aortic aneurysm,
+with the expected answer being Yes.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.30\textwidth]{vqarad_fc_0.jpg}
+  \caption{VQA-RAD Case 1: chest X-ray.}
+  \label{fig:vqarad_case1}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{VQA-RAD Case 1: model responses.
+    Expected answer: Yes (aortic aneurysm present).}
+  \label{tab:vqarad_case1_answers}
+  \begin{tabular}{llcc}
+    \toprule
+    Model & Response summary & Score & Type \\
+    \midrule
+    GPT-5.4-mini     & No convincing evidence; mild aortic widening & 2 & faithfulness \\
+    Gemini 2.5 Flash & Limited sensitivity on chest X-ray, cannot confirm & 2 & faithfulness \\
+    Qwen3.5-35B-A3B  & Evidence suggests descending aortic aneurysm & 6 & none \\
+    Qwen3-VL-235B    & No clear radiographic evidence & 2 & faithfulness \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Three models (GPT-5.4-mini, Gemini, Qwen3-VL)
+answer ``no convincing evidence,''
+contradicting the expected positive finding.
+All three mention objective findings
+such as mild aortic widening or prominence
+but ultimately avoid a positive conclusion.
+This is the conservative strategy
+observed in POPE for GPT-5.4-mini,
+now manifesting in the medical domain
+where the consequences are more severe:
+in medical screening,
+a false negative
+(reporting a positive finding as negative)
+may delay diagnosis.
+Only Qwen3.5-35B-A3B provides
+the correct positive diagnosis
+and receives the highest score (6).

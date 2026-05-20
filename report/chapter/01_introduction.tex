@@ -1,0 +1,91 @@
+\section{Introduction}
+
+\subsection{Task Description}
+
+Multimodal Large Language Models (MLLMs) have demonstrated powerful capabilities
+in visual question answering and image-text reasoning,
+yet they still suffer from hallucinations,
+generating outputs that are inconsistent with visual inputs,
+contradict world knowledge,
+or contain flawed reasoning.
+This experiment focuses on hallucination detection and evaluation in MLLMs.
+The assessment requirements are as follows:
+
+\begin{enumerate}
+  \item Hallucination definition and classification:
+    define at least two types of hallucinations,
+    with no fewer than two examples per type and clear explanations.
+  \item Automated detection methods and evaluation metrics:
+    construct at least two detection methods (e.g., rule-based, MLLM Judge)
+    and design at least two evaluation metrics.
+  \item Experimental evaluation (main task):
+    evaluate at least two models
+    (including one closed-source and one open-source)
+    on general visual question answering
+    and mathematical image-text reasoning datasets.
+  \item Human alignment verification:
+    construct 20--50 human-annotated samples,
+    compare automated detection results with human judgments,
+    and analyze inconsistent cases.
+  \item Analysis requirements:
+    include analysis of CoT's impact on hallucinations,
+    cross-model comparison,
+    and in-depth analysis of at least two typical failure cases.
+  \item Bonus:
+    extend to other image-text tasks, specific domains,
+    or conduct cross-task generalization analysis.
+\end{enumerate}
+
+\subsection{Evaluated Models}
+
+This experiment selects four representative MLLMs,
+covering both closed-source and open-source models
+with diverse parameter scales and architectural designs,
+to provide a multi-dimensional comparative perspective.
+\Cref{tab:model_config} summarizes the key configurations.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Model configurations.}
+  \label{tab:model_config}
+  \begin{tabular}{lllll}
+    \toprule
+    Model & Type & Parameters & API Protocol & Platform \\
+    \midrule
+    GPT-5.4-mini       & Closed-source   & Undisclosed          & OpenAI Responses & right.codes \\
+    Gemini 2.5 Flash   & Closed-source   & Undisclosed          & OpenAI Chat      & right.codes \\
+    Qwen3.5-35B-A3B    & Open-source MoE & 35B (3B activated)   & OpenAI Chat      & SiliconFlow \\
+    Qwen3-VL-235B-A22B & Open-source MoE & 235B (22B activated) & OpenAI Chat      & SiliconFlow \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Evaluation Datasets}
+
+Three standard benchmarks are selected,
+covering object perception, mathematical reasoning,
+and medical VQA tasks respectively.
+All datasets are sourced from Hugging
+Face.\footnote{POPE: \url{https://huggingface.co/datasets/lmms-lab/POPE};
+MathVista: \url{https://huggingface.co/datasets/AI4Math/MathVista};
+VQA-RAD: \url{https://huggingface.co/datasets/flaviagiammarino/vqa-rad}.}
+\Cref{tab:dataset_overview} provides a summary;
+detailed dataset descriptions are given in \Cref{sec:appendix}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Dataset overview.}
+  \label{tab:dataset_overview}
+  \begin{tabular}{lll}
+    \toprule
+    Dataset   & Task Type                      & Samples \\
+    \midrule
+    POPE \citep{liEvaluatingObjectHallucination2023}
+      & Object existence probing        & 3{,}000 (3 splits $\times$ 1{,}000) \\
+    MathVista \citep{luMathVistaEvaluatingMathematical2024}
+      & Mathematical visual reasoning   & 1{,}000 (testmini) \\
+    VQA-RAD \citep{lauDatasetClinicallyGenerated2018}
+      & Medical radiology VQA           & 451 (test split) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
