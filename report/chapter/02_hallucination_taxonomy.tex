@@ -1,43 +1,44 @@
 \section{Hallucination Definition and Taxonomy}
 
-Hallucination is one of the central challenges facing MLLMs.
-While different studies adopt varying perspectives on definition and categorization,
-a broad consensus has emerged.
+Hallucination remains a central challenge for MLLMs.
+Although different studies adopt varying terminology and perspectives,
+a broad consensus has emerged on the underlying concepts.
 This section reviews three representative surveys
-and then presents the taxonomy adopted in this work
 \citep{baiHallucinationMultimodalLarge2025,
        chenSurveyMultimodalHallucination2026,
-       liuSurveyHallucinationLarge2024}.
+       liuSurveyHallucinationLarge2024}
+and then presents the taxonomy adopted in this work.
 
 \citet{baiHallucinationMultimodalLarge2025} define hallucination in MLLMs
-as generated textual responses that are inconsistent
+as generated text that is inconsistent
 with the corresponding visual content,
 emphasizing cross-modal inconsistency.
 They also trace the concept back to LLMs,
 distinguishing factual hallucinations (deviations from real-world facts)
 from faithfulness hallucinations
-(deviations from input context or self-consistency).
+(deviations from the input context or self-consistency).
 Their object-centric taxonomy comprises three levels:
 category (fabricating or misidentifying objects),
-attribute (correct category but wrong properties such as color, shape, or count),
+attribute (correct category but incorrect properties such as color, shape, or count),
 and relation (correct objects and attributes
 but incorrect spatial or interactive relations).
 
 \citet{chenSurveyMultimodalHallucination2026} propose a broader unified definition,
 treating hallucination as any inconsistency
-between generated content and either the input conditions
+between the generated content and either the input conditions
 or established world knowledge.
 Their taxonomy extends the faithfulness-factuality dichotomy:
 faithfulness hallucinations are stratified by visual granularity
 into object-level, attribute-level, and scene-level errors,
-forming a progression from shallow perception to deep understanding;
+forming a progression from shallow perception to deeper scene understanding;
 factuality hallucinations are divided into commonsense errors
 and domain-specific errors.
 
 \citet{liuSurveyHallucinationLarge2024} restrict hallucination
 to the visual domain,
-defining it as inconsistency between factual visual content in the image
-and the corresponding generated text.
+defining it as inconsistency between
+the factual visual content of the image
+and the generated text.
 They adopt a dual-perspective taxonomy:
 a cognitive perspective distinguishing judgment hallucinations
 (yes/no contradictions with visual facts)
@@ -46,25 +47,63 @@ from descriptive hallucinations
 and a semantic perspective distinguishing object, attribute,
 and relation hallucinations.
 
-Synthesizing these frameworks and considering that our experiments
-primarily target visual question answering and image-text reasoning tasks,
-we adopt the following definition and three-category taxonomy.
+Synthesizing these frameworks
+and given that the experiments in this report
+primarily target visual question answering
+and image-text reasoning,
+I adopt the following definition and three-category taxonomy.
 
 \begin{quote}
-\textit{We define MLLM hallucination as a model response
+\textit{An MLLM hallucination is a model response
 that is inconsistent with the input visual content,
 contradicts verifiable real-world knowledge,
-or contains errors in the reasoning process.}
+or contains flaws in the reasoning process.}
 \end{quote}
+
+\Cref{tab:taxonomy_comparison} situates this definition
+relative to the three surveys above.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Comparison of MLLM hallucination taxonomies
+    across three representative surveys and the framework adopted in this work.
+    The bottom row (shaded) marks the taxonomy used throughout this report.}
+  \label{tab:taxonomy_comparison}
+  \small
+  \begin{tabular}{lp{2.6cm}p{3.2cm}p{5.1cm}}
+    \toprule
+    Source & Scope & Primary axis & Sub-categories \\
+    \midrule
+    \citet{baiHallucinationMultimodalLarge2025}
+      & Cross-modal inconsistency
+      & Factual vs.\ faithfulness
+      & Category / attribute / relation \\
+    \citet{chenSurveyMultimodalHallucination2026}
+      & Generalized inconsistency
+      & Faithfulness vs.\ factuality
+      & Faithfulness: object / attribute / scene; Factuality: commonsense / domain \\
+    \citet{liuSurveyHallucinationLarge2024}
+      & Visual domain only
+      & Judgment vs.\ descriptive
+      & Object / attribute / relation \\
+    \midrule
+    \rowcolor{pink!20}
+    \textbf{This work}
+      & Visual + knowledge + reasoning
+      & Three orthogonal categories
+      & Faithfulness / factuality / logical \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \noindent The three categories are detailed below.
 
 \subsection{Faithfulness Hallucination (Visual Inconsistency)}
 
-Faithfulness hallucination refers to generated text
+Faithfulness hallucination refers to a model response
 that is inconsistent with the visual content of the input image.
 Depending on the level of visual granularity,
-this category is further divided into three levels.
+this category is further divided into three sublevels.
 
 At the object level,
 the model claims the presence of objects that do not exist in the image,
@@ -115,8 +154,8 @@ is the output consistent with the image?
 
 \subsection{Factuality Hallucination (Factual Inconsistency)}
 
-Factuality hallucination refers to generated outputs
-that contradict established, verifiable real-world knowledge.
+Factuality hallucination refers to a model response
+that contradicts established, verifiable real-world knowledge.
 
 At the commonsense level,
 the error involves everyday knowledge,
@@ -154,18 +193,19 @@ is the output consistent with world knowledge?
 
 \subsection{Logical Hallucination (Reasoning Error)}
 
-Logical hallucination refers to errors in the reasoning process,
-where the model's conclusion does not logically follow
+Logical hallucination refers to a model response
+with flaws in the reasoning process,
+where the conclusion does not logically follow
 from the visual evidence or from its own established premises.
 
-In deductive reasoning errors,
+In a deductive reasoning error,
 the model correctly reads the visual information
-but arrives at a contradictory conclusion.
-Such numerical reasoning errors
-are the primary source of logical hallucinations in MathVista
+but reaches a contradictory conclusion through faulty inference.
+Such errors---in particular numerical reasoning failures---are
+the primary source of logical hallucinations in MathVista
 (\Cref{fig:logic_deductive}).
 
-In causal reasoning errors,
+In a causal reasoning error,
 the model infers causal relationships
 that contradict the visual evidence
 (\Cref{fig:logic_causal}).

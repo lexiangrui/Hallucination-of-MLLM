@@ -2,79 +2,107 @@
 
 \subsection{Task Description}
 
-Multimodal Large Language Models (MLLMs) have demonstrated powerful capabilities
+Multimodal Large Language Models (MLLMs) have demonstrated strong capabilities
 in visual question answering and image-text reasoning,
-yet they still suffer from hallucinations,
-generating outputs that are inconsistent with visual inputs,
-contradict world knowledge,
+yet they remain susceptible to hallucinations---outputs
+that are inconsistent with the visual input,
+contradict established world knowledge,
 or contain flawed reasoning.
-This experiment focuses on hallucination detection and evaluation in MLLMs.
-The assessment requirements are as follows:
+This report investigates hallucination detection and evaluation in MLLMs.
+The assessment requirements are summarized as follows:
 
 \begin{enumerate}
-  \item Hallucination definition and classification:
+  \item \textbf{Hallucination definition and classification:}
     define at least two types of hallucinations,
-    with no fewer than two examples per type and clear explanations.
-  \item Automated detection methods and evaluation metrics:
-    construct at least two detection methods (e.g., rule-based, MLLM Judge)
-    and design at least two evaluation metrics.
-  \item Experimental evaluation (main task):
-    evaluate at least two models
-    (including one closed-source and one open-source)
-    on general visual question answering
-    and mathematical image-text reasoning datasets.
-  \item Human alignment verification:
-    construct 20--50 human-annotated samples,
+    provide clear explanations,
+    and supply no fewer than two examples for each type.
+  \item \textbf{Automated detection methods and evaluation metrics:}
+    construct at least two detection methods
+    (e.g., a rule-based method and an MLLM-Judge protocol)
+    and design no fewer than two evaluation metrics.
+  \item \textbf{Experimental evaluation (main task):}
+    evaluate at least two models,
+    including one closed-source and one open-source,
+    on general visual question answering (e.g., POPE)
+    and one of the recommended image-text reasoning benchmarks
+    (MathVista or ChartQA).
+  \item \textbf{Human alignment verification (Human-as-Judge):}
+    construct a small-scale human-annotated set
+    of 20--50 samples as the gold label,
     compare automated detection results with human judgments,
     and analyze inconsistent cases.
-  \item Analysis requirements:
-    include analysis of CoT's impact on hallucinations,
-    cross-model comparison,
-    and in-depth analysis of at least two typical failure cases.
-  \item Bonus:
-    extend to other image-text tasks, specific domains,
-    or conduct cross-task generalization analysis.
+  \item \textbf{Analysis requirements:}
+    include an analysis of CoT's impact on hallucinations,
+    a cross-model comparison,
+    and in-depth analysis of no fewer than two typical failure cases.
+  \item \textbf{Bonus:}
+    extend the evaluation to other image-text tasks
+    or specific domains
+    (e.g., OCR, medical, or remote sensing),
+    or conduct a cross-task generalization analysis.
 \end{enumerate}
 
 \subsection{Evaluated Models}
 
-This experiment selects four representative MLLMs,
-covering both closed-source and open-source models
-with diverse parameter scales and architectural designs,
-to provide a multi-dimensional comparative perspective.
+I evaluate four representative MLLMs
+that cover both closed-source and open-source models
+and span a range of architectures (dense and Mixture-of-Experts)
+and parameter scales (from 3\,B to 235\,B activated).
+Two additional models serve as MLLM Judges
+in the detection pipeline and in the cross-judge consistency check
+(\Cref{sec:appendix}).
 \Cref{tab:model_config} summarizes the key configurations.
 
 \begin{table}[htbp]
   \centering
-  \caption{Model configurations.}
+  \caption{Model configurations.
+    Four models are evaluated;
+    two additional models serve as MLLM Judges.
+    Architecture lists the total parameter count for MoE models;
+    the active counts are 3\,B (Qwen3.5-35B-A3B)
+    and 22\,B (Qwen3-VL-235B-A22B).}
   \label{tab:model_config}
+  \small
+  \setlength{\tabcolsep}{3pt}
   \begin{tabular}{lllll}
     \toprule
-    Model & Type & Parameters & API Protocol & Platform \\
+    Model & Role & Architecture & Access Type & API SDK \\
     \midrule
-    GPT-5.4-mini       & Closed-source   & Undisclosed          & OpenAI Responses & right.codes \\
-    Gemini 2.5 Flash   & Closed-source   & Undisclosed          & OpenAI Chat      & right.codes \\
-    Qwen3.5-35B-A3B    & Open-source MoE & 35B (3B activated)   & OpenAI Chat      & SiliconFlow \\
-    Qwen3-VL-235B-A22B & Open-source MoE & 235B (22B activated) & OpenAI Chat      & SiliconFlow \\
+    GPT-5.4-mini \citep{openaiModelsOverview}
+      & Evaluated & Dense           & Closed-source & OpenAI \\
+    Gemini 2.5 Flash \citep{googleGeminiModels}
+      & Evaluated & Dense           & Closed-source & OpenAI \\
+    Qwen3.5-35B-A3B \citep{qwen35TechnicalReport2025}
+      & Evaluated & MoE 35\,B  & Open-source   & OpenAI \\
+    Qwen3-VL-235B-A22B \citep{qwen3VLTechnicalReport2025}
+      & Evaluated & MoE 235\,B & Open-source  & OpenAI \\
+    \midrule
+    GPT-5.5 \citep{openaiGPT55Model}
+      & Judge     & Dense           & Closed-source & OpenAI \\
+    Claude Opus 4.7 \citep{anthropicClaudeOpus47}
+      & Judge     & Dense           & Closed-source & Anthropic \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \subsection{Evaluation Datasets}
 
-Three standard benchmarks are selected,
-covering object perception, mathematical reasoning,
-and medical VQA tasks respectively.
-All datasets are sourced from Hugging
-Face.\footnote{POPE: \url{https://huggingface.co/datasets/lmms-lab/POPE};
+I adopt three standard benchmarks
+that respectively target object-level perception,
+mathematical visual reasoning, and medical radiology VQA.
+All datasets are accessed from Hugging~Face.\footnote{POPE: \url{https://huggingface.co/datasets/lmms-lab/POPE};
 MathVista: \url{https://huggingface.co/datasets/AI4Math/MathVista};
 VQA-RAD: \url{https://huggingface.co/datasets/flaviagiammarino/vqa-rad}.}
 \Cref{tab:dataset_overview} provides a summary;
-detailed dataset descriptions are given in \Cref{sec:appendix}.
+detailed descriptions are deferred to \Cref{sec:appendix}.
 
 \begin{table}[htbp]
   \centering
-  \caption{Dataset overview.}
+  \caption{Dataset overview.
+    POPE samples are subsampled
+    per split for this experiment;
+    MathVista uses the full \textsc{testmini} split
+    and VQA-RAD uses the official test split.}
   \label{tab:dataset_overview}
   \begin{tabular}{lll}
     \toprule

@@ -3,52 +3,177 @@
 
 \subsection{Dataset Details}
 
-POPE (Polling-based Object Probing Evaluation)
-is a benchmark built on the COCO dataset
-\citep{linMicrosoftCOCOCommon2015}
-that converts object hallucination evaluation
+\subsubsection{POPE (Polling-based Object Probing Evaluation)}
+
+\textbf{Overview.}
+POPE \citep{liEvaluatingObjectHallucination2023}
+converts object hallucination evaluation
 into a binary existence probing task
-\citep{liEvaluatingObjectHallucination2023}.
+built on top of the MS COCO \texttt{val2014} split
+\citep{linMicrosoftCOCOCommon2015}.
 The paradigm was originally proposed
 by \citet{rohrbachObjectHallucinationImage2018}
-for image captioning hallucination
-and later systematized by \citet{liEvaluatingObjectHallucination2023}.
-Given an image, the benchmark constructs binary questions
-asking whether a candidate object exists.
-Three negative sampling strategies create
-an increasing difficulty gradient:
-Random (random negatives, easiest),
-Popular (high-frequency co-occurring but absent objects),
-and Adversarial (semantically similar but absent objects, hardest).
-This experiment uses all three splits,
-1{,}000 items each, totaling 3{,}000 per model.
+under the CHAIR metric for image captioning hallucination,
+and later systematized into a stable polling protocol
+by \citet{liEvaluatingObjectHallucination2023}.
 
-MathVista is a comprehensive benchmark
-for evaluating mathematical reasoning
-of foundation models in visual contexts
-\citep{luMathVistaEvaluatingMathematical2024}.
-Questions span chart interpretation, geometry, numerical computation,
-and function analysis,
-in both multiple-choice and free-response formats.
+\textbf{Construction.}
+Given a COCO image with annotated objects,
+POPE samples six probing questions per image:
+three positive ones (asking about a ground-truth-present object)
+and three negative ones
+(asking about a ground-truth-absent object).
+Each question follows the fixed template
+``Is there a/an \texttt{<object>} in the image?''
+and expects a Yes/No answer.
+The three splits differ only
+in how the negative objects are sampled:
+\begin{itemize}[leftmargin=*,topsep=0pt]
+  \item \textit{Random:} negative objects are drawn uniformly
+    from the COCO label set, excluding objects present in the image.
+  \item \textit{Popular:} negative objects are drawn
+    from the top-K most frequent COCO categories,
+    again excluding the present ones,
+    creating high-frequency co-occurrence distractors.
+  \item \textit{Adversarial:} for each image,
+    the three categories
+    that co-occur most frequently with the present objects
+    in the COCO training statistics
+    are chosen as negatives,
+    yielding semantically similar distractors.
+\end{itemize}
+The three splits induce a monotonic difficulty gradient,
+empirically confirmed in \Cref{sec:pope_difficulty}.
+
+\textbf{Scale and balance.}
+Each split contains 3{,}000 probing questions
+(500 images $\times$ 6 questions),
+with a balanced 1{,}500 Yes / 1{,}500 No
+ground-truth distribution.
+Official evaluation reports Accuracy, Precision, Recall,
+F1, and Yes Ratio.
+
+\textbf{Subset used in this experiment.}
+For each of the three splits,
+1{,}000 questions are randomly subsampled
+with seed 42,
+yielding 3{,}000 evaluation samples per model
+and 12{,}000 in total across the four evaluated models.
+The 1{,}000-per-split budget balances
+API-cost and statistical power
+while preserving the original 1:1 Yes/No balance
+of the parent splits.
+
+\subsubsection{MathVista}
+
+\textbf{Overview.}
+MathVista \citep{luMathVistaEvaluatingMathematical2024}
+is a comprehensive benchmark
+for evaluating the mathematical reasoning of foundation models
+in visual contexts.
 The task requires simultaneous visual perception,
-mathematical knowledge, and multi-step reasoning,
-making it well suited to trigger and analyze all three hallucination types.
-This experiment uses the testmini subset
-(approximately 1{,}000 samples).
+mathematical knowledge,
+and multi-step reasoning,
+making it well suited to trigger and analyze
+all three hallucination types
+(faithfulness, factuality, logical).
 
-VQA-RAD is a standard medical VQA benchmark
-\citep{lauDatasetClinicallyGenerated2018}
-containing 2{,}244 clinically generated question-answer pairs
-over 314 radiology images (X-ray, CT, MRI).
-Answers are either closed-ended (yes/no, approximately 56\%)
-or open-ended (free-text diagnosis, approximately 44\%).
-This experiment uses the test split (451 samples).
+\textbf{Construction.}
+The benchmark integrates 31 source datasets:
+28 existing multimodal math or VQA datasets
+and three datasets newly created by the authors
+(IQTest, FunctionQA, PaperQA).
+Each sample is annotated with two orthogonal taxonomies:
+\begin{itemize}[leftmargin=*,topsep=0pt]
+  \item \textit{Five task types:}
+    Figure Question Answering (FQA),
+    Geometry Problem Solving (GPS),
+    Math Word Problem (MWP),
+    Textbook Question Answering (TQA),
+    and Visual Question Answering (VQA).
+  \item \textit{Seven mathematical-reasoning skills:}
+    algebraic, arithmetic, geometric, logical,
+    numeric commonsense, scientific, and statistical reasoning.
+\end{itemize}
+Questions appear in two answer formats:
+multiple choice and free-form
+(integer, float, or short text).
+
+\textbf{Scale.}
+The benchmark contains 6{,}141 examples in total,
+partitioned into a 1{,}000-example \textsc{testmini} subset
+(with public ground truth, used for model development)
+and a 5{,}141-example \textsc{test} subset
+(with private ground truth, used for leaderboard ranking).
+Official evaluation reports accuracy as the primary metric.
+
+\textbf{Subset used in this experiment.}
+The complete \textsc{testmini} subset (1{,}000 samples) is used,
+under both Direct and CoT prompting modes,
+yielding 2{,}000 evaluation samples per model
+and 8{,}000 in total across the four evaluated models.
+Both modes share the same sample set,
+which allows direct paired comparison
+in \Cref{sec:mathvista}.
+
+\subsubsection{VQA-RAD}
+
+\textbf{Overview.}
+VQA-RAD \citep{lauDatasetClinicallyGenerated2018}
+is the first manually constructed medical VQA dataset
+in which clinicians generated questions and reference answers
+directly from radiology images
+sourced from the MedPix open teaching collection.
+It serves as a high-stakes domain testbed
+because both visual perception (anatomy, pathology)
+and clinical knowledge are required.
+
+\textbf{Construction.}
+Radiology trainees and faculty were asked to write
+naturally occurring questions
+about a balanced subset of radiology images.
+The annotation produced
+3{,}515 question--answer pairs over 315 images,
+with the image collection deliberately balanced across modalities
+(approximately 104 head axial CT/MRI,
+107 chest X-rays, and 104 abdominal axial CT slices).
+Each question is labeled with one of eleven categories:
+modality, plane, organ system, abnormality,
+object/condition presence, positional reasoning,
+color, size, attribute (other),
+counting, and other.
+Answers are split into
+free-form (43.1\%, 1{,}515 pairs)
+and closed-ended (56.9\%, 2{,}000 pairs);
+within the closed-ended portion,
+approximately 92\% are Yes/No questions.
+
+\textbf{Scale and the standard test split.}
+The official test split consists of 451 QA pairs:
+300 randomly chosen free-form questions
+plus 151 paraphrased questions
+derived from those free-form items.
+Official evaluation typically reports
+exact-match accuracy or BLEU
+for free-form answers.
+
+\textbf{Subset used in this experiment.}
+The complete official 451-item test split is used,
+accessed via the Hugging Face mirror
+of the dataset.
+The closed/open ratio of this test split
+(251 closed-ended, 200 open-ended in the HF version)
+allows the stratified HR reporting in \Cref{sec:vqarad}.
+No additional sampling or filtering is applied.
 
 %% ===================================================================
 \subsection{POPE Response Generation Prompt}
 
-The model prompt for POPE concatenates the question
-with a fixed format instruction.
+The POPE prompt concatenates the dataset question
+with a fixed format instruction
+that constrains the response to a single token (Yes or No).
+This matches the post-processing assumption
+of \Cref{alg:pope_normalize}.
 \Cref{fig:pope_prompt_example} shows a concrete example.
 
 \begin{figure}[htbp]
@@ -60,8 +185,7 @@ with a fixed format instruction.
     Prompt sent to the model:
 \begin{lstlisting}
 Is there a chair in the image?
-Please answer YES or NO without
-an explanation.
+Please answer YES or NO without an explanation.
 \end{lstlisting}
   \end{minipage}
   \caption{POPE prompt example
@@ -74,16 +198,19 @@ an explanation.
 
 MathVista prompts are dynamically constructed from sample metadata.
 The format instruction varies by question type:
-``Answer with the option letter only.'' for multiple-choice,
+``Answer with the option letter only.'' for multiple-choice questions,
 ``Answer with an integer.'' for integer answers,
 ``Answer with a number rounded to $k$ decimal place(s).'' for float answers,
 and ``Keep your answer concise.'' as the default.
-If choices are present, they are appended on a separate line.
+If the sample carries a non-empty \texttt{unit} field,
+the suffix `` Include the unit `\{unit\}'.''
+is appended to the integer and float instructions.
+If choice options are present, they are appended on a separate line.
 
 In Direct mode, the prompt structure is:
 
 \begin{lstlisting}
-Question: {query}
+Question: {question}
 
 {format_instruction}
 Choices: {choices}
@@ -92,14 +219,9 @@ Choices: {choices}
 In CoT mode, a step-by-step reasoning preamble is prepended:
 
 \begin{lstlisting}
-Please generate a step-by-step answer,
-base your reasoning strictly on what is
-visible in the image, and avoid speculating
-about details that are unclear or not
-present. End with the final answer on a
-separate line starting with 'Final answer:'.
+Please generate a step-by-step answer, base your reasoning strictly on what is visible in the image, and avoid speculating about details that are unclear or not present. End with the final answer on a separate line starting with 'Final answer:'.
 
-Question: {query}
+Question: {question}
 
 {format_instruction}
 Choices: {choices}
@@ -109,7 +231,7 @@ Choices: {choices}
 a concrete CoT-mode example using a geometry problem
 from MathVista testmini (pid=5, question\_type=multi\_choice).
 
-\begin{figure}[htbp]
+\begin{figure}[h]
   \begin{minipage}{0.30\textwidth}
     \centering
     \includegraphics[width=\linewidth]{mathvista_pid5.jpg}
@@ -117,12 +239,7 @@ from MathVista testmini (pid=5, question\_type=multi\_choice).
   \begin{minipage}{0.65\textwidth}
     CoT prompt sent to the model:
 \begin{lstlisting}
-Please generate a step-by-step answer,
-base your reasoning strictly on what is
-visible in the image, and avoid speculating
-about details that are unclear or not
-present. End with the final answer on a
-separate line starting with 'Final answer:'.
+Please generate a step-by-step answer, base your reasoning strictly on what is visible in the image, and avoid speculating about details that are unclear or not present. End with the final answer on a separate line starting with 'Final answer:'.
 
 Question: Find $m\angle H$
 
@@ -138,9 +255,12 @@ Choices: 97, 102, 107, 122
 %% ===================================================================
 \subsection{VQA-RAD Response Generation Prompt}
 
-The VQA-RAD prompt adopts an expert role preamble
-following the strategy of
-\citet{panditHALTMedVQAHallucinationAware2025}.
+The VQA-RAD prompt prepends an expert-role preamble
+(``You are an expert radiologist.''),
+following the role-setting strategy
+of \citet{panditHALTMedVQAHallucinationAware2025},
+and appends an instruction
+to ground the answer in the medical image.
 \Cref{fig:vqarad_prompt_example} shows a concrete example.
 
 \begin{figure}[htbp]
@@ -154,8 +274,7 @@ following the strategy of
 You are an expert radiologist.
 
 Is there evidence of an aortic aneurysm?
-Please provide a detailed answer based on
-what you observe in the medical image.
+Please provide a detailed answer based on what you observe in the medical image.
 \end{lstlisting}
   \end{minipage}
   \caption{VQA-RAD prompt example (chest X-ray).}
@@ -167,132 +286,83 @@ what you observe in the medical image.
 
 The judge system prompt consists of three parts:
 a rating scale definition,
-few-shot examples with an important reminder,
+five few-shot examples with an important reminder,
 and a hallucination type classification with output format.
-The complete text is reproduced below.
+The complete text reproduced below
+matches the implementation
+in \texttt{evaluation/judge.py};
+non-ASCII em dashes and arrows in the source
+are transcribed as \texttt{--} and \texttt{->}.
 
 \begin{lstlisting}
-You are an impartial evaluator for multimodal
-language models. Your task is to rate a model's
-response to a visual question on a 0-6 scale,
-jointly considering informativeness and
-hallucination.
+You are an impartial evaluator for multimodal language models. Your task is to rate a model's response to a visual question on a 0-6 scale, jointly considering informativeness and hallucination.
 
 ## Rating Scale (0-6)
-- 6: Very informative, with good
-     analysis/reasoning, NO hallucination
-- 5: Very informative, NO hallucination
-- 4: Somewhat informative, NO hallucination
-- 3: Not informative (e.g., "I don't know"),
-     but NO hallucination
-- 2: Very informative, WITH hallucination
-- 1: Somewhat informative, WITH hallucination
-- 0: Not informative, WITH hallucination
+- **6**: Very informative, with good analysis/reasoning, NO hallucination
+- **5**: Very informative, NO hallucination
+- **4**: Somewhat informative, NO hallucination
+- **3**: Not informative (e.g., "I don't know"), but NO hallucination
+- **2**: Very informative, WITH hallucination
+- **1**: Somewhat informative, WITH hallucination
+- **0**: Not informative, WITH hallucination
 
 ## Hallucination Definition
-Hallucination refers to situations where the
-response includes information not present or
-implied in the image, or makes claims
-inconsistent with the visual content.
-A response that honestly admits inability to
-answer (e.g., "I cannot determine") has NO
-hallucination (score 3).
+Hallucination refers to situations where the response includes information not present or implied in the image, or makes claims inconsistent with the visual content. A response that honestly admits inability to answer (e.g., "I cannot determine") has NO hallucination (score 3).
 
 ## Few-Shot Examples
 
-Example 1 - Hallucination (Score 2):
-Image shows two cats. Question: "How many cats
-are in the image?" Model response: "There is
-one cat in the image." The response is
-informative but miscounts a visible object.
-Score: 2.
+**Example 1 -- Hallucination (Score 2):**
+Image shows two cats. Question: "How many cats are in the image?" Model response: "There is one cat in the image." -> The response is informative but miscounts a visible object. Score: 2 (Very informative, WITH hallucination).
 
-Example 2 - No Hallucination (Score 5):
-Image shows a panda sitting on a tree branch
-with green leaves. Question: "What is the
-panda doing?" Model response: "The panda is
-sitting on a tree branch, surrounded by
-leaves." The response is accurate and makes no
-false claims. Score: 5.
+**Example 2 -- No Hallucination (Score 5):**
+Image shows a panda sitting on a tree branch with green leaves. Question: "What is the panda doing?" Model response: "The panda is sitting on a tree branch, surrounded by leaves." -> The response is accurate and makes no false claims about the image. Score: 5 (Very informative, NO hallucination).
 
-Example 3 - Hallucination (Score 2):
-Image shows a dog holding an umbrella, with no
-water in sight. Question: "Describe the scene."
-Model response: "A dog holding an umbrella,
-positioned near the water." The response
-fabricates "water" which is not in the image.
-Score: 2.
+**Example 3 -- Hallucination (Score 2):**
+Image shows a dog holding an umbrella, with no water in sight. Question: "Describe the scene." Model response: "A dog holding an umbrella, positioned near the water." -> The response fabricates "water" which is not in the image. Score: 2 (Very informative, WITH hallucination).
 
-Example 4 - No Hallucination (Score 3):
-Image shows a complex diagram or chart.
-Question: "Explain the economic trend." Model
-response: "I cannot determine the specific
-trend from this image. The chart appears to
-show some data over time." The response
-honestly admits uncertainty without making
-false claims. Score: 3.
+**Example 4 -- No Hallucination (Score 3):**
+Image shows a complex diagram or chart. Question: "Explain the economic trend." Model response: "I cannot determine the specific trend from this image. The chart appears to show some data over time." -> The response honestly admits uncertainty without making false claims. Score: 3 (Not informative, NO hallucination).
 
-Example 5 - No Hallucination (Score 6):
-Image shows industrial smokestacks. Question:
-"What environmental concerns does this image
-raise?" Model response provides a detailed
-analysis of potential emissions, air quality
-impacts, and relevant environmental
-regulations, all grounded in visible evidence.
-Score: 6.
+**Example 5 -- No Hallucination (Score 6):**
+Image shows industrial smokestacks. Question: "What environmental concerns does this image raise?" Model response provides a detailed analysis of potential emissions, air quality impacts, and relevant environmental regulations, all grounded in visible evidence. -> The detailed reasoning is based on what is visible and makes no false claims. Score: 6 (Very informative with good analysis, NO hallucination).
 
 ## Important Reminder
-The standard human-generated answer may only
-contain factual information without detailed
-analysis, and may not be fully comprehensive.
-A model response that provides detailed
-reasoning or analysis grounded in the visual
-evidence should be encouraged, not penalized.
-Only penalize claims that are clearly
-inconsistent with or absent from the image.
+The standard human-generated answer may only contain factual information without detailed analysis, and may not be fully comprehensive. A model response that provides detailed reasoning or analysis grounded in the visual evidence should be encouraged, not penalized. Only penalize claims that are clearly inconsistent with or absent from the image. If the model provides extra detail that is factually correct and consistent with the image, do NOT treat it as hallucination.
 
 ## Hallucination Types (only when score < 3)
-- faithfulness: Visual inconsistency -
-  describes objects/attributes/relations not
-  in the image
-- factuality: Contradiction with established
-  world knowledge
-- logical: Reasoning error - conclusion does
-  not follow from evidence or
-  self-contradiction
+- **faithfulness**: Visual inconsistency -- describes objects/attributes/relations not in the image
+- **factuality**: Contradiction with established world knowledge
+- **logical**: Reasoning error -- conclusion does not follow from evidence or self-contradiction
 
 ## Output Format
 Reply in JSON only:
-{"score": 0-6, "has_hallucination": true/false,
- "hallucination_type": "faithfulness" |
-   "factuality" | "logical" | "none",
- "reason": "Brief explanation in English"}
+{
+    "score": 0-6,
+    "has_hallucination": true/false,
+    "hallucination_type": "faithfulness" | "factuality" | "logical" | "none",
+    "reason": "Brief explanation in English"
+}
 \end{lstlisting}
 
 %% ===================================================================
 \subsection{MLLM Judge User Prompt}
 
 For each evaluation, the judge receives a user prompt
-constructed from the task description, question,
-model response, and ground truth.
-The task description varies by dataset:
+constructed from a dataset-specific task description,
+the question, the model response, and the ground-truth answer.
+The task description varies by dataset
+and is selected by \texttt{\_build\_judge\_prompt}
+in \texttt{evaluation/judge.py}:
 
 \begin{lstlisting}
 # POPE
-The question is a Yes/No object existence
-query.
+The question is a Yes/No object existence query.
 
 # MathVista
-The question requires mathematical visual
-reasoning (chart, diagram, or geometry).
+The question requires mathematical visual reasoning (chart, diagram, or geometry).
 
 # VQA-RAD
-The question is about medical visual question
-answering based on a radiology image (X-ray,
-CT, or MRI). Carefully check whether the
-model's response is consistent with the
-visual content of the image and with
-established medical and anatomical knowledge.
+The question is about medical visual question answering based on a radiology image (X-ray, CT, or MRI). Carefully check whether the model's response is consistent with the visual content of the image and with established medical and anatomical knowledge.
 \end{lstlisting}
 
 The user prompt template is:
@@ -304,8 +374,7 @@ Question: {question}
 Model Response: {model_response}
 Ground Truth Answer: {ground_truth}
 
-Please rate the model's response on the
-0-6 scale.
+Please rate the model's response on the 0-6 scale.
 \end{lstlisting}
 
 \Cref{fig:judge_prompt_example} shows
@@ -320,25 +389,15 @@ where GPT-5.4-mini produced a correct CoT response (score 6).
   \begin{minipage}{0.65\textwidth}
     User prompt sent to the judge:
 \begin{lstlisting}
-The question requires mathematical visual
-reasoning (chart, diagram, or geometry).
+The question requires mathematical visual reasoning (chart, diagram, or geometry).
 
 Question: Find $m\angle H$
 Choices: 97, 102, 107, 122
-Model Response: The figure shows a
-pentagon with interior angles labeled:
-angle E = x, angle F = (x+20),
-angle G = (x+5), angle H = (x-5),
-angle J = (x+10). For a pentagon, the
-sum of interior angles is 540. So
-x + (x+20) + (x+5) + (x-5) + (x+10)
-= 540, 5x + 30 = 540, x = 102.
-Then m angle H = x - 5 = 97.
+Model Response: The figure shows a pentagon with interior angles labeled: angle E = x, angle F = (x+20), angle G = (x+5), angle H = (x-5), angle J = (x+10). For a pentagon, the sum of interior angles is 540. So x + (x+20) + (x+5) + (x-5) + (x+10) = 540, 5x + 30 = 540, x = 102. Then m angle H = x - 5 = 97.
 Final answer: A
 Ground Truth Answer: 97
 
-Please rate the model's response on the
-0-6 scale.
+Please rate the model's response on the 0-6 scale.
 \end{lstlisting}
   \end{minipage}
   \caption{MLLM Judge user prompt example (MathVista pid=5).

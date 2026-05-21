@@ -4,6 +4,7 @@
 
 \subsubsection{Experimental Setup}
 
+\textbf{Setup.}
 This experiment examines the agreement
 between the GPT-5.5 Judge's hallucination judgments
 and those of a human annotator,
@@ -15,7 +16,7 @@ and Type Agreement
 (the proportion of matching hallucination type labels
 among samples that both human and judge classify as hallucinated).
 $\kappa$ values are interpreted
-following the Landis and Koch (1977) scale:
+following the scale of \citet{landisKoch1977}:
 $<$0.20 slight, 0.21--0.40 fair, 0.41--0.60 moderate,
 0.61--0.80 substantial, 0.81--1.00 almost perfect.
 
@@ -35,7 +36,7 @@ A single-blind design
 is used to avoid annotation bias.
 \Cref{fig:annotate_interface} shows the annotation interface.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.85\textwidth]{annotate.png}
   \caption{Human annotation interface used in the alignment experiment.
@@ -86,15 +87,16 @@ and \Cref{tab:human_confusion} shows the confusion matrix.
 
 \begin{table}[htbp]
   \centering
-  \caption{Human alignment: per-model results.}
+  \caption{Human alignment: per-model results
+    (10 samples per model).}
   \label{tab:human_per_model}
   \small
-  \begin{tabular}{lccccc}
+  \begin{tabular}{lcccc}
     \toprule
     Model & $N$ & Accuracy & F1 & $\kappa$ \\
     \midrule
     GPT-5.4-mini (CoT)     & 10 & 1.000 & 1.000 & 1.000 \\
-    Qwen3.5-35B-A3B (CoT)  & 10 & 1.000 & 1.000 & 1.000 \\
+    Qwen3.5-35B (CoT)      & 10 & 1.000 & 1.000 & 1.000 \\
     Qwen3-VL-235B (CoT)    & 10 & 0.800 & 0.750 & 0.600 \\
     Gemini 2.5 Flash (CoT) & 10 & 0.600 & 0.333 & 0.200 \\
     \bottomrule
@@ -123,17 +125,31 @@ the hallucination type confusion matrix.
   \end{tabular}
 \end{table}
 
-Overall alignment is strong ($\kappa = 0.70$),
-and the MLLM Judge does not miss
-any human-identified hallucination (Recall = 100\%),
-confirming that its detection sensitivity fully covers
-the human standard.
-GPT-5.4-mini and Qwen3.5-35B-A3B align perfectly with the human
+\textbf{Strong overall alignment with no missed hallucinations.}
+Overall alignment is substantial ($\kappa = 0.70$),
+and---critically for the validity of the automated pipeline---the
+MLLM Judge does not miss any human-identified hallucination
+(Recall = 100\%).
+The error profile is asymmetric:
+Precision = 70\% indicates 6 over-judgments
+(human says non-hallucinated, judge says hallucinated)
+but zero under-judgments.
+For an automated hallucination detector
+this is the preferable failure mode,
+since downstream uses can re-examine flagged cases
+but cannot recover from silently missed ones.
+On the per-model breakdown,
+GPT-5.4-mini and Qwen3.5-35B-A3B align perfectly
+on this 10-sample subset
 ($\kappa = 1.0$),
-as these two models produce clear and stable hallucination patterns.
+reflecting clear and stable hallucination patterns
+in their responses;
+the per-model $\kappa$ values
+are statistically loose at $N=10$ and should be read as descriptive.
 Gemini 2.5 Flash has the worst alignment ($\kappa = 0.20$),
 with 4 of the 6 over-judgments attributed to this model.
 
+\textbf{Root cause: rubric coupling.}
 All six over-judgments share a single error pattern:
 age-estimation questions
 where the model produces a reasonable refusal
@@ -148,60 +164,88 @@ but because the model's refusal contains some information
 (explaining the reason for refusal),
 the judge tends to assign scores of 1--2,
 pushing the sample into the ``hallucinated'' category.
-This suggests that the scoring rubric lacks
+The scoring rubric therefore lacks
 an intermediate slot for ``moderately informative and hallucination-free''
-responses.
+responses,
+which points to a concrete refinement target
+(an extra moderate-information no-hallucination bin)
+should the MMHal-Bench rubric be revised for future use.
+One caveat: because the 40-sample stratified pool
+favors hallucinated cases over benign refusals,
+the prevalence of this single pattern
+should be re-examined on a larger and less stratified sample
+before generalizing.
 
 \subsection{Judge Model Consistency Check}
 
+\textbf{Setup.}
 This experiment examines whether evaluation conclusions
 depend on the choice of judge model,
 by comparing GPT-5.5 and Claude Opus 4.7
 on the same sample set.
 One hundred samples are randomly drawn
 from MathVista testmini (seed 42),
-yielding 100 responses per model (400 total).
+yielding 100 responses per evaluated model (400 total).
 Both judges use identical system prompts
 (MMHal-Bench 0--6 rubric, five few-shot examples,
 hallucination type classification).
 
-\Cref{tab:judge_consistency} reports the results.
+\Cref{tab:judge_consistency} reports the results;
+the ``Model'' column refers to the model whose responses are being judged,
+not to the judge.
 
 \begin{table}[htbp]
   \centering
-  \caption{Judge consistency: GPT-5.5 vs.\ Claude Opus 4.7.}
+  \caption{Judge consistency: GPT-5.5 vs.\ Claude Opus 4.7.
+    The ``Model'' column denotes the response model being judged,
+    not the judge model.}
   \label{tab:judge_consistency}
   \small
+  \setlength{\tabcolsep}{3pt}
   \begin{tabular}{lc ccc cc cc}
     \toprule
     Model & $N$ & GPT HR & Claude HR & $\Delta$HR
       & GPT Avg & Claude Avg & $\kappa$ & Spearman $\rho$ \\
     \midrule
-    GPT-5.4-mini     & 100 & 45.0\% & 44.0\% & $-$1.0pp & 3.27 & 3.01 & 0.980 & 0.805 \\
-    Gemini 2.5 Flash & 100 & 37.0\% & 27.0\% & $-$10.0pp & 4.30 & 4.40 & 0.591 & 0.658 \\
-    Qwen3.5-35B-A3B  & 100 & 14.0\% & 18.0\% & +4.0pp & 5.01 & 4.61 & 0.777 & 0.722 \\
-    Qwen3-VL-235B    & 100 & 15.0\% & 22.0\% & +7.0pp & 4.91 & 4.38 & 0.638 & 0.669 \\
+    GPT-5.4-mini     & 100 & 45.0\% & 44.0\% & $-$1.0\,pp  & 3.27 & 3.01 & 0.980 & 0.805 \\
+    Gemini 2.5 Flash & 100 & 37.0\% & 27.0\% & $-$10.0\,pp & 4.30 & 4.40 & 0.591 & 0.658 \\
+    Qwen3.5-35B      & 100 & 14.0\% & 18.0\% & $+$4.0\,pp  & 5.01 & 4.61 & 0.777 & 0.722 \\
+    Qwen3-VL-235B    & 100 & 15.0\% & 22.0\% & $+$7.0\,pp  & 4.91 & 4.38 & 0.638 & 0.669 \\
     \midrule
     Overall          & 400 & --- & --- & --- & --- & --- & 0.776 & 0.740 \\
     \bottomrule
   \end{tabular}
+
+  \vspace{0.3em}
+  \small
+  \textit{Note:} Overall $\kappa$ and $\rho$ are pooled across the 400 samples,
+  not arithmetic means of the per-model values.
+  Overall Pearson $r = 0.762$ ($p < 0.001$).
 \end{table}
 
-The overall Pearson $r$ is 0.7623 ($p < 0.001$).
+\textbf{Substantial agreement with preserved ranking.}
 The two judges show substantial overall agreement
-($\kappa = 0.776$, $r = 0.762$),
-indicating that evaluation results are reasonably robust
-across judge models.
-GPT-5.4-mini is the most stable ($\kappa = 0.98$),
-while Gemini 2.5 Flash shows the largest divergence ($\kappa = 0.59$).
-Despite per-model differences,
-the relative model ranking is preserved under both judges:
-both Qwen models perform best,
-GPT-5.4-mini is in the middle,
+($\kappa = 0.776$, Spearman $\rho = 0.740$),
+and the relative model ranking is preserved under both:
+in each judge, both Qwen models rank best,
+GPT-5.4-mini sits in the middle,
 and Gemini 2.5 Flash is the weakest.
+The largest per-model divergence
+falls on Gemini ($\kappa = 0.591$):
+Claude rates Gemini's HR 10\,pp lower than GPT-5.5 does,
+indicating that Gemini's verbose responses
+sit closer to the disagreement boundary
+between the two judges' calibration of ``informative but wrong.''
+GPT-5.4-mini is by contrast the most stable ($\kappa = 0.98$),
+likely because its often single-token Direct responses
+leave little room for judge interpretation.
+These conclusions are based on two frontier closed-source judges
+and should be re-examined
+when an open-source or domain-specific judge becomes available.
 
 \subsection{Threshold Sensitivity Analysis}
 
+\textbf{Setup.}
 This analysis examines how sensitive
 the Hallucination Rate is to the threshold $T = 3$.
 For each threshold $T$ from 0 to 6,
@@ -214,15 +258,16 @@ for three representative thresholds.
   \centering
   \caption{Threshold sensitivity (MathVista Direct).}
   \label{tab:threshold_sensitivity}
+  \small
   \begin{tabular}{l ccc cc}
     \toprule
     Model & HR($T$=2) & HR($T$=3) & HR($T$=4)
       & $\Delta(3{\to}2)$ & $\Delta(4{\to}3)$ \\
     \midrule
-    GPT-5.4-mini     & 18.1\% & 45.1\% & 45.3\% & $-$27.0pp & +0.2pp \\
-    Gemini 2.5 Flash & 1.2\%  & 34.3\% & 34.6\% & $-$33.1pp & +0.3pp \\
-    Qwen3.5-35B-A3B  & 0.8\%  & 13.3\% & 13.3\% & $-$12.5pp & +0.0pp \\
-    Qwen3-VL-235B    & 2.1\%  & 16.3\% & 16.4\% & $-$14.2pp & +0.1pp \\
+    GPT-5.4-mini     & 18.1\% & 45.1\% & 45.3\% & $-$27.0\,pp & $+$0.2\,pp \\
+    Gemini 2.5 Flash & 1.2\%  & 34.3\% & 34.6\% & $-$33.1\,pp & $+$0.3\,pp \\
+    Qwen3.5-35B      & 0.8\%  & 13.3\% & 13.3\% & $-$12.5\,pp & $+$0.0\,pp \\
+    Qwen3-VL-235B    & 2.1\%  & 16.3\% & 16.4\% & $-$14.2\,pp & $+$0.1\,pp \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -236,26 +281,30 @@ for three representative thresholds.
   \label{fig:threshold_sensitivity}
 \end{figure}
 
+\textbf{Bimodal scores; ranking robust to threshold.}
 HR($T$=3) and HR($T$=4) are nearly identical
-(difference $<$0.3pp),
-indicating that very few samples receive score 3
+(difference $<$0.3\,pp),
+which implies that very few samples receive score 3
 and the judge's scores follow a clear bimodal distribution.
 The largest jump occurs between $T$=2 and $T$=3
-(12.5--33.1pp),
-reflecting a concentration of samples at score 2.
+(12.5--33.1\,pp),
+indicating a concentration of samples at score 2.
 The model ranking is fully preserved
 across all three thresholds,
-confirming that the core conclusions
-are insensitive to the threshold choice.
+so the core conclusions are insensitive to the threshold choice.
 
 \subsection{Length Bias Analysis}
 
+\textbf{Setup.}
 This analysis examines whether the MLLM Judge
-exhibits systematic length bias.
+exhibits a systematic length bias.
 Spearman correlation coefficients
 between response length (word count) and judge score
 are computed for all MathVista samples
 in both Direct and CoT modes.
+Each row also reports the median length per mode
+and the mean score across length quartiles
+(Q1 = shortest, Q4 = longest).
 
 \Cref{tab:length_bias} reports the results.
 
@@ -263,9 +312,13 @@ in both Direct and CoT modes.
   \centering
   \caption{Spearman correlation between response length
     and judge score (MathVista).
+    Q1$\to$Q4 columns give the mean score
+    across length quartiles
+    (Q1 = shortest 25\%, Q4 = longest 25\%).
     $^{**}$: $p < 0.01$; $^{***}$: $p < 0.001$.}
   \label{tab:length_bias}
   \small
+  \setlength{\tabcolsep}{3pt}
   \begin{tabular}{l cc cc cc}
     \toprule
     Model & Direct $\rho$ & CoT $\rho$
@@ -273,39 +326,55 @@ in both Direct and CoT modes.
       & Direct Q1$\to$Q4 & CoT Q1$\to$Q4 \\
     \midrule
     GPT-5.4-mini
-      & +0.086$^{**}$ & +0.015
+      & $+$0.086$^{**}$ & $+$0.015
       & 1 & 43
       & 3.19$\to$3.46 & 4.17$\to$3.95 \\
     Gemini 2.5 Flash
       & $-$0.142$^{***}$ & $-$0.218$^{***}$
       & 242 & 228
       & 4.61$\to$3.80 & 5.30$\to$4.33 \\
-    Qwen3.5-35B-A3B
-      & +0.530$^{***}$ & +0.006
+    Qwen3.5-35B
+      & $+$0.530$^{***}$ & $+$0.006
       & 42 & 122
       & 4.56$\to$5.33 & 5.32$\to$5.26 \\
     Qwen3-VL-235B
-      & +0.394$^{***}$ & $-$0.241$^{***}$
+      & $+$0.394$^{***}$ & $-$0.241$^{***}$
       & 40 & 103
       & 4.38$\to$4.92 & 5.32$\to$4.32 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The MLLM Judge does not exhibit
-a uniform ``longer $\to$ higher score'' bias.
-The direction of correlation depends
-on the quality pattern of each model's responses:
-positive when longer responses carry more valid reasoning
-(Qwen models in Direct mode),
-negative when longer responses introduce more errors
-(Gemini, Qwen3-VL under CoT).
-CoT generally eliminates or reverses the positive correlation,
-indicating that the judge is more sensitive
+\textbf{No uniform length bias; CoT shifts the sign.}
+The judge does not show a uniform ``longer $\to$ higher score'' bias:
+the sign of the correlation depends
+on the quality pattern of each model's responses.
+The correlation is positive when longer responses
+carry more valid reasoning
+(both Qwen models in Direct mode),
+and negative when longer responses
+introduce more errors
+(Gemini, and Qwen3-VL under CoT).
+The Qwen3.5 Direct correlation of $+0.530$ is the strongest in the panel,
+but the corresponding Q1$\to$Q4 progression (4.56 $\to$ 5.33)
+shows that the longer-quartile responses
+do score better in absolute terms,
+indicating ``longer because more correct''
+rather than ``higher score because longer.''
+
+Switching to CoT generally eliminates or reverses the positive correlation:
+Qwen3.5 drops from $+0.530$ to nearly zero,
+and Qwen3-VL flips from $+0.394$ to $-0.241$.
+This pattern is consistent
+with the exposure effect identified in \Cref{sec:mathvista}:
+under CoT, longer chains contain more visual assertions
+and therefore more opportunities to be penalized,
+so the judge becomes more sensitive
 to noise in longer reasoning chains.
 
 \subsection{Cross-Model Hallucination Consistency}
 
+\textbf{Setup.}
 This analysis examines whether hallucinations overlap across models
 on the same questions.
 For each sample,
@@ -332,20 +401,38 @@ the number of models that produce hallucinations (0--4) is counted.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.75\textwidth]{fig5_radar_comparison.pdf}
+  \includegraphics[width=0.6\textwidth]{fig5_radar_comparison.pdf}
   \caption{Radar chart comparing model performance
     across six dimensions (accuracy = $1 - \text{HR}$).
-    Larger area indicates better overall capability.}
+    Points closer to the outer ring indicate better performance.}
   \label{fig:radar_comparison}
 \end{figure}
 
-VQA-RAD is the most difficult dataset:
-only 13.1\% of samples are answered correctly by all models,
-and 33.7\% are answered incorrectly by three or more,
-indicating substantial model-independent intrinsic difficulty.
-MathVista Direct has an even distribution:
-38.7\% fully correct and 6.8\% fully incorrect.
-After CoT, the Hard Ratio increases
-from 11.7\% to 14.9\%,
-reflecting the polarization effect of CoT
-that causes model errors to converge.
+\textbf{VQA-RAD difficulty is largely intrinsic.}
+On VQA-RAD,
+only 13.1\% of samples (59/451) are answered correctly by all four models,
+and 33.7\% are answered incorrectly by three or more.
+This concentration at the ``hard'' end of the spectrum
+indicates a substantial pool of items
+whose difficulty is intrinsic to the data
+rather than specific to any individual model.
+The finding sharpens the interpretation
+of \Cref{sec:vqarad}:
+the high VQA-RAD hallucination rates
+are not driven by an idiosyncratic weakness of one or two models
+but by a domain-level perception gap
+shared across general-purpose MLLMs,
+consistent with the ``knowledge $\neq$ perception'' diagnosis
+of Case~2 (\Cref{sec:vqarad_case2}).
+
+\textbf{MathVista and the polarization signature of CoT.}
+MathVista Direct shows a more balanced distribution
+(38.7\% fully correct, 6.8\% fully incorrect).
+Under CoT the Hard Ratio rises from 11.7\% to 14.9\%,
+a modest but consistent shift
+in line with the CoT polarization effect
+already documented in \Cref{sec:mathvista}:
+CoT pushes responses toward the extremes
+of either fully-correct or fully-wrong,
+so the distribution at both tails grows
+while intermediate cells shrink.

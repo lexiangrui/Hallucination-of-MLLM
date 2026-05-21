@@ -5,45 +5,52 @@
 \subsubsection{POPE: Object Existence Hallucination Detection}
 
 The detection method for POPE is rule-based matching.
+
+\textbf{Prompt and post-processing.}
 During response generation,
 the model receives a prompt containing only the question
 and an instruction to answer Yes or No,
 ensuring concise and parseable responses
 (the complete prompt template is provided in \Cref{sec:appendix}).
 The answer post-processing algorithm follows
-the official evaluation script from the
+the official evaluation script of the
 RUCAIBox/POPE repository;\footnote{\url{https://github.com/RUCAIBox/POPE/blob/main/evaluate.py}}
-its pseudocode is given in \Cref{alg:pope_normalize}.
+the pseudocode is given in \Cref{alg:pope_normalize}.
 
 \begin{algorithm}[htbp]
   \caption{POPE answer normalization}
   \label{alg:pope_normalize}
   \begin{algorithmic}[1]
-    \Procedure{NormalizePOPEAnswer}{response}
-      \State sentence $\gets$ first sentence of response (split by ``.'')
-      \State remove all commas from sentence
-      \State words $\gets$ split sentence by spaces
-      \If{``No'' $\in$ words \textbf{or} ``not'' $\in$ words \textbf{or} ``no'' $\in$ words}
-        \State \Return ``no''
-      \EndIf
-      \State \Return ``yes''
-    \EndProcedure
+    \Require{Model response $r$, a free-form text string}
+    \Ensure{Normalized answer $a \in \{\text{``yes''}, \text{``no''}\}$}
+    \State $s \gets$ first sentence of $r$ \hfill \textit{// split by ``.''}
+    \State remove all commas from $s$
+    \State $W \gets$ split $s$ by whitespace into a set of words
+    \If{\text{``No''} $\in W$ \textbf{or} \text{``not''} $\in W$ \textbf{or} \text{``no''} $\in W$}
+      \State \Return \text{``no''}
+    \EndIf
+    \State \Return \text{``yes''}
   \end{algorithmic}
 \end{algorithm}
 
-Hallucination is defined following the POPE protocol:
-a sample is counted as an object hallucination (false positive)
-when the model answers ``yes'' but the ground truth label is ``no,''
-corresponding to object-level faithfulness hallucination.
+\textbf{Object hallucination in POPE.}
+Under this protocol,
+the model commits an object hallucination
+whenever it answers ``yes''
+while the ground-truth label is ``no.''
+The event is a false positive in the binary-classification view
+and instantiates the object-level faithfulness category of the taxonomy.
 
-Evaluation metrics treat ``yes'' (object present) as the positive class,
-so object hallucination corresponds to false positives.
+The metrics treat ``yes'' (object present) as the positive class,
+so object hallucinations correspond to false positives.
 The core metrics are summarized in \Cref{tab:pope_metrics}.
 
 \begin{table}[htbp]
   \centering
-  \caption{POPE evaluation metrics.}
+  \caption{POPE evaluation metrics.
+    Hallucination Rate is the core hallucination metric.}
   \label{tab:pope_metrics}
+  \small
   \begin{tabular}{lll}
     \toprule
     Metric & Formula & Description \\
@@ -60,23 +67,37 @@ The core metrics are summarized in \Cref{tab:pope_metrics}.
 
 \subsubsection{MathVista: Mathematical Reasoning Hallucination Detection}
 
+\textbf{Detection method.}
 The detection method for MathVista employs an MLLM Judge
 following the MMHal-Bench evaluation protocol
 \citep{sunAligningLargeMultimodal2023},
-which adopts a 0--6 Likert scale that jointly assesses
-the informativeness and hallucination level of each response,
-using a threshold of 3 (scores below 3 indicate hallucination).
-In our implementation, GPT-5.5 serves as the judge model.
+which adopts a 0--6 Likert scale
+that jointly assesses the informativeness
+and the hallucination level of each response.
+A threshold of 3 separates the two regimes:
+scores below 3 indicate hallucination,
+and scores at or above 3 indicate no hallucination.
+GPT-5.5 serves as the Judge in this implementation.
 The judge's system prompt defines the scoring rubric,
-hallucination criteria,
-and a three-way hallucination type classification,
-accompanied by five few-shot examples to ensure consistency.
-When the judge assigns a score below 3,
+the hallucination criteria,
+and a three-way type classification,
+and is supplemented by five few-shot examples for consistency.
+Whenever the judge assigns a score below 3,
 it additionally labels the hallucination type
 (faithfulness, factuality, or logical).
-The complete prompt templates for both model response generation
+The complete prompt templates for both response generation
 and judge scoring are provided in \Cref{sec:appendix}.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{Judge Framework.pdf}
+  \caption{MLLM Judge evaluation framework for MathVista:
+    the judge receives a question, a model response, and a scoring rubric,
+    and produces a score (0--6) with an optional hallucination type label.}
+  \label{fig:judge_framework}
+\end{figure}
+
+\textbf{Prompt construction.}
 During response generation,
 prompts are dynamically constructed from sample metadata
 to produce format-specific instructions.
@@ -93,8 +114,10 @@ The evaluation metrics are shown in \Cref{tab:mathvista_metrics}.
 
 \begin{table}[htbp]
   \centering
-  \caption{MathVista evaluation metrics.}
+  \caption{MathVista evaluation metrics.
+    Hallucination Rate is the core hallucination metric.}
   \label{tab:mathvista_metrics}
+  \small
   \begin{tabular}{lll}
     \toprule
     Metric & Definition & Description \\
@@ -108,13 +131,14 @@ The evaluation metrics are shown in \Cref{tab:mathvista_metrics}.
 
 \subsubsection{VQA-RAD: Medical Visual Question Answering Hallucination Detection}
 
-The detection method for VQA-RAD follows the same MLLM Judge protocol
+\textbf{Medical adaptation.}
+The detection method for VQA-RAD reuses the MLLM Judge protocol
 (0--6 Likert scale, threshold 3)
-with domain-specific prompt adaptations for medical scenarios
+with domain-specific prompt adaptations for the medical setting
 (see \Cref{sec:appendix}).
 The judge's task description is replaced
-with a radiology-specific scenario description
-that requires the judge to verify consistency
+with a radiology-specific scenario description,
+requiring the judge to verify consistency
 with both the image's visual content
 and established medical and anatomical knowledge.
 During response generation,
@@ -135,27 +159,33 @@ and stratified metrics for closed-ended and open-ended questions.
 All four models are accessed through APIs
 with a unified random seed of 42.
 Temperature is kept at each platform's default,
-and maximum token length is uncapped.
+and the maximum token length is uncapped.
 POPE samples 1{,}000 items per split,
-MathVista uses the full testmini set (approximately 1{,}000 items),
+MathVista uses the full testmini set (1{,}000 items),
 and VQA-RAD uses the test split (451 items).
-The MLLM Judge is GPT-5.5.
+GPT-5.5 serves as the MLLM Judge throughout.
 
 \Cref{tab:method_dataset_overview} summarizes
 the correspondence among detection methods, datasets, and metrics.
 
 \begin{table}[htbp]
   \centering
-  \caption{Overview of method--dataset--metric correspondence.}
+  \caption{Overview of method--dataset--metric correspondence.
+    The shaded bottom row reports the human alignment study
+    conducted on a 40-sample MathVista CoT subset
+    (\Cref{sec:appendix}).}
   \label{tab:method_dataset_overview}
-  \begin{tabular}{llll}
+  \small
+  \begin{tabularx}{\textwidth}{@{}lllX@{}}
     \toprule
-    Dataset   & Detection Method & Hallucination Types  & Core Metrics \\
+    Dataset   & Detection Method  & Annotation Scope    & Core Metrics \\
     \midrule
-    POPE      & Rule-based       & Faithfulness         & HR, F1 \\
-    MathVista & MLLM Judge       & All three types      & HR, Avg Score \\
-    VQA-RAD   & MLLM Judge       & All three types      & HR, Avg Score, Closed/Open HR \\
-    Human     & Manual annotation & All three types     & Kappa, Pearson $r$, F1 \\
+    POPE      & Rule-based        & Faithfulness        & HR, F1 \\
+    MathVista & MLLM Judge        & All three types     & HR, Avg Score \\
+    VQA-RAD   & MLLM Judge        & All three types     & HR, Avg Score, Closed/Open HR \\
+    \midrule
+    \rowcolor{pink!20}
+    Human     & Manual annotation & All three types     & Kappa, F1, Type Agreement \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
 \end{table}
