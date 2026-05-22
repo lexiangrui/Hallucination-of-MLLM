@@ -1,0 +1,140 @@
+{
+  "models": [
+    {
+      "model": "GPT-5.4-mini",
+      "slug": "gpt-5.4-mini",
+      "n_paired": 1000,
+      "contingency": {
+        "a_both_clean": 447,
+        "b_cot_only_h": 102,
+        "c_direct_only_h": 209,
+        "d_both_h": 242
+      },
+      "hr_direct": 0.451,
+      "hr_direct_ci": [
+        0.42040542652712193,
+        0.48196959580446247
+      ],
+      "hr_cot": 0.344,
+      "hr_cot_ci": [
+        0.3152044922028449,
+        0.37398945644464826
+      ],
+      "delta_hr": -0.10700000000000004,
+      "delta_hr_ci": [
+        -0.14092215841006797,
+        -0.07307784158993202
+      ],
+      "mcnemar": {
+        "chi2": 36.12861736334405,
+        "p_value": 1.8471421108859133e-09,
+        "method": "chi2_cc",
+        "b": 102,
+        "c": 209,
+        "n_discordant": 311
+      }
+    },
+    {
+      "model": "Gemini 2.5 Flash",
+      "slug": "gemini-2.5-flash",
+      "n_paired": 1000,
+      "contingency": {
+        "a_both_clean": 584,
+        "b_cot_only_h": 73,
+        "c_direct_only_h": 140,
+        "d_both_h": 203
+      },
+      "hr_direct": 0.343,
+      "hr_direct_ci": [
+        0.3142286235426158,
+        0.3729729786218485
+      ],
+      "hr_cot": 0.276,
+      "hr_cot_ci": [
+        0.2491910960732594,
+        0.3045232917282693
+      ],
+      "delta_hr": -0.067,
+      "delta_hr_ci": [
+        -0.0953017034851571,
+        -0.03869829651484292
+      ],
+      "mcnemar": {
+        "chi2": 20.450704225352112,
+        "p_value": 6.118703787618294e-06,
+        "method": "chi2_cc",
+        "b": 73,
+        "c": 140,
+        "n_discordant": 213
+      }
+    },
+    {
+      "model": "Qwen3.5-35B",
+      "slug": "Qwen3.5-35B-A3B",
+      "n_paired": 1000,
+      "contingency": {
+        "a_both_clean": 818,
+        "b_cot_only_h": 49,
+        "c_direct_only_h": 27,
+        "d_both_h": 106
+      },
+      "hr_direct": 0.133,
+      "hr_direct_ci": [
+        0.11335116065727395,
+        0.15545768007112354
+      ],
+      "hr_cot": 0.155,
+      "hr_cot_ci": [
+        0.13389362461519208,
+        0.17874683873984096
+      ],
+      "delta_hr": 0.021999999999999992,
+      "delta_hr_ci": [
+        0.0049679242514737015,
+        0.039032075748526296
+      ],
+      "mcnemar": {
+        "chi2": 5.802631578947368,
+        "p_value": 0.016002207003435933,
+        "method": "chi2_cc",
+        "b": 49,
+        "c": 27,
+        "n_discordant": 76
+      }
+    },
+    {
+      "model": "Qwen3-VL-235B",
+      "slug": "Qwen3-VL-235B-A22B-Instruct",
+      "n_paired": 1000,
+      "contingency": {
+        "a_both_clean": 721,
+        "b_cot_only_h": 116,
+        "c_direct_only_h": 39,
+        "d_both_h": 124
+      },
+      "hr_direct": 0.163,
+      "hr_direct_ci": [
+        0.14140399765906392,
+        0.18717523756020027
+      ],
+      "hr_cot": 0.24,
+      "hr_cot_ci": [
+        0.21455652518754262,
+        0.2674333892249461
+      ],
+      "delta_hr": 0.07699999999999999,
+      "delta_hr_ci": [
+        0.05306989118579496,
+        0.10093010881420504
+      ],
+      "mcnemar": {
+        "chi2": 37.26451612903226,
+        "p_value": 1.0314436286594014e-09,
+        "method": "chi2_cc",
+        "b": 116,
+        "c": 39,
+        "n_discordant": 155
+      }
+    }
+  ]
+}

@@ -167,7 +167,9 @@ allows the stratified HR reporting in \Cref{sec:vqarad}.
 No additional sampling or filtering is applied.
 
 %% ===================================================================
-\subsection{POPE Response Generation Prompt}
+\subsection{Response Generation Prompts}
+
+\subsubsection{POPE}
 
 The POPE prompt concatenates the dataset question
 with a fixed format instruction
@@ -194,7 +196,7 @@ Please answer YES or NO without an explanation.
 \end{figure}
 
 %% ===================================================================
-\subsection{MathVista Response Generation Prompt}
+\subsubsection{MathVista}
 
 MathVista prompts are dynamically constructed from sample metadata.
 The format instruction varies by question type:
@@ -231,7 +233,7 @@ Choices: {choices}
 a concrete CoT-mode example using a geometry problem
 from MathVista testmini (pid=5, question\_type=multi\_choice).
 
-\begin{figure}[h]
+\begin{figure}[htbp]
   \begin{minipage}{0.30\textwidth}
     \centering
     \includegraphics[width=\linewidth]{mathvista_pid5.jpg}
@@ -253,12 +255,12 @@ Choices: 97, 102, 107, 122
 \end{figure}
 
 %% ===================================================================
-\subsection{VQA-RAD Response Generation Prompt}
+\subsubsection{VQA-RAD}
 
 The VQA-RAD prompt prepends an expert-role preamble
 (``You are an expert radiologist.''),
 following the role-setting strategy
-of \citet{panditHALTMedVQAHallucinationAware2025},
+of \citet{wuHallucinationBenchmarkMedical2024},
 and appends an instruction
 to ground the answer in the medical image.
 \Cref{fig:vqarad_prompt_example} shows a concrete example.
@@ -282,7 +284,9 @@ Please provide a detailed answer based on what you observe in the medical image.
 \end{figure}
 
 %% ===================================================================
-\subsection{MLLM Judge System Prompt}
+\subsection{MLLM Judge Prompts}
+
+\subsubsection{System Prompt}
 
 The judge system prompt consists of three parts:
 a rating scale definition,
@@ -345,7 +349,7 @@ Reply in JSON only:
 \end{lstlisting}
 
 %% ===================================================================
-\subsection{MLLM Judge User Prompt}
+\subsubsection{User Prompt}
 
 For each evaluation, the judge receives a user prompt
 constructed from a dataset-specific task description,

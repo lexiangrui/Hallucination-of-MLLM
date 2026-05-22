@@ -4,7 +4,6 @@
 
 \subsubsection{Experimental Setup}
 
-\textbf{Setup.}
 This experiment examines the agreement
 between the GPT-5.5 Judge's hallucination judgments
 and those of a human annotator,
@@ -15,8 +14,7 @@ Evaluation metrics include Accuracy, F1, Cohen's $\kappa$
 and Type Agreement
 (the proportion of matching hallucination type labels
 among samples that both human and judge classify as hallucinated).
-$\kappa$ values are interpreted
-following the scale of \citet{landisKoch1977}:
+$\kappa$ values are interpreted on the conventional scale:
 $<$0.20 slight, 0.21--0.40 fair, 0.41--0.60 moderate,
 0.61--0.80 substantial, 0.81--1.00 almost perfect.
 
@@ -36,7 +34,7 @@ A single-blind design
 is used to avoid annotation bias.
 \Cref{fig:annotate_interface} shows the annotation interface.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\textwidth]{annotate.png}
   \caption{Human annotation interface used in the alignment experiment.
@@ -48,59 +46,43 @@ is used to avoid annotation bias.
 
 \subsubsection{Overall Results}
 
-\Cref{tab:human_overall} reports the overall alignment metrics,
-and \Cref{tab:human_confusion} shows the confusion matrix.
+\Cref{tab:human_overall} reports the overall alignment metrics
+together with the underlying confusion matrix.
 
 \begin{table}[htbp]
   \centering
-  \caption{Human alignment: overall metrics.}
+  \caption{Human alignment: aggregate metrics with 95\% CIs (left)
+    and the underlying $2\times 2$ confusion matrix (right).
+    Wilson 95\% CIs for proportions;
+    percentile bootstrap CI ($B=2000$) for $\kappa$.}
   \label{tab:human_overall}
-  \begin{tabular}{lc}
-    \toprule
-    Metric & Value \\
-    \midrule
-    Accuracy       & 85.0\% (34/40) \\
-    Precision      & 70.0\% (14/20) \\
-    Recall         & 100.0\% (14/14) \\
-    F1             & 0.8235 \\
-    Cohen's $\kappa$ & 0.700 (Substantial) \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\begin{table}[htbp]
-  \centering
-  \caption{Human alignment: confusion matrix
-    (MLLM Judge vs.\ human annotator).}
-  \label{tab:human_confusion}
-  \begin{tabular}{l cc}
-    \toprule
-     & Judge: Hallucinated & Judge: Not hallucinated \\
-    \midrule
-    Human: Hallucinated     & TP = 14 & FN = 0 \\
-    Human: Not hallucinated & FP = 6  & TN = 20 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\Cref{tab:human_per_model} reports per-model alignment.
-
-\begin{table}[htbp]
-  \centering
-  \caption{Human alignment: per-model results
-    (10 samples per model).}
-  \label{tab:human_per_model}
   \small
-  \begin{tabular}{lcccc}
-    \toprule
-    Model & $N$ & Accuracy & F1 & $\kappa$ \\
-    \midrule
-    GPT-5.4-mini (CoT)     & 10 & 1.000 & 1.000 & 1.000 \\
-    Qwen3.5-35B (CoT)      & 10 & 1.000 & 1.000 & 1.000 \\
-    Qwen3-VL-235B (CoT)    & 10 & 0.800 & 0.750 & 0.600 \\
-    Gemini 2.5 Flash (CoT) & 10 & 0.600 & 0.333 & 0.200 \\
-    \bottomrule
-  \end{tabular}
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \begin{tabular}{lc}
+      \toprule
+      Metric & Value [95\% CI] \\
+      \midrule
+      Accuracy        & 85.0\% [70.9, 92.9] \\
+      Precision       & 70.0\% [48.1, 85.5] \\
+      Recall          & 100.0\% [78.5, 100.0] \\
+      F1              & 0.824 \\
+      Cohen's $\kappa$ & 0.700 [0.481, 0.898] \\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.48\textwidth}
+    \centering
+    \begin{tabular}{l cc}
+      \toprule
+       & Judge: Hall. & Judge: Not \\
+      \midrule
+      Human: Hall. & TP = 14 & FN = 0 \\
+      Human: Not   & FP = 6  & TN = 20 \\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}
 \end{table}
 
 Among the 14 samples where both human and judge agree
@@ -126,28 +108,19 @@ the hallucination type confusion matrix.
 \end{table}
 
 \textbf{Strong overall alignment with no missed hallucinations.}
-Overall alignment is substantial ($\kappa = 0.70$),
-and---critically for the validity of the automated pipeline---the
-MLLM Judge does not miss any human-identified hallucination
-(Recall = 100\%).
+Overall alignment is substantial
+($\kappa = 0.70$, 95\% CI $[0.48, 0.90]$).
+Critically for the validity of the automated pipeline,
+the MLLM Judge does not miss any human-identified hallucination
+(Recall = 100\%, 95\% CI $[78.5, 100.0]$).
 The error profile is asymmetric:
-Precision = 70\% indicates 6 over-judgments
+Precision = 70\% (95\% CI $[48.1, 85.5]$) indicates 6 over-judgments
 (human says non-hallucinated, judge says hallucinated)
 but zero under-judgments.
 For an automated hallucination detector
 this is the preferable failure mode,
 since downstream uses can re-examine flagged cases
 but cannot recover from silently missed ones.
-On the per-model breakdown,
-GPT-5.4-mini and Qwen3.5-35B-A3B align perfectly
-on this 10-sample subset
-($\kappa = 1.0$),
-reflecting clear and stable hallucination patterns
-in their responses;
-the per-model $\kappa$ values
-are statistically loose at $N=10$ and should be read as descriptive.
-Gemini 2.5 Flash has the worst alignment ($\kappa = 0.20$),
-with 4 of the 6 over-judgments attributed to this model.
 
 \textbf{Root cause: rubric coupling.}
 All six over-judgments share a single error pattern:
@@ -212,7 +185,7 @@ not to the judge.
     Qwen3.5-35B      & 100 & 14.0\% & 18.0\% & $+$4.0\,pp  & 5.01 & 4.61 & 0.777 & 0.722 \\
     Qwen3-VL-235B    & 100 & 15.0\% & 22.0\% & $+$7.0\,pp  & 4.91 & 4.38 & 0.638 & 0.669 \\
     \midrule
-    Overall          & 400 & --- & --- & --- & --- & --- & 0.776 & 0.740 \\
+    Overall          & 400 & n/a & n/a & n/a & n/a & n/a & 0.776 & 0.740 \\
     \bottomrule
   \end{tabular}
 
@@ -274,7 +247,7 @@ for three representative thresholds.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.75\textwidth]{fig3_threshold_sensitivity_line.pdf}
+  \includegraphics[width=0.65\textwidth]{fig3_threshold_sensitivity_line.pdf}
   \caption{Hallucination rate as a function of threshold $T$
     (MathVista Direct).
     The vertical dashed line marks the official threshold $T = 3$.}

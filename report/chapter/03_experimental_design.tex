@@ -1,8 +1,8 @@
 \section{Experimental Design}
 
-\subsection{Datasets, Detection Methods, and Evaluation Metrics}
+\subsection{Detection Methods and Evaluation Metrics}
 
-\subsubsection{POPE: Object Existence Hallucination Detection}
+\subsubsection{POPE: Object-Existence Probing}
 
 The detection method for POPE is rule-based matching.
 
@@ -65,7 +65,7 @@ The core metrics are summarized in \Cref{tab:pope_metrics}.
   \end{tabular}
 \end{table}
 
-\subsubsection{MathVista: Mathematical Reasoning Hallucination Detection}
+\subsubsection{MathVista: Mathematical Visual Reasoning}
 
 \textbf{Detection method.}
 The detection method for MathVista employs an MLLM Judge
@@ -129,7 +129,7 @@ The evaluation metrics are shown in \Cref{tab:mathvista_metrics}.
   \end{tabular}
 \end{table}
 
-\subsubsection{VQA-RAD: Medical Visual Question Answering Hallucination Detection}
+\subsubsection{VQA-RAD: Medical Radiology VQA}
 
 \textbf{Medical adaptation.}
 The detection method for VQA-RAD reuses the MLLM Judge protocol
@@ -144,15 +144,17 @@ and established medical and anatomical knowledge.
 During response generation,
 a radiologist expert role prompt is adopted
 following the role-setting strategy
-of \citet{panditHALTMedVQAHallucinationAware2025}.
+of \citet{wuHallucinationBenchmarkMedical2024}.
 The three-way hallucination type classification
 (faithfulness, factuality, logical) is always enabled,
 and hallucination rates are additionally stratified
 by closed-ended and open-ended answer types.
 
+The full 451-sample test split is used,
+comprising 251 closed-ended (yes/no) and 200 open-ended (free-text) questions.
 The evaluation metrics include Hallucination Rate, Average Score,
 type-specific hallucination counts,
-and stratified metrics for closed-ended and open-ended questions.
+and hallucination rates stratified by answer type.
 
 \subsection{Experimental Conditions}
 

@@ -23,7 +23,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from evaluation.metrics import cohens_kappa, confusion_matrix
+from evaluation.metrics import bootstrap_kappa_ci, cohens_kappa, confusion_matrix, wilson_ci
 
 DEFAULT_EVAL_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "results" / "errors_analysis" / "human_alignment"
@@ -75,7 +75,7 @@ def _join_rows(rows: list[dict[str, str]], meta: dict[str, dict[str, Any]]) -> l
     return joined
 
 
-def _alignment_metrics(records: list[dict[str, Any]]) -> dict[str, float]:
+def _alignment_metrics(records: list[dict[str, Any]], with_ci: bool = False) -> dict[str, float]:
     if not records:
         return {}
     human_labels = [int(row["human_label"]) for row in records]
@@ -90,7 +90,7 @@ def _alignment_metrics(records: list[dict[str, Any]]) -> dict[str, float]:
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
     kappa = cohens_kappa(human_labels, gpt_labels)
 
-    return {
+    metrics = {
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
@@ -98,27 +98,68 @@ def _alignment_metrics(records: list[dict[str, Any]]) -> dict[str, float]:
         "cohens_kappa": kappa,
     }
 
+    if with_ci and total > 0:
+        acc_lo, acc_hi = wilson_ci(tp + tn, total)
+        metrics["accuracy_ci"] = (acc_lo, acc_hi)
+        if (tp + fp) > 0:
+            p_lo, p_hi = wilson_ci(tp, tp + fp)
+            metrics["precision_ci"] = (p_lo, p_hi)
+        if (tp + fn) > 0:
+            r_lo, r_hi = wilson_ci(tp, tp + fn)
+            metrics["recall_ci"] = (r_lo, r_hi)
+        k_lo, k_hi = bootstrap_kappa_ci(human_labels, gpt_labels, n_resamples=2000)
+        metrics["kappa_ci"] = (k_lo, k_hi)
 
-def _format_metrics_table(title: str, rows: list[tuple[str, list[dict[str, Any]]]]) -> list[str]:
-    lines = [
-        f"### {title}",
-        "",
-        "| 子集 | N | Accuracy | Precision | Recall | F1 | Cohen's Kappa |",
-        "|------|---:|---------:|----------:|-------:|---:|--------------:|",
-    ]
+    return metrics
+
+
+def _format_metrics_table(title: str, rows: list[tuple[str, list[dict[str, Any]]]],
+                          with_ci: bool = False) -> list[str]:
+    if with_ci:
+        lines = [
+            f"### {title}",
+            "",
+            "| 子集 | N | Accuracy [95% CI] | Precision [95% CI] | Recall [95% CI] | F1 | Cohen's κ [95% CI] |",
+            "|------|---:|------------------|-------------------|-----------------|---:|--------------------|",
+        ]
+    else:
+        lines = [
+            f"### {title}",
+            "",
+            "| 子集 | N | Accuracy | Precision | Recall | F1 | Cohen's Kappa |",
+            "|------|---:|---------:|----------:|-------:|---:|--------------:|",
+        ]
     for name, subset in rows:
-        metrics = _alignment_metrics(subset)
+        metrics = _alignment_metrics(subset, with_ci=with_ci)
         if not metrics:
-            lines.append(f"| {name} | 0 | - | - | - | - | - |")
+            if with_ci:
+                lines.append(f"| {name} | 0 | - | - | - | - | - |")
+            else:
+                lines.append(f"| {name} | 0 | - | - | - | - | - |")
             continue
-        lines.append(
-            "| {name} | {n} | {accuracy:.4f} | {precision:.4f} | {recall:.4f} | "
-            "{f1:.4f} | {cohens_kappa:.4f} |".format(
-                name=name,
-                n=len(subset),
-                **metrics,
+        if with_ci:
+            def _fmt(val: float, ci_key: str) -> str:
+                if ci_key in metrics:
+                    lo, hi = metrics[ci_key]
+                    return f"{val:.3f} [{lo:.3f}, {hi:.3f}]"
+                return f"{val:.3f}"
+            lines.append(
+                f"| {name} | {len(subset)} | "
+                f"{_fmt(metrics['accuracy'], 'accuracy_ci')} | "
+                f"{_fmt(metrics['precision'], 'precision_ci')} | "
+                f"{_fmt(metrics['recall'], 'recall_ci')} | "
+                f"{metrics['f1']:.3f} | "
+                f"{_fmt(metrics['cohens_kappa'], 'kappa_ci')} |"
             )
-        )
+        else:
+            lines.append(
+                "| {name} | {n} | {accuracy:.4f} | {precision:.4f} | {recall:.4f} | "
+                "{f1:.4f} | {cohens_kappa:.4f} |".format(
+                    name=name,
+                    n=len(subset),
+                    **{k: v for k, v in metrics.items() if not k.endswith("_ci")},
+                )
+            )
     lines.append("")
     return lines
 
@@ -195,6 +236,7 @@ def _format_breakdowns(records: list[dict[str, Any]]) -> list[str]:
     lines.extend(_format_metrics_table(
         "整体与按模型指标",
         [("overall", records)] + [(model, by_model[model]) for model in sorted(by_model)],
+        with_ci=True,
     ))
 
     lines.extend(_format_metrics_table(

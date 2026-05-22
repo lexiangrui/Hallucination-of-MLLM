@@ -1,7 +1,7 @@
 \section{Experiment 2: MathVista Mathematical Reasoning Hallucination Detection}
 \label{sec:mathvista}
 
-\subsection{Direct Mode Baseline Results}
+\subsection{Direct Mode: Results}
 
 \Cref{tab:mathvista_direct} reports the MathVista evaluation results
 for all four models in Direct mode.
@@ -9,7 +9,7 @@ for all four models in Direct mode.
 \begin{table}[htbp]
   \centering
   \caption{MathVista Direct mode results.
-    Best values are underlined.}
+    Best values are highlighted in pink.}
   \label{tab:mathvista_direct}
   \small
   \begin{tabular}{l cccc}
@@ -17,13 +17,13 @@ for all four models in Direct mode.
     Metric
       & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B & Qwen3-VL-235B \\
     \midrule
-    Hallucination Rate & 45.1\% & 34.3\% & \underline{13.3\%} & 16.3\% \\
-    Average Score      & 3.31   & 4.46   & \underline{5.00}   & 4.85 \\
-    $n_{\text{hallucinated}}$ & 451 & 343 & \underline{133} & 163 \\
-    \quad Faithfulness & 189 & 278 & \underline{98}  & 113 \\
-    \quad Factuality   & 14  & 13  & \underline{5}   & 6 \\
-    \quad Logical      & 248 & 52  & \underline{30}  & 44 \\
-    None               & 549 & 657 & \underline{867} & 837 \\
+    Hallucination Rate & 45.1\% & 34.3\% & \cellcolor{pink!25}13.3\% & 16.3\% \\
+    Average Score      & 3.31   & 4.46   & \cellcolor{pink!25}5.00   & 4.85 \\
+    $n_{\text{hallucinated}}$ & 451 & 343 & \cellcolor{pink!25}133 & 163 \\
+    \quad Faithfulness & 189 & 278 & \cellcolor{pink!25}98  & 113 \\
+    \quad Factuality   & 14  & 13  & \cellcolor{pink!25}5   & 6 \\
+    \quad Logical      & 248 & 52  & \cellcolor{pink!25}30  & 44 \\
+    None               & 549 & 657 & \cellcolor{pink!25}867 & 837 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -37,7 +37,7 @@ for all four models in Direct mode.
   \label{fig:mathvista_pie}
 \end{figure}
 
-\subsubsection{Direct Mode Analysis}
+\subsection{Direct Mode: Analysis}
 
 \textbf{From POPE to MathVista: a richer error surface.}
 On POPE the four-model HR range spans roughly 5 percentage points;
@@ -47,7 +47,7 @@ visual perception, mathematical knowledge,
 and multi-step reasoning.
 From the worst performer GPT-5.4-mini (45.1\%)
 to the best Qwen3.5-35B-A3B (13.3\%),
-HR differs by a factor of 3.4---
+HR differs by a factor of 3.4,
 far exceeding the cross-model gap on POPE.
 The capacity--calibration view from \Cref{sec:pope_cross_model_comparison}
 remains useful as a starting point,
@@ -88,7 +88,7 @@ but on MathVista's mathematical reasoning it leads by a small margin,
 suggesting higher efficiency in mathematical reasoning
 despite its smaller activated parameter count.
 
-\subsection{CoT Mode Results and Direct Comparison}
+\subsection{CoT Mode: Results and Comparison}
 
 \Cref{tab:mathvista_cot_comparison} compares
 the core metrics between Direct and CoT modes,
@@ -96,37 +96,58 @@ including overall performance changes and per-type hallucination breakdowns.
 
 \begin{table}[htbp]
   \centering
-  \caption{MathVista Direct vs.\ CoT comparison with per-type hallucination changes.}
+  \caption{MathVista Direct vs.\ CoT hallucination rates
+    with 95\% confidence intervals and paired significance tests.
+    All models share the same $N=1000$ MathVista testmini items
+    across both conditions, so a paired McNemar test is appropriate.}
+  \label{tab:mathvista_cot_significance}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lcccc}
+    \toprule
+    Model & Direct HR [95\% CI] & CoT HR [95\% CI] & $\Delta$HR [95\% CI] & McNemar $p$ \\
+    \midrule
+    GPT-5.4-mini     & 45.1\% [42.0, 48.2] & 34.4\% [31.5, 37.4] & $-$10.7\,pp [$-$14.1, $-$7.3] & $1.9\!\times\!10^{-9}$ \\
+    Gemini 2.5 Flash & 34.3\% [31.4, 37.3] & 27.6\% [24.9, 30.5] & $-$6.7\,pp [$-$9.5, $-$3.9]  & $6.1\!\times\!10^{-6}$ \\
+    Qwen3.5-35B      & 13.3\% [11.3, 15.5] & 15.5\% [13.4, 17.9] & $+$2.2\,pp [$+$0.5, $+$3.9] & $0.016$ \\
+    Qwen3-VL-235B    & 16.3\% [14.1, 18.7] & 24.0\% [21.5, 26.7] & $+$7.7\,pp [$+$5.3, $+$10.1] & $1.0\!\times\!10^{-9}$ \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.3em}
+
+  \small
+  \textit{Note:} Wilson 95\% CIs for HR;
+  Wald 95\% CI for the paired difference $\Delta$HR.
+  McNemar $p$-values use continuity-corrected $\chi^2$ (df=1).
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{MathVista Direct vs.\ CoT: average score and per-type
+    hallucination count changes.}
   \label{tab:mathvista_cot_comparison}
   \small
   \setlength{\tabcolsep}{3pt}
-  \begin{tabular}{l cc c cc c}
+  \begin{tabular}{l ccc ccc c}
     \toprule
-    \multicolumn{7}{c}{\textbf{Overall Performance Comparison}} \\
+    Model & Direct Avg & CoT Avg & $\Delta$Avg
+      & $\Delta$ Faith. & $\Delta$ Fact. & $\Delta$ Logical
+      & Net improvement \\
     \midrule
-    Model & Direct HR & CoT HR & $\Delta$HR
-      & Direct Avg & CoT Avg & $\Delta$Avg \\
-    \midrule
-    GPT-5.4-mini     & 45.1\% & 34.4\% & $\downarrow$10.7\,pp & 3.31 & 4.35 & +1.04 \\
-    Gemini 2.5 Flash & 34.3\% & 27.6\% & $\downarrow$6.7\,pp  & 4.46 & 4.81 & +0.35 \\
-    Qwen3.5-35B      & 13.3\% & 15.5\% & $\uparrow$2.2\,pp    & 5.00 & 5.34 & +0.34 \\
-    Qwen3-VL-235B    & 16.3\% & 24.0\% & $\uparrow$7.7\,pp    & 4.85 & 4.94 & +0.09 \\
-    \midrule
-    \multicolumn{7}{c}{\textbf{Per-Type Hallucination Changes}} \\
-    \midrule
-    Model & \multicolumn{2}{c}{$\Delta$ Faithfulness} & $\Delta$ Factuality
-      & \multicolumn{2}{c}{$\Delta$ Logical} & Net improvement \\
-    \midrule
-    GPT-5.4-mini     & \multicolumn{2}{c}{+8}   & $-$10 & \multicolumn{2}{c}{$-$105} & +107 \\
-    Gemini 2.5 Flash & \multicolumn{2}{c}{$-$66} & $-$8  & \multicolumn{2}{c}{+7}     & +67  \\
-    Qwen3.5-35B      & \multicolumn{2}{c}{+26}  & $-$3  & \multicolumn{2}{c}{$-$1}   & $-$22 \\
-    Qwen3-VL-235B    & \multicolumn{2}{c}{+41}  & 0     & \multicolumn{2}{c}{+36}    & $-$77 \\
+    GPT-5.4-mini     & 3.31 & 4.35 & +1.04 & +8   & $-$10 & $-$105 & +107 \\
+    Gemini 2.5 Flash & 4.46 & 4.81 & +0.35 & $-$66 & $-$8  & +7     & +67  \\
+    Qwen3.5-35B      & 5.00 & 5.34 & +0.34 & +26  & $-$3  & $-$1   & $-$22 \\
+    Qwen3-VL-235B    & 4.85 & 4.94 & +0.09 & +41  & 0     & +36    & $-$77 \\
     \bottomrule
   \end{tabular}
-  \vspace{0.5em}
+  \vspace{0.3em}
 
   \small
-  \textit{Note:} Net improvement denotes the net change in sample count (positive = improvement, negative = degradation).
+  \textit{Note:} Per-type columns report the change in raw count
+  (CoT minus Direct) for each hallucination category;
+  negative values indicate fewer hallucinations under CoT.
+  Net improvement is the signed change in total hallucinated samples
+  (positive = improvement).
 \end{table}
 
 \begin{figure}[htbp]
@@ -140,9 +161,8 @@ including overall performance changes and per-type hallucination breakdowns.
 
 \subsection{CoT Effect Analysis}
 
-\subsubsection{Overview}
+\subsubsection{Baseline-Dependent CoT Effects}
 
-\textbf{Baseline-dependent CoT effects.}
 CoT effects on MathVista divide cleanly along a single axis:
 the Direct-mode baseline.
 Models with high Direct HR
@@ -151,8 +171,14 @@ improve substantially under CoT,
 whereas models with low Direct HR
 (Qwen3.5 at 13.3\%, Qwen3-VL at 16.3\%)
 degrade.
+All four shifts are statistically significant under a paired
+McNemar test (\Cref{tab:mathvista_cot_significance}),
+though the p-values differ by several orders of magnitude:
+the GPT and Qwen3-VL effects reach $p<10^{-9}$,
+while the Qwen3.5 $+$2.2\,pp shift is far weaker
+($p=0.016$, 95\% CI $[+0.5, +3.9]$).
 \Cref{tab:mathvista_cot_comparison,fig:mathvista_cot_bar}
-quantify this pattern.
+quantify the accompanying score and per-type changes.
 The remainder of this subsection isolates
 the mechanisms responsible for each direction
 and identifies why CoT helps logical hallucinations
@@ -238,7 +264,7 @@ Faithfulness hallucinations increase from 113 to 154 (+41 cases, +36.3\%),
 indicating that forcing explicit visual description
 systematically exposes perceptual weaknesses.
 
-\subsubsection{Underlying Mechanisms}
+\subsubsection{Underlying Mechanisms: Exposure and Commitment}
 
 This phenomenon aligns with recent findings.
 \citet{liuMoreThinkingLess2025} show through attention analysis
@@ -325,7 +351,7 @@ The correct answer is $70^\circ$ (option B).
   \label{fig:mathvista_case1}
 \end{figure}
 
-\begin{table}[H]
+\begin{table}[htbp]
   \centering
   \caption{MathVista Case 1: responses under two modes.}
   \label{tab:mathvista_case1_answers}
@@ -400,7 +426,7 @@ The correct answer is Common water flea (option B).
   \label{fig:mathvista_case2}
 \end{figure}
 
-\begin{table}[H]
+\begin{table}[htbp]
   \centering
   \caption{MathVista Case 2: responses under two modes.}
   \label{tab:mathvista_case2_answers}

@@ -1,7 +1,8 @@
 \begin{abstract}
 Multimodal Large Language Models (MLLMs) have demonstrated strong capabilities
 in visual question answering and image-text reasoning,
-yet they remain susceptible to hallucinations---outputs
+yet they remain susceptible to hallucinations:
+outputs
 that are inconsistent with the visual input,
 contradict established world knowledge,
 or contain flaws in the reasoning process.
@@ -30,16 +31,17 @@ it substantially reduces hallucinations in weaker-baseline models
 (GPT-5.4-mini $-$10.7\,pp, Gemini~2.5~Flash $-$6.7\,pp)
 but exacerbates them in stronger-baseline ones
 (Qwen3-VL $+$7.7\,pp),
-through two specifically identified mechanisms---
+through two specifically identified mechanisms:
 an \emph{exposure effect}
 (latent perceptual errors made visible by reasoning chains)
 and a \emph{commitment error}
 (snowballed elaboration around an early wrong premise).
 (3)~In medical VQA,
 faithfulness hallucinations account for over 96\% of all hallucinations,
-and a recurring confident-but-wrong failure mode---models
-recite domain conventions accurately
-yet localize anatomical findings incorrectly---demonstrates
+and a recurring confident-but-wrong failure mode
+(models recite domain conventions accurately
+yet localize anatomical findings incorrectly)
+demonstrates
 that fluent medical knowledge does not entail medical visual perception.
 Five independent error analyses
 (human alignment with Cohen's $\kappa = 0.70$,

@@ -1,3 +1,160 @@
 \section{Limitations and Future Work}
 
-\subsection{Future Directions}
+\subsection{Limitations}
+
+\textbf{Benchmark coverage is narrow.}
+The three datasets (POPE, MathVista, VQA-RAD)
+probe three distinct hallucination regimes
+(object existence,
+mathematical reasoning,
+and medical visual grounding)
+but do not span
+the full landscape of publicly available hallucination benchmarks.
+HallusionBench \citep{guanHallusionBenchAdvancedDiagnostic2024}
+(visual illusions and language-context manipulations),
+AMBER \citep{wangAMBERLLMfreeMultidimensional2023}
+(a multi-dimensional LLM-free benchmark
+covering existence, attribute, and relation hallucinations),
+and broader capability suites such as
+MM-Vet \citep{yuMMVetEvaluatingLarge2024}
+and MMBench \citep{liuMMBenchAllaroundPlayer2024}
+are not included.
+Whether the patterns identified here
+(particularly
+the CoT polarization effect on MathVista
+and the knowledge--perception gap on VQA-RAD)
+generalize
+to these probes remains untested.
+
+\textbf{Model panel is restricted.}
+Four models from three families (OpenAI, Google, Alibaba)
+are evaluated.
+Smaller open-weight models
+(e.g., the LLaVA, MiniGPT, and InstructBLIP families)
+and parameter-scale ablations within a single family
+are excluded,
+so the report cannot disentangle effects driven by model scale
+from those driven by training methodology or visual-encoder choice.
+
+\textbf{Human alignment is sample-limited.}
+The 40-sample annotation pool
+yields an overall Cohen's $\kappa = 0.70$
+with a 95\% bootstrap CI of $[0.48, 0.90]$,
+which is wide
+enough to characterize agreement as substantial in aggregate
+but insufficient to support a statistically grounded
+per-model judge-reliability ranking.
+A scaled-up annotation effort
+(approximately $N \geq 80$ per model)
+would be required to make such quantitative cross-model claims.
+
+\subsection{Future Work}
+
+\textbf{Language-prior override of visual content.}
+Recently, in a casual conversation with GPT-5.5,
+I noticed an interesting phenomenon:
+when I asked ``Which orange ball is bigger?''
+on the pair of Ebbinghaus-style images
+shown in \Cref{fig:ebbinghaus_probe},
+the model gave the same answer on both inputs,
+even though the second image is not a real illusion at all.
+What I find striking is that this is essentially the same mechanism
+identified in the POPE Popular split (\Cref{sec:case2_pope}),
+where models fall back on co-occurrence statistics
+once a familiar context cue is present;
+the Ebbinghaus probe just pushes it to an extreme,
+in which the memorized association
+``Ebbinghaus image $\Rightarrow$ equal sizes''
+appears to override the image signal entirely.
+This is consistent with the reasoning-time visual disengagement
+reported by \citet{liuMoreThinkingLess2025}
+and the broader language-prior failure modes
+surveyed by \citet{baiHallucinationMultimodalLarge2025}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ebbinghaus_canonical.png}
+    \caption{Canonical Ebbinghaus configuration.
+      The two central disks are equal in size.
+      GPT-5.5 correctly answers ``same size''
+      and identifies the image as the Titchener-circles illusion.}
+    \label{fig:ebbinghaus_canonical}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.54\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{ebbinghaus_counter.png}
+    \caption{Counter-illusion variant.
+      The surround pattern is preserved
+      but the right central disk is drawn substantially larger.
+      GPT-5.5 returns the same ``same size'' answer
+      and the same textbook explanation.}
+    \label{fig:ebbinghaus_counter}
+  \end{subfigure}
+  \caption{Conversation screenshots from a manual probe of GPT-5.5
+    on two Ebbinghaus-style images.
+    The model gives identical answers on both inputs
+    despite the obvious size difference in the right image.}
+  \label{fig:ebbinghaus_probe}
+\end{figure}
+
+\textbf{A LAST-ViT-inspired remediation.}
+I happened to have read a recent paper
+that addresses a structurally similar problem
+on the pure-vision side.
+\citet{shiVisionTransformersRegisters2026} observe
+that in standard Vision Transformers,
+the model's summary representation
+(the CLS token,
+which collects information from all image patches
+and is then used to make the final prediction)
+tends to draw most of its content
+from background regions of an image
+rather than from the actual subject of the photo.
+The reason is fairly mundane:
+background patches simply occupy more area than foreground patches,
+and the standard training objective
+only checks whether the final image-level label is correct,
+without constraining which patches the model is actually paying attention to.
+Their proposed fix, named LAST-ViT,
+is a lightweight plug-in module
+that re-weights how patch information is aggregated into the CLS token,
+biasing it back toward the foreground
+without requiring any retraining of the backbone,
+and the paper reports consistent gains across twelve vision benchmarks.
+The qualitative effect of the fix is illustrated in \Cref{fig:lastvit_attention_compare}:
+a vanilla Transformer scatters attention across background patches,
+whereas the LAST-ViT variant concentrates attention
+on the actual subject of the photo.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{lastvit_attention_compare.png}
+  \caption{Attention and feature visualizations comparing
+    a ConvNet baseline, a standard Vision Transformer,
+    and a Transformer equipped with the LAST-ViT (LazyStrike) module.
+    The Transformer baseline disperses attention across the background,
+    while the LAST-ViT variant concentrates attention on the foreground subject.
+    Figure reproduced from \citet{shiVisionTransformersRegisters2026}, Fig.~1.}
+  \label{fig:lastvit_attention_compare}
+\end{figure}
+
+Reading that paper alongside my own Ebbinghaus observation,
+I started wondering whether the same kind of shortcut
+is at work in MLLMs as well,
+just along a different axis:
+instead of background patches drowning out foreground patches in a single image,
+the language prior drowns out the image signal across an entire conversation turn.
+A concrete next step would be to construct
+paired illusion and counter-illusion test sets in the style of the probe above,
+and then study whether a similar re-weighting at decoding time,
+which pulls the model's attention back toward the visual tokens
+whenever the language prior and the image content disagree,
+can reduce this failure mode
+without degrading performance on tasks
+where the language prior is genuinely useful.
+This remains a conjecture for now,
+pending controlled experiments on open-weight MLLMs
+whose attention pattern can be inspected and edited directly.

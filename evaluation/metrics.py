@@ -17,6 +17,16 @@ Hallucination detection is treated as a binary classification:
   predictions as the detection result and ground truth as the label.
 """
 
+import math
+
+import numpy as np
+from scipy.stats import bootstrap as _scipy_bootstrap
+from scipy.stats import norm as _scipy_norm
+from scipy.stats import pearsonr as _scipy_pearsonr
+from sklearn.metrics import cohen_kappa_score as _sk_cohen_kappa
+from statsmodels.stats.contingency_tables import mcnemar as _sm_mcnemar
+from statsmodels.stats.proportion import proportion_confint as _sm_prop_confint
+
 def confusion_matrix(
     y_true: list[int],
     y_pred: list[int],
@@ -169,13 +179,11 @@ def compute_mllm_judge_summary(details: list[dict], total: int) -> tuple[dict, l
 def cohens_kappa(y_true: list[int], y_pred: list[int]) -> float:
     """
     Cohen's Kappa — inter-rater agreement corrected for chance.
+    Wraps sklearn.metrics.cohen_kappa_score; returns 1.0 when both raters
+    assign every sample to the same single class (sklearn would return NaN
+    in that degenerate case).
 
-    kappa = (p_o - p_e) / (1 - p_e)
-
-    where p_o = observed agreement proportion,
-          p_e = expected agreement by chance.
-
-    Interpretation:
+    Interpretation (Landis & Koch 1977):
         < 0.00  — worse than chance
         0.00–0.20 — slight
         0.21–0.40 — fair
@@ -183,48 +191,24 @@ def cohens_kappa(y_true: list[int], y_pred: list[int]) -> float:
         0.61–0.80 — substantial
         0.81–1.00 — almost perfect
     """
-    n = len(y_true)
-    if n == 0:
+    if len(y_true) == 0:
         return 0.0
-
-    cm = confusion_matrix(y_true, y_pred)
-    tp, tn, fp, fn = cm["TP"], cm["TN"], cm["FP"], cm["FN"]
-
-    p_o = (tp + tn) / n
-    p_positive_judge = (tp + fp) / n
-    p_positive_true = (tp + fn) / n
-    p_negative_judge = (tn + fn) / n
-    p_negative_true = (tn + fp) / n
-    p_e = (p_positive_judge * p_positive_true) + (p_negative_judge * p_negative_true)
-
-    if p_e == 1.0:
+    if y_true == y_pred and len(set(y_true)) == 1:
         return 1.0
-
-    return (p_o - p_e) / (1.0 - p_e)
+    return float(_sk_cohen_kappa(y_true, y_pred))
 
 
 def pearson_correlation(x: list[float], y: list[float]) -> float:
     """
-    Pearson correlation coefficient — measures linear correlation
-    between two sets of scores (e.g., GPT scores vs. human scores).
-
-    r = Σ((x_i - x̄)(y_i - ȳ)) / sqrt(Σ(x_i - x̄)² * Σ(y_i - ȳ)²)
+    Pearson correlation coefficient. Wraps scipy.stats.pearsonr;
+    returns 0.0 when either input has zero variance.
     """
-    n = len(x)
-    if n == 0:
+    if len(x) == 0:
         return 0.0
-
-    mean_x = sum(x) / n
-    mean_y = sum(y) / n
-
-    cov = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, y))
-    std_x = (sum((xi - mean_x) ** 2 for xi in x)) ** 0.5
-    std_y = (sum((yi - mean_y) ** 2 for yi in y)) ** 0.5
-
-    if std_x == 0 or std_y == 0:
+    arr_x, arr_y = np.asarray(x), np.asarray(y)
+    if arr_x.std() == 0 or arr_y.std() == 0:
         return 0.0
-
-    return cov / (std_x * std_y)
+    return float(_scipy_pearsonr(arr_x, arr_y).statistic)
 
 
 def human_alignment_report(
@@ -243,22 +227,136 @@ def human_alignment_report(
     p = tp / denom_p if denom_p else 0.0
     r = tp / denom_r if denom_r else 0.0
 
-    n = len(human_labels)
-    p_o = (tp + tn) / n if n else 0.0
-    p_positive_judge = (tp + fp) / n if n else 0.0
-    p_positive_true = (tp + fn) / n if n else 0.0
-    p_negative_judge = (tn + fn) / n if n else 0.0
-    p_negative_true = (tn + fp) / n if n else 0.0
-    p_e = (p_positive_judge * p_positive_true) + (p_negative_judge * p_negative_true)
-    kappa = 1.0 if p_e == 1.0 else (p_o - p_e) / (1.0 - p_e) if n else 0.0
-
     report = {
         "accuracy": (tp + tn) / total if total else 0.0,
         "precision": p,
         "recall": r,
         "f1": 2 * p * r / (p + r) if p + r else 0.0,
-        "cohens_kappa": kappa,
+        "cohens_kappa": cohens_kappa(human_labels, detector_labels),
     }
     if human_scores is not None and detector_scores is not None:
         report["pearson_r"] = pearson_correlation(human_scores, detector_scores)
     return report
+
+
+# ==================== Confidence Intervals & Significance Tests ====================
+
+
+def wilson_ci(k: int, n: int, alpha: float = 0.05) -> tuple[float, float]:
+    """Wilson score 95% CI for k/n. Wraps statsmodels.proportion_confint."""
+    if n == 0:
+        return (0.0, 0.0)
+    lo, hi = _sm_prop_confint(k, n, alpha=alpha, method="wilson")
+    return (float(lo), float(hi))
+
+
+def paired_diff_ci(b: int, c: int, n: int, alpha: float = 0.05) -> tuple[float, float]:
+    """
+    Wald CI for the paired proportion difference Δ = (b - c) / n.
+
+    b, c are the off-diagonal counts of the 2x2 paired contingency table
+    (Fleiss, Levin & Paik 2003, §13.1):
+
+        Var(Δ) = [(b + c) - (b - c)^2 / n] / n^2
+    """
+    if n == 0:
+        return (0.0, 0.0)
+    z = float(_scipy_norm.ppf(1 - alpha / 2))
+    diff = (b - c) / n
+    var = ((b + c) - (b - c) ** 2 / n) / (n * n)
+    se = math.sqrt(max(0.0, var))
+    return (diff - z * se, diff + z * se)
+
+
+def mcnemar_test(b: int, c: int, exact: bool | None = None) -> dict:
+    """
+    McNemar test for paired binary data. Wraps statsmodels.
+
+    Uses exact binomial when b + c < 25; continuity-corrected chi² otherwise.
+    Returns {chi2, p_value, method, b, c, n_discordant} with plain Python floats.
+    """
+    n_disc = b + c
+    if exact is None:
+        exact = n_disc < 25
+
+    table = [[0, b], [c, 0]]
+    result = _sm_mcnemar(table, exact=exact, correction=not exact)
+
+    chi2 = float(result.statistic) if result.statistic is not None else 0.0
+    p = float(result.pvalue)
+    method = "exact_binomial" if exact else "chi2_cc"
+
+    if exact and n_disc > 0:
+        chi2 = ((b - c) ** 2) / n_disc
+    return {"chi2": chi2, "p_value": p, "method": method,
+            "b": b, "c": c, "n_discordant": n_disc}
+
+
+def bootstrap_kappa_ci(
+    y_true: list[int],
+    y_pred: list[int],
+    n_resamples: int = 2000,
+    alpha: float = 0.05,
+    seed: int = 42,
+) -> tuple[float, float]:
+    """
+    Percentile bootstrap CI for Cohen's kappa via scipy.stats.bootstrap.
+
+    Note: under perfect agreement on a small sample, the percentile bootstrap
+    is degenerate ([1, 1]); this reflects a limitation of the method, not the
+    true precision of kappa at that sample size.
+    """
+    n = len(y_true)
+    if n == 0:
+        return (0.0, 0.0)
+
+    yt = np.asarray(y_true)
+    yp = np.asarray(y_pred)
+
+    if (yt == yp).all():
+        return (1.0, 1.0)
+
+    def _stat(a: np.ndarray, b: np.ndarray) -> float:
+        return cohens_kappa(a.tolist(), b.tolist())
+
+    result = _scipy_bootstrap(
+        (yt, yp),
+        _stat,
+        paired=True,
+        n_resamples=n_resamples,
+        random_state=seed,
+        confidence_level=1 - alpha,
+        method="percentile",
+        vectorized=False,
+    )
+    return (float(result.confidence_interval.low),
+            float(result.confidence_interval.high))
+
+
+def paired_flip_counts(
+    flags_a: dict[str, int],
+    flags_b: dict[str, int],
+) -> tuple[int, int, int, int, list[str]]:
+    """
+    Given two dicts pid → hallucination_flag (0/1), return (a, b, c, d, pids)
+    contingency table over the intersection of pids:
+
+        a = #pids where A=0 and B=0
+        b = #pids where A=0 and B=1   (A→B introduced hallucination)
+        c = #pids where A=1 and B=0   (A→B fixed hallucination)
+        d = #pids where A=1 and B=1
+        pids = sorted list of shared pids actually used
+    """
+    shared = sorted(set(flags_a) & set(flags_b))
+    a = b = c = d = 0
+    for pid in shared:
+        fa, fb = flags_a[pid], flags_b[pid]
+        if fa == 0 and fb == 0:
+            a += 1
+        elif fa == 0 and fb == 1:
+            b += 1
+        elif fa == 1 and fb == 0:
+            c += 1
+        else:
+            d += 1
+    return a, b, c, d, shared

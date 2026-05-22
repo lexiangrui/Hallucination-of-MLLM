@@ -12,7 +12,7 @@ and the four confusion matrix entries (TP/TN/FP/FN).
 \begin{table}[htbp]
   \centering
   \caption{Comprehensive POPE results across three splits.
-    Best values per metric are underlined.}
+    Best values per metric are highlighted in pink.}
   \label{tab:pope_results}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -22,32 +22,32 @@ and the four confusion matrix entries (TP/TN/FP/FN).
       & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B & Qwen3-VL-235B \\
     \midrule
     \multirow{7}{*}{Random}
-      & Accuracy  & 0.9010 & 0.9160 & \underline{0.9260} & 0.9200 \\
-      & Precision & 0.9831 & 0.9814 & 0.9754 & \underline{0.9929} \\
-      & Recall    & 0.8156 & 0.8477 & \underline{0.8737} & 0.8457 \\
-      & F1        & 0.8916 & 0.9097 & \underline{0.9218} & 0.9134 \\
+      & Accuracy  & 0.9010 & 0.9160 & \cellcolor{pink!25}0.9260 & 0.9200 \\
+      & Precision & 0.9831 & 0.9814 & 0.9754 & \cellcolor{pink!25}0.9929 \\
+      & Recall    & 0.8156 & 0.8477 & \cellcolor{pink!25}0.8737 & 0.8457 \\
+      & F1        & 0.8916 & 0.9097 & \cellcolor{pink!25}0.9218 & 0.9134 \\
       & Yes Ratio & 0.414  & 0.431  & 0.447  & 0.425 \\
-      & HR        & 0.70\% & 0.80\% & 1.10\% & \underline{0.30\%} \\
+      & HR        & 0.70\% & 0.80\% & 1.10\% & \cellcolor{pink!25}0.30\% \\
       & TP/TN/FP/FN & 407/494/7/92 & 423/493/8/76
         & 436/490/11/63 & 422/498/3/77 \\
     \midrule
     \multirow{7}{*}{Popular}
-      & Accuracy  & 0.8570 & 0.8620 & 0.8730 & \underline{0.8970} \\
-      & Precision & 0.8836 & 0.8800 & 0.8750 & \underline{0.9459} \\
-      & Recall    & 0.8216 & 0.8377 & \underline{0.8697} & 0.8417 \\
-      & F1        & 0.8515 & 0.8583 & 0.8724 & \underline{0.8908} \\
+      & Accuracy  & 0.8570 & 0.8620 & 0.8730 & \cellcolor{pink!25}0.8970 \\
+      & Precision & 0.8836 & 0.8800 & 0.8750 & \cellcolor{pink!25}0.9459 \\
+      & Recall    & 0.8216 & 0.8377 & \cellcolor{pink!25}0.8697 & 0.8417 \\
+      & F1        & 0.8515 & 0.8583 & 0.8724 & \cellcolor{pink!25}0.8908 \\
       & Yes Ratio & 0.464  & 0.475  & 0.496  & 0.444 \\
-      & HR        & 5.40\% & 5.70\% & 6.20\% & \underline{2.40\%} \\
+      & HR        & 5.40\% & 5.70\% & 6.20\% & \cellcolor{pink!25}2.40\% \\
       & TP/TN/FP/FN & 410/447/54/89 & 418/444/57/81
         & 434/439/62/65 & 420/477/24/79 \\
     \midrule
     \multirow{7}{*}{Adversarial}
-      & Accuracy  & 0.8280 & 0.8730 & 0.8520 & \underline{0.8750} \\
-      & Precision & 0.8385 & 0.8924 & 0.8318 & \underline{0.8979} \\
-      & Recall    & 0.8116 & 0.8477 & \underline{0.8818} & 0.8457 \\
-      & F1        & 0.8248 & 0.8695 & 0.8560 & \underline{0.8710} \\
+      & Accuracy  & 0.8280 & 0.8730 & 0.8520 & \cellcolor{pink!25}0.8750 \\
+      & Precision & 0.8385 & 0.8924 & 0.8318 & \cellcolor{pink!25}0.8979 \\
+      & Recall    & 0.8116 & 0.8477 & \cellcolor{pink!25}0.8818 & 0.8457 \\
+      & F1        & 0.8248 & 0.8695 & 0.8560 & \cellcolor{pink!25}0.8710 \\
       & Yes Ratio & 0.483  & 0.474  & 0.529  & 0.470 \\
-      & HR        & 7.80\% & 5.10\% & 8.90\% & \underline{4.80\%} \\
+      & HR        & 7.80\% & 5.10\% & 8.90\% & \cellcolor{pink!25}4.80\% \\
       & TP/TN/FP/FN & 405/423/78/94 & 423/450/51/76
         & 440/412/89/59 & 422/453/48/77 \\
     \bottomrule
@@ -63,7 +63,7 @@ and the four confusion matrix entries (TP/TN/FP/FN).
   \label{fig:pope_hr_bar}
 \end{figure}
 
-\subsection{Result Analysis}
+\subsection{Analysis}
 
 \subsubsection{Three Splits Probe Three Error Mechanisms}
 \label{sec:pope_difficulty}
@@ -109,7 +109,7 @@ and the model can no longer rely on scene-level associations:
 the visual encoder must resolve fine-grained semantic boundaries.
 Case~1 in \Cref{sec:case1_pope}
 shows that this is the hardest of the three failure modes,
-because the underlying cause---confusion of conceptual hierarchies---is
+because the underlying cause, confusion of conceptual hierarchies, is
 not addressable by scale alone.
 
 In sum,
