@@ -129,10 +129,10 @@ Dataset → Method:
   VQA-RAD   → MLLM Judge
 
 Examples:
-  python main.py --dataset pope --model gpt-5.4 --response-files gpt-5.4:pope=responses/gpt54_pope_random.json
-  python main.py --dataset mathvista --model gpt-5.4 --response-files gpt-5.4:mathvista=responses/gpt54_mathvista.json --workers 4
-  python main.py --dataset vqarad --model gpt-5.4 --response-files gpt-5.4:vqarad=responses/gpt54_vqarad.json --workers 4
-  python main.py --dataset all --response-files gpt-5.4:pope=responses/gpt54_pope_random.json gpt-5.4:mathvista=responses/gpt54_mathvista.json gpt-5.4:vqarad=responses/gpt54_vqarad.json --max-samples 100
+  python main.py --dataset pope --model gpt-5.4-mini --response-files gpt-5.4-mini:pope=responses/gpt-5.4-mini_pope_random.json
+  python main.py --dataset mathvista --model gpt-5.4-mini --response-files gpt-5.4-mini:mathvista=responses/gpt-5.4-mini_mathvista.json --workers 4
+  python main.py --dataset vqarad --model gpt-5.4-mini --response-files gpt-5.4-mini:vqarad=responses/gpt-5.4-mini_vqarad.json --workers 4
+  python main.py --dataset all --response-files gpt-5.4-mini:pope=responses/gpt-5.4-mini_pope_random.json gpt-5.4-mini:mathvista=responses/gpt-5.4-mini_mathvista.json gpt-5.4-mini:vqarad=responses/gpt-5.4-mini_vqarad.json --max-samples 100
         """,
     )
     parser.add_argument("--dataset", default="pope",

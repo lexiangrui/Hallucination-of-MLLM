@@ -113,28 +113,7 @@ def compute_pope_metrics(label_list: list[str], pred_list: list[str]) -> dict:
 
 
 def hallucination_rate(gpt_flags: list[int | None]) -> float:
-    """
-    Hallucination Rate — defined in MMHal-Bench (Sun et al., 2024).
-
-    GPT-4 rates each response on a 0-6 Likert scale. Scores < 3 (i.e.,
-    0/1/2) indicate "with hallucination", scores >= 3 "no hallucination".
-    The rate is the proportion of hallucinated responses.
-
-    This metric appears as "Hallucination Rate" in Table 6 of the paper;
-    the exact thresholding logic (score < 3 = hallucination) is from the
-    official eval script at https://github.com/Shengcao1006/MMHal-Bench.
-
-    Reference:
-        Sun et al., "Aligning Large Multimodal Models with Factually
-        Augmented RLHF," ACL Findings, 2024. arXiv:2309.14525.
-
-    Args:
-        gpt_flags: List where 1 = hallucination, 0 = no hallucination,
-                   None = evaluation error.
-
-    Returns:
-        Float in [0, 1]. Lower is better.
-    """
+    """Proportion of hallucinated responses (score < 3 per MMHal-Bench)."""
     valid = [f for f in gpt_flags if f is not None]
     if not valid:
         return 0.0

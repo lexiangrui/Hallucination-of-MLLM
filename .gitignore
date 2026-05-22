@@ -13,9 +13,10 @@ env/
 data/MathVista/data
 data/POPE/data
 data/vqa-rad/data
-doc/
 
 # Output
+
+Beamer/
 
 # LaTeX
 *.aux

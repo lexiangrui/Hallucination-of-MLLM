@@ -29,15 +29,7 @@ T = TypeVar("T")
 
 
 def hf_image_to_tempfile(image_data, suffix=".jpg") -> str:
-    """
-    Extract image bytes from a Hugging Face Datasets parquet column
-    and write to a persistent temp file. Returns the file path.
-
-    Handles:
-    - dict with 'bytes' key (HF Image feature in parquet)
-    - raw bytes (binary column)
-    - string path (pass-through, already on disk)
-    """
+    """Extract image bytes from HF parquet column to a temp file."""
     if image_data is None:
         return ""
     if isinstance(image_data, dict):
