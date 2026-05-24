@@ -77,6 +77,23 @@ def _load_mathvista_lookup() -> dict[str, dict[str, Any]]:
     return {str(sample["pid"]): sample for sample in load_mathvista()}
 
 
+def _persist_image(image_path: str, pid: str, out_dir: Path) -> str:
+    if not image_path:
+        return ""
+    src = Path(image_path)
+    if not src.exists():
+        return image_path
+
+    image_dir = out_dir / "images"
+    image_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = src.suffix.lower() or ".jpg"
+    dst = image_dir / f"pid_{pid}{suffix}"
+    if not dst.exists():
+        dst.write_bytes(src.read_bytes())
+    return str(dst.resolve())
+
+
 def _parse_result_source(entry: str) -> tuple[str, Path]:
     if "=" not in entry:
         raise ValueError(f"Invalid --result entry {entry!r}; expected model=path.json")
@@ -91,6 +108,7 @@ def _parse_result_source(entry: str) -> tuple[str, Path]:
 def _flatten_records(
     sources: list[tuple[str, Path]],
     response_paths: dict[str, Path],
+    out_dir: Path,
 ) -> list[dict[str, Any]]:
     mathvista_by_pid = _load_mathvista_lookup()
     records = []
@@ -114,12 +132,13 @@ def _flatten_records(
             sample = mathvista_by_pid[pid]
             sample_id = f"{_safe_model_name(model)}__{pid}"
             gpt_has_h = detail.get("has_hallucination")
+            image_path = _persist_image(sample["image"], pid, out_dir)
 
             records.append({
                 "sample_id": sample_id,
                 "model": model,
                 "pid": pid,
-                "image": sample["image"],
+                "image": image_path,
                 "question": sample["question"],
                 "gt_answer": sample["answer"],
                 "model_response": responses[pid],
@@ -243,7 +262,7 @@ def main() -> None:
     )
     out_dir = Path(args.out_dir)
 
-    records = _flatten_records(sources, DEFAULT_RESPONSES)
+    records = _flatten_records(sources, DEFAULT_RESPONSES, out_dir)
     selected = _sample_records(records, per_cell=args.per_cell, seed=args.seed)
 
     samples_path = out_dir / "samples.csv"

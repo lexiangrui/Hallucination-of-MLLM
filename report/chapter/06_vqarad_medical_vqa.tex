@@ -1,4 +1,4 @@
-\section{Extension Experiment: VQA-RAD Medical VQA Hallucination Detection}
+\section{Extension: VQA-RAD Medical VQA}
 \label{sec:vqarad}
 
 Medical visual question answering is a representative application
@@ -58,71 +58,73 @@ and hallucination rates stratified by answer type.
 %  \label{fig:vqarad_pie}
 %\end{figure}
 
-\subsection{Analysis}
+\subsection{Result Analysis}
 
-The VQA-RAD results reveal a performance landscape
-that differs markedly from both MathVista and POPE.
+\subsubsection{Absolute Dominance of Faithfulness Hallucinations}
 
-\textbf{GPT-5.4-mini: strongly bimodal performance.}
-GPT-5.4-mini leads overall
-with the lowest HR (33.26\%) and highest average score (4.52)
-across both closed and open questions.
-Its score distribution, however, is strongly bimodal:
-142 samples receive score 2
-(informative but visually incorrect)
-while 193 receive score 6 (perfect),
-with intermediate scores comparatively rare.
-Rather than being uniformly strong,
-the model alternates between confident-and-correct
-and confident-and-wrong,
-consistent with the conservative response strategy
-observed on POPE.
+The most salient feature of VQA-RAD is that faithfulness hallucinations
+account for more than 96\% of all hallucinations
+across the four models (96.6\%--99.0\%),
+while factuality and logical hallucinations are almost absent.
+This sharply contrasts with MathVista,
+where all three hallucination types are substantially represented.
+In medical VQA, errors almost entirely originate
+from visual misreading rather than knowledge retrieval
+or logical reasoning.
 
-\textbf{Model ranking reversal.}
-Qwen3-VL-235B (HR = 58.31\%), which leads on POPE,
-and Qwen3.5-35B-A3B (HR = 39.25\%), which leads on MathVista,
-both regress in the medical domain.
-Conversely, GPT-5.4-mini,
-which trails on MathVista and ranks among the weaker on POPE,
-performs best here.
-This reversal indicates that medical VQA
-depends on a different axis of capability:
-not general visual perception (probed by POPE)
-nor chart-style reasoning (probed by MathVista),
-but \emph{radiology-specific} visual perception:
-the ability to localize anatomical structures
-and pathological findings on X-ray, CT, and MRI inputs.
-General-purpose MLLMs evidently have uneven coverage
-of radiology imagery in their training data.
+This pattern can be explained through the dual-modality prior analysis
+in \Cref{sec:pope_dual_priors}.
+In the radiology setting,
+the visual encoder faces an image domain
+that is underrepresented in its training distribution:
+general-purpose visual encoders learn primarily
+from natural images such as COCO and ImageNet,
+and lack fine-grained sensitivity
+to anatomical structures and lesions in X-ray, CT, and MRI.
+At the same time,
+the language module has accumulated abundant medical knowledge
+from text pretraining.
+The models can fluently discuss DWI sequences,
+periventricular white matter,
+and the radiologist's-view convention,
+yet they cannot reliably decide
+which half of the brain contains a lesion.
+When the visual signal is intrinsically weak,
+the language prior dominates the output,
+producing responses that are fluent in medical language
+but visually wrong.
 
-\textbf{Faithfulness dominates the error profile.}
-Faithfulness hallucinations account for over 96\% of all hallucinations,
-in contrast with MathVista
-where all three types are well represented.
-Almost all hallucinations stem from visual misreadings
-rather than from logical or factual errors.
-The core challenge of medical VQA
-lies in precise identification
-of anatomical structures and pathological findings:
-whether the aorta is widened on a chest X-ray
-(\Cref{sec:vqarad_case1}),
-or which hemisphere of a brain MRI contains a lesion
-(\Cref{sec:vqarad_case2}).
-When the model misjudges the anatomical content of the image,
-all downstream answers based on the incorrect premise
-are classified as faithfulness hallucinations by the judge.
+\subsubsection{Model Ranking Reversal and Conservative Strategy Transfer}
+
+The model ranking on VQA-RAD barely overlaps
+with the rankings on POPE and MathVista.
+Qwen3-VL-235B, which leads on POPE,
+regresses substantially in the medical domain
+(HR = 58.31\%),
+and Qwen3.5-35B-A3B,
+which leads on MathVista,
+also drops to HR = 39.25\%.
+By contrast,
+GPT-5.4-mini ranks first on VQA-RAD
+with the lowest hallucination rate (33.26\%)
+and highest average score (4.52).
+Consistent with the conservative response tendency observed on POPE,
+GPT-5.4-mini's restrained style on closed-ended screening questions
+unexpectedly becomes an advantage here:
+because it tends to avoid affirmative claims under uncertainty,
+it produces fewer faithfulness hallucinations caused by over-claiming.
 
 \subsection{Failure Case Analysis}
 
-\subsubsection{Case 1: Conservative Refusal Leading to Aortic Aneurysm
-  Missed Diagnosis (Closed Question, ID=0)}
+\subsubsection{Case 1: Conservative Refusal Leading to Missed Diagnosis
+  (Closed Question)}
 \label{sec:vqarad_case1}
 
 \Cref{tab:vqarad_case1_answers} and \Cref{fig:vqarad_case1}
 present this case.
-The question asks whether there is evidence
+The question asks whether the chest X-ray shows evidence
 of an aortic aneurysm,
-with the expected answer being Yes.
+with the expected answer being ``Yes.''
 
 \begin{figure}[htbp]
   \centering
@@ -134,7 +136,7 @@ with the expected answer being Yes.
 \begin{table}[htbp]
   \centering
   \caption{VQA-RAD Case 1: model responses.
-    Expected answer: Yes (aortic aneurysm present).}
+    Expected answer: Yes.}
   \label{tab:vqarad_case1_answers}
   \small
   \begin{tabular}{p{2.8cm}p{8cm}cc}
@@ -149,59 +151,27 @@ with the expected answer being Yes.
   \end{tabular}
 \end{table}
 
-\textbf{Three of four converge on under-claim.}
 Three of the four models (GPT-5.4-mini, Gemini 2.5 Flash, Qwen3-VL-235B)
-return some variant of ``no convincing evidence,''
-even though all three describe the relevant finding (mild aortic
-widening or prominence in the mediastinum) and simply stop short
-of calling it a diagnosis.
-Perception succeeds; inference quietly abstains.
-Only Qwen3.5-35B-A3B converts the same observation
-into the correct positive diagnosis and receives the highest score (6),
-confirming that the radiographic signal
-is in fact recoverable from the image.
+correctly describe abnormal signs such as mild widening
+or prominence of the mediastinal aorta,
+but ultimately refuse to make a positive diagnosis.
+In other words,
+they perceive the abnormality but retreat at the decision stage.
+Qwen3.5-35B-A3B is the only model
+that converts the observation into a positive diagnosis.
+In clinical screening,
+this conservative answer is equivalent to a missed diagnosis:
+a false negative can prevent the patient
+from entering the downstream diagnostic pathway.
 
-\textbf{Conservative strategy generalizes from POPE.}
-On POPE, GPT-5.4-mini shows a conservative response profile
-(\Cref{sec:pope_cross_model_comparison}),
-with the lowest Yes Ratio (0.414 on Random)
-and highest Precision (0.9831 on Random)
-at the cost of recall.
-This profile extends to three of the four models
-in the radiological setting.
-A plausible driver is conservative alignment
-on medically sensitive prompts:
-the rehearsed safe phrasing
-``no clear radiographic evidence; clinical correlation needed''
-is precisely the kind of clinically defensible non-answer
-that medical instruction-tuning data would reinforce.
-Regardless of the exact training cause,
-the empirical effect is a panel-wide under-claim bias
-on closed-ended screening questions.
-
-\textbf{Asymmetric costs in clinical screening.}
-The clinical cost of this profile is sharper than its POPE counterpart.
-Defaulting to No on POPE produces benign omissions
-(\Cref{sec:pope_cross_model_comparison});
-on a radiological screening question,
-the same behavior becomes a missed diagnosis,
-since the false negative blocks the patient
-from entering the downstream diagnostic pathway,
-which is the very purpose of a screening question.
-A conservative response strategy therefore does not transfer
-cleanly between general VQA and clinical screening:
-in the latter setting,
-the under-claim itself becomes the dangerous outcome,
-rather than a safe default.
-
-\subsubsection{Case 2: Medical Knowledge Overriding Visual Evidence
-  (Open Question, ID=102)}
+\subsubsection{Case 2: Fluent Knowledge Overriding Faulty Vision
+  (Open Question)}
 \label{sec:vqarad_case2}
 
 \Cref{tab:vqarad_case2_answers} and \Cref{fig:vqarad_case2}
 present this case.
 The question asks on which side of the brain a lesion is located,
-with the ground-truth answer ``left.''
+with the correct answer being ``left.''
 On the axial MRI shown,
 a clear hyperintense periventricular lesion
 sits on the viewer's right of the image,
@@ -229,91 +199,30 @@ corresponds to the patient's left brain.
     \toprule
     Model & Response summary & Score & Type \\
     \midrule
-    GPT-5.4-mini     & Locates lesion on the viewer's right
-                       (visually correct), but misapplies the convention
-                       $\to$ concludes patient's right                & 2 & faithfulness \\
+    GPT-5.4-mini     & Sees the lesion on the image right,
+                       but reverses the radiological convention
+                       $\to$ concludes right                         & 2 & faithfulness \\
     Gemini 2.5 Flash & Misreads the brain MRI as an abdominal CT;
                        describes gallstones in the gallbladder        & 0 & faithfulness \\
-    Qwen3.5-35B      & Recites convention correctly, but \emph{mislocates}
-                       the hyperintensity on the left of the image
-                       $\to$ concludes patient's right                & 2 & faithfulness \\
-    Qwen3-VL-235B    & Recites convention with extra detail
-                       (DWI, ischemia), but mislocates the lesion
-                       in ``right frontal/parietal'' $\to$ patient's right & 2 & faithfulness \\
+    Qwen3.5-35B      & Recites the convention correctly,
+                       but locates the lesion on the image left
+                       $\to$ concludes right                         & 2 & faithfulness \\
+    Qwen3-VL-235B    & Recites the convention and adds DWI/ischemia details,
+                       but locates the lesion in the right frontal lobe & 2 & faithfulness \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\textbf{All four models fail along three different paths.}
-Gemini misidentifies the modality entirely,
-describing an abdominal CT with gallstones on what is unambiguously
-an axial brain MRI, which represents the score-0 extreme
-of the bimodal distribution in \Cref{sec:vqarad}.
-The other three converge on the same wrong answer (``patient's right'')
-through two opposite error paths.
-GPT-5.4-mini sees the lesion correctly on the viewer's right
-but inverts the radiological convention,
-equating ``right of the image'' with ``patient's right brain''
-despite acknowledging the convention in passing.
+All four models answer incorrectly,
+but through different paths.
+GPT-5.4-mini visually identifies that the lesion is on the right side
+of the image,
+but applies the radiological convention in the wrong direction.
 The two Qwen models do the opposite:
-they recite the convention correctly
-(Qwen3-VL even prefaces its reasoning with
-``the patient's right side appears on the left side of the image'')
-but then mislocate the hyperintensity itself,
-placing it on the image's left (Qwen3.5)
-or directly in the patient's right hemisphere (Qwen3-VL).
-A confident, clinically phrased ``right side''
-thus masks two different underlying defects:
-broken convention application in GPT,
-broken visual localization in the Qwen pair.
-
-\textbf{Linguistic prior overriding visual evidence.}
-The pattern echoes POPE Case~2 (\Cref{sec:case2_pope})
-at a higher level of abstraction.
-In POPE, the co-occurrence prior
-(\emph{outdoor + person + eating $\to$ backpack})
-overrode visual evidence.
-Here, the three non-Gemini models all default
-to the most rehearsed clinical phrasing
-(``the lesion is on the right side of the brain''),
-each via a different local breakdown,
-yet yielding the same fluent, confidently clinical wrong answer.
-Qwen3-VL even posts
-``\textbf{Final Answer: The lesion is on the RIGHT side of the brain}.''
-The mechanism is structurally the same:
-when visual evidence is perceptually demanding,
-a strong language prior prevails.
-The medical domain merely raises the stakes,
-because the prior here is expert phrasing
-that lends the wrong answer surface plausibility.
-
-\subsubsection{Synthesis: Knowledge Without Perception}
-
-Together the two cases delineate the two dominant failure modes
-of general-purpose MLLMs in radiology:
-under-claim in Case~1
-(the panel describes the findings but refuses to convert them into a diagnosis,
-producing a false negative on a screening question)
-and over-claim in Case~2
-(the panel produces the rehearsed clinical phrasing
-even when the visual or convention step is wrong,
-producing a false positive on the wrong hemisphere).
-Both pathways are classified as faithfulness hallucinations by the judge,
-which explains the near-monopoly of that category
-in \Cref{tab:vqarad_results} ($>$96\% across all four models).
-
-Both modes reflect a single deeper gap.
-All four models can write fluently about
-DWI sequences, periventricular white matter,
-and the radiologist's-view convention,
-linguistic content
-that the language backbone has clearly absorbed.
-What they cannot reliably do is decide
-which half of a brain MRI contains a bright lesion,
-a perception task that involves no medical knowledge at all.
-When the visual signal is clear (Case~1),
-conservative alignment suppresses the correct answer;
-when it is weak (Case~2),
-language priors fabricate one in its place.
-Fluent medical knowledge, in short,
-does not entail medical visual competence.
+they accurately recite the radiologist's-view rule,
+but mislocalize the lesion in the image.
+This is a typical case of $P_L$ overriding $P_V$:
+when visual evidence is difficult to interpret,
+fluent clinical terminology fills the gap,
+producing an answer that sounds professional
+but is visually wrong.

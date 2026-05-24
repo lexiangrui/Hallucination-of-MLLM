@@ -147,14 +147,17 @@ is at work in MLLMs as well,
 just along a different axis:
 instead of background patches drowning out foreground patches in a single image,
 the language prior drowns out the image signal across an entire conversation turn.
-A concrete next step would be to construct
-paired illusion and counter-illusion test sets in the style of the probe above,
-and then study whether a similar re-weighting at decoding time,
-which pulls the model's attention back toward the visual tokens
-whenever the language prior and the image content disagree,
+The dual-prior framework of CausalMM (\Cref{sec:pope_dual_priors})
+provides a causal grounding for this conjecture:
+$P_V$ and $P_L$ act through independent confounding pathways,
+and CausalMM showed that targeted intervention on either pathway
+can partially offset the other's confounding effect.
+Following the LAST-ViT approach,
+a decoding-time re-weighting strategy
+that pulls attention back toward visual tokens
+when the two priors conflict
+may improve model performance.
+A concrete next step would be to study
+whether such re-weighting at decoding time
 can reduce this failure mode
-without degrading performance on tasks
-where the language prior is genuinely useful.
-This remains a conjecture for now,
-pending controlled experiments on open-weight MLLMs
-whose attention pattern can be inspected and edited directly.
+without degrading language capability.

@@ -4,38 +4,17 @@
 
 \subsubsection{POPE: Object-Existence Probing}
 
-The detection method for POPE is rule-based matching.
-
-\textbf{Prompt and post-processing.}
-During response generation,
-the model receives a prompt containing only the question
-and an instruction to answer Yes or No,
-ensuring concise and parseable responses
-(the complete prompt template is provided in \Cref{sec:appendix}).
-The answer post-processing algorithm follows
-the official evaluation script of the
-RUCAIBox/POPE repository;\footnote{\url{https://github.com/RUCAIBox/POPE/blob/main/evaluate.py}}
-the pseudocode is given in \Cref{alg:pope_normalize}.
-
-\begin{algorithm}[htbp]
-  \caption{POPE answer normalization}
-  \label{alg:pope_normalize}
-  \begin{algorithmic}[1]
-    \Require{Model response $r$, a free-form text string}
-    \Ensure{Normalized answer $a \in \{\text{``yes''}, \text{``no''}\}$}
-    \State $s \gets$ first sentence of $r$ \hfill \textit{// split by ``.''}
-    \State remove all commas from $s$
-    \State $W \gets$ split $s$ by whitespace into a set of words
-    \If{\text{``No''} $\in W$ \textbf{or} \text{``not''} $\in W$ \textbf{or} \text{``no''} $\in W$}
-      \State \Return \text{``no''}
-    \EndIf
-    \State \Return \text{``yes''}
-  \end{algorithmic}
-\end{algorithm}
-
 \textbf{Object hallucination in POPE.}
-Under this protocol,
-the model commits an object hallucination
+\citet{liEvaluatingObjectHallucination2023} define object hallucination
+as the phenomenon in which a vision-language model
+generates descriptions or answers
+containing objects that are inconsistent with
+or absent from the target image.
+POPE operationalizes this notion as a binary probing task:
+for each image,
+the benchmark issues yes/no questions
+of the form ``Is there an X in the image?'',
+and the model commits an object hallucination
 whenever it answers ``yes''
 while the ground-truth label is ``no.''
 The event is a false positive in the binary-classification view
@@ -64,6 +43,34 @@ The core metrics are summarized in \Cref{tab:pope_metrics}.
     \bottomrule
   \end{tabular}
 \end{table}
+
+\textbf{Prompt and post-processing.}
+The detection method for POPE is rule-based matching.
+During response generation,
+the model receives a prompt containing only the question
+and an instruction to answer Yes or No,
+ensuring concise and parseable responses
+(the complete prompt template is provided in \Cref{sec:appendix}).
+The answer post-processing algorithm follows
+the official evaluation script of the
+RUCAIBox/POPE repository;\footnote{\url{https://github.com/RUCAIBox/POPE/blob/main/evaluate.py}}
+the pseudocode is given in \Cref{alg:pope_normalize}.
+
+\begin{algorithm}[htbp]
+  \caption{POPE answer normalization}
+  \label{alg:pope_normalize}
+  \begin{algorithmic}[1]
+    \Require{Model response $r$, a free-form text string}
+    \Ensure{Normalized answer $a \in \{\text{``yes''}, \text{``no''}\}$}
+    \State $s \gets$ first sentence of $r$ \hfill \textit{// split by ``.''}
+    \State remove all commas from $s$
+    \State $W \gets$ split $s$ by whitespace into a set of words
+    \If{\text{``No''} $\in W$ \textbf{or} \text{``not''} $\in W$ \textbf{or} \text{``no''} $\in W$}
+      \State \Return \text{``no''}
+    \EndIf
+    \State \Return \text{``yes''}
+  \end{algorithmic}
+\end{algorithm}
 
 \subsubsection{MathVista: Mathematical Visual Reasoning}
 
@@ -134,7 +141,7 @@ The evaluation metrics are shown in \Cref{tab:mathvista_metrics}.
 \textbf{Medical adaptation.}
 The detection method for VQA-RAD reuses the MLLM Judge protocol
 (0--6 Likert scale, threshold 3)
-with domain-specific prompt adaptations for the medical setting
+with adaptations for the medical setting
 (see \Cref{sec:appendix}).
 The judge's task description is replaced
 with a radiology-specific scenario description,
@@ -165,17 +172,15 @@ and the maximum token length is uncapped.
 POPE samples 1{,}000 items per split,
 MathVista uses the full testmini set (1{,}000 items),
 and VQA-RAD uses the test split (451 items).
-GPT-5.5 serves as the MLLM Judge throughout.
+GPT-5.5 serves as the MLLM Judge throughout,
+and a human alignment study is conducted as part of the error analysis.
 
 \Cref{tab:method_dataset_overview} summarizes
 the correspondence among detection methods, datasets, and metrics.
 
 \begin{table}[htbp]
   \centering
-  \caption{Overview of method--dataset--metric correspondence.
-    The shaded bottom row reports the human alignment study
-    conducted on a 40-sample MathVista CoT subset
-    (\Cref{sec:appendix}).}
+  \caption{Overview of method--dataset--metric correspondence.}
   \label{tab:method_dataset_overview}
   \small
   \begin{tabularx}{\textwidth}{@{}lllX@{}}

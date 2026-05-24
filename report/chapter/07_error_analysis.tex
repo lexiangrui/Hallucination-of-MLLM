@@ -46,108 +46,153 @@ is used to avoid annotation bias.
 
 \subsubsection{Overall Results}
 
-\Cref{tab:human_overall} reports the overall alignment metrics
-together with the underlying confusion matrix.
+\textbf{Substantial agreement between automatic Judge and human annotator.}
+On the 40 valid human-annotated samples,
+the GPT-5.5 Judge reaches 85.0\% accuracy
+(95\% CI: [0.709, 0.929]),
+F1 = 0.824,
+and Cohen's $\kappa = 0.700$
+(95\% CI: [0.481, 0.898]).
+Under the conventional interpretation,
+$\kappa = 0.700$ falls into the substantial-agreement range,
+indicating that the automatic Judge tracks
+human judgments closely.
+\Cref{tab:human_alignment_results} reports
+the overall and per-model breakdowns.
 
 \begin{table}[htbp]
   \centering
-  \caption{Human alignment: aggregate metrics with 95\% CIs (left)
-    and the underlying $2\times 2$ confusion matrix (right).
-    Wilson 95\% CIs for proportions;
-    percentile bootstrap CI ($B=2000$) for $\kappa$.}
-  \label{tab:human_overall}
-  \small
-  \begin{minipage}[t]{0.48\textwidth}
-    \centering
-    \begin{tabular}{lc}
-      \toprule
-      Metric & Value [95\% CI] \\
-      \midrule
-      Accuracy        & 85.0\% [70.9, 92.9] \\
-      Precision       & 70.0\% [48.1, 85.5] \\
-      Recall          & 100.0\% [78.5, 100.0] \\
-      F1              & 0.824 \\
-      Cohen's $\kappa$ & 0.700 [0.481, 0.898] \\
-      \bottomrule
-    \end{tabular}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}[t]{0.48\textwidth}
-    \centering
-    \begin{tabular}{l cc}
-      \toprule
-       & Judge: Hall. & Judge: Not \\
-      \midrule
-      Human: Hall. & TP = 14 & FN = 0 \\
-      Human: Not   & FP = 6  & TN = 20 \\
-      \bottomrule
-    \end{tabular}
-  \end{minipage}
+  \caption{Human alignment results.
+    Per-model intervals are wide because each model
+    is evaluated on only 10 samples.}
+  \label{tab:human_alignment_results}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{l c c c c c c}
+    \toprule
+    Subset & $N$ & Accuracy [95\% CI] & Precision [95\% CI]
+      & Recall [95\% CI] & F1 & Cohen's $\kappa$ [95\% CI] \\
+    \midrule
+    Overall          & 40 & 0.850 [0.709, 0.929] & 0.700 [0.481, 0.855]
+      & 1.000 [0.785, 1.000] & 0.824 & 0.700 [0.481, 0.898] \\
+    Qwen3-VL-235B    & 10 & 0.800 [0.490, 0.943] & 0.600 [0.231, 0.882]
+      & 1.000 [0.439, 1.000] & 0.750 & 0.600 [0.000, 1.000] \\
+    Qwen3.5-35B      & 10 & 1.000 [0.722, 1.000] & 1.000 [0.566, 1.000]
+      & 1.000 [0.566, 1.000] & 1.000 & 1.000 [1.000, 1.000] \\
+    Gemini 2.5 Flash & 10 & 0.600 [0.313, 0.832] & 0.200 [0.036, 0.624]
+      & 1.000 [0.207, 1.000] & 0.333 & 0.200 [0.000, 0.737] \\
+    GPT-5.4-mini     & 10 & 1.000 [0.722, 1.000] & 1.000 [0.566, 1.000]
+      & 1.000 [0.566, 1.000] & 1.000 & 1.000 [1.000, 1.000] \\
+    \bottomrule
+  \end{tabular}}
 \end{table}
 
-Among the 14 samples where both human and judge agree
-on the presence of hallucination,
-Type Agreement reaches 92.9\% (13/14).
-\Cref{tab:human_type_matrix} shows
-the hallucination type confusion matrix.
+\textbf{Errors concentrate on over-judgment, not missed detection.}
+The confusion matrix (\Cref{tab:confusion_matrix})
+contains 20 true negatives, 14 true positives,
+6 false positives, and 0 false negatives.
+The Judge therefore achieves
+a perfect recall of 1.000 (95\% CI: [0.785, 1.000]):
+every response that the human annotator labels as hallucinated
+is also flagged by the Judge.
+The dominant error mode is over-judgment
+rather than missed detection.
 
 \begin{table}[htbp]
   \centering
-  \caption{Hallucination type agreement matrix
-    (14 concordant hallucinated samples).}
-  \label{tab:human_type_matrix}
-  \begin{tabular}{l ccc}
+  \caption{Confusion matrix: human annotation (rows)
+    vs.\ GPT-5.5 Judge verdict (columns).}
+  \label{tab:confusion_matrix}
+  \begin{tabular}{l rrr}
     \toprule
-    Human $\backslash$ Judge & faithfulness & factuality & logical \\
+    Human \textbackslash{} Judge & No halluc.\ & Halluc.\ & Total \\
     \midrule
-    faithfulness & 7 & 0 & 0 \\
-    factuality   & 0 & 4 & 0 \\
-    logical      & 1 & 0 & 2 \\
+    No halluc.\   & 20 & 6  & 26 \\
+    Halluc.\      &  0 & 14 & 14 \\
+    \midrule
+    Total         & 20 & 20 & 40 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\textbf{Strong overall alignment with no missed hallucinations.}
-Overall alignment is substantial
-($\kappa = 0.70$, 95\% CI $[0.48, 0.90]$).
-Critically for the validity of the automated pipeline,
-the MLLM Judge does not miss any human-identified hallucination
-(Recall = 100\%, 95\% CI $[78.5, 100.0]$).
-The error profile is asymmetric:
-Precision = 70\% (95\% CI $[48.1, 85.5]$) indicates 6 over-judgments
-(human says non-hallucinated, judge says hallucinated)
-but zero under-judgments.
-For an automated hallucination detector
-this is the preferable failure mode,
-since downstream uses can re-examine flagged cases
-but cannot recover from silently missed ones.
+All six disagreements fall into the
+``human-no, Judge-yes'' quadrant.
+They concentrate on items
+that ask the model to infer information
+not directly visible in the image,
+such as exact age differences or birth decades.
+In these samples the model typically declines
+to estimate from appearance alone
+and outputs a conservative answer of 0
+or ``cannot determine''.
+The human annotator treats such a refusal
+as no additional hallucination,
+because the model explicitly avoids fabricating
+unobservable content,
+whereas the Judge tends to mark it
+as a logical or faithfulness hallucination
+solely on the basis of the numerical mismatch
+with the reference answer.
+\Cref{fig:overjudgment_cases} shows
+three representative cases.
 
-\textbf{Root cause: rubric coupling.}
-All six over-judgments share a single error pattern:
-age-estimation questions
-where the model produces a reasonable refusal
-(e.g., ``cannot determine age from appearance'')
-that the MLLM Judge misclassifies as logical hallucination.
-The root cause lies in the coupling
-of the ``informativeness'' and ``hallucination'' dimensions
-in the MMHal-Bench scoring rubric:
-score 3 is the only slot matching
-``low information + no hallucination,''
-but because the model's refusal contains some information
-(explaining the reason for refusal),
-the judge tends to assign scores of 1--2,
-pushing the sample into the ``hallucinated'' category.
-The scoring rubric therefore lacks
-an intermediate slot for ``moderately informative and hallucination-free''
-responses,
-which points to a concrete refinement target
-(an extra moderate-information no-hallucination bin)
-should the MMHal-Bench rubric be revised for future use.
-One caveat: because the 40-sample stratified pool
-favors hallucinated cases over benign refusals,
-the prevalence of this single pattern
-should be re-examined on a larger and less stratified sample
-before generalizing.
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{annotate_case1.png}
+    \caption{Age gap between the leftmost
+      and rightmost persons (reference 5).
+      The model refuses to infer ages from appearance
+      and answers 0.}
+    \label{fig:overjudge_case1}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{annotate_case2.png}
+    \caption{Age gap between the two depicted persons
+      (reference 27).
+      The model explicitly invokes the
+      ``visible-information-only'' rule and answers 0.}
+    \label{fig:overjudge_case2}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{annotate_case3.png}
+    \caption{Number of people born after the end of WWII
+      (reference 2).
+      The model cannot determine birth years from the image
+      and answers 0.}
+    \label{fig:overjudge_case3}
+  \end{subfigure}
+  \caption{Three representative over-judgment cases
+    in the human alignment study
+    (annotation interface screenshots).
+    In every case the model declines to infer
+    unobservable information and outputs a conservative 0;
+    the human annotator labels them as no hallucination,
+    while the Judge flags them based on the numerical mismatch
+    with the reference answer.}
+  \label{fig:overjudgment_cases}
+\end{figure}
+
+\textbf{Hallucination type labels also align well.}
+Type agreement reaches 0.9286:
+among the 14 samples
+that both human and Judge classify as hallucinated,
+13 receive identical type labels,
+with only one logical-vs-faithfulness mismatch.
+This confirms that the three-category taxonomy
+proposed in this report is operationally well-defined:
+the Judge not only achieves high recall
+in detecting hallucination
+but also assigns type labels that are consistent
+with the human annotation in most cases.
+Per-model confidence intervals nonetheless remain wide,
+because this study relies on a single annotator
+and only 40 samples (10 per evaluated model);
+larger annotation sets and multiple annotators
+would be needed for finer-grained per-model
+reliability claims.
 
 \subsection{Judge Model Consistency Check}
 

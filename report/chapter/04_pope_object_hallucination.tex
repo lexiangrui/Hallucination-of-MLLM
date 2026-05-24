@@ -1,4 +1,4 @@
-\section{Experiment 1: POPE Object Hallucination Detection}
+\section{Experiment 1: POPE Object Probing}
 
 \subsection{Results}
 
@@ -54,6 +54,19 @@ and the four confusion matrix entries (TP/TN/FP/FN).
   \end{tabular}
 \end{table}
 
+\subsection{Analysis}
+
+\subsubsection{Cross-Model Comparison}
+\label{sec:pope_cross_model_comparison}
+
+
+
+The four models exhibit distinct decision styles
+that can be characterized along two dimensions:
+hallucination control (HR) and response bias (Yes Ratio).
+\Cref{fig:pope_hr_bar} visualizes the HR of all four models
+across the three splits.
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.75\textwidth]{fig1_pope_hr_bar.pdf}
@@ -63,9 +76,34 @@ and the four confusion matrix entries (TP/TN/FP/FN).
   \label{fig:pope_hr_bar}
 \end{figure}
 
-\subsection{Analysis}
+\textbf{Qwen3-VL-235B} achieves the lowest HR on every split
+(0.30\%, 2.40\%, 4.80\%)
+with a stable Yes Ratio ($\leq$0.47),
+reflecting a strong visual encoder
+combined with a balanced decision style.
 
-\subsubsection{Three Splits Probe Three Error Mechanisms}
+\textbf{Gemini 2.5 Flash} shows balanced Precision--Recall
+and is the only model whose HR \emph{decreases}
+from Popular (5.70\%) to Adversarial (5.10\%),
+indicating greater robustness
+to near-synonym distractors than to co-occurrence distractors.
+
+\textbf{Qwen3.5-35B-A3B} attains the highest Recall on every split
+($\geq$0.87)
+but at the cost of the panel's highest Yes Ratio
+(peaking at 0.529 on Adversarial)
+and worst Adversarial HR (8.90\%),
+exemplifying a permissive decision style.
+
+\textbf{GPT-5.4-mini} adopts the opposite, conservative strategy:
+the lowest Yes Ratio (0.414 on Random)
+suppresses HR on easier splits
+but produces the steepest cross-split degradation
+(Adversarial HR = 7.80\%, F1 = 0.8248, both panel-worst),
+as the ``default to No'' shortcut fails
+under adversarial pressure.
+
+\subsubsection{Three Splits Detect Three Error Mechanisms}
 \label{sec:pope_difficulty}
 
 \textbf{Monotonic difficulty gradient.}
@@ -101,7 +139,7 @@ models fall back on the statistical co-occurrence patterns
 learned during pretraining.
 Case~2 in \Cref{sec:case2_pope} provides a direct instance of this mechanism.
 
-\textbf{Adversarial split: fine-grained semantic discrimination.}
+\textbf{Adversarial split: near-synonym semantic discrimination.}
 Negative objects are semantically similar to objects that do appear in the image
 (e.g., asking about a bear when only a teddy bear is present).
 HR rises further to 4.80\%--8.90\%
@@ -112,108 +150,104 @@ shows that this is the hardest of the three failure modes,
 because the underlying cause, confusion of conceptual hierarchies, is
 not addressable by scale alone.
 
-In sum,
-the three splits jointly diagnose
-where in the perception--prior pipeline
-an object-level faithfulness hallucination originates,
-rather than merely how often it occurs.
+\subsubsection{Root Cause: The Confounding Effects of Dual Modality Priors}
+\label{sec:pope_dual_priors}
 
-\subsubsection{Cross-Model Comparison}
-\label{sec:pope_cross_model_comparison}
+\textbf{The architectural asymmetry of MLLMs.}
+Current mainstream MLLMs all adopt the modular architecture of
+``vision encoder + projector + LLM backbone'':
+the vision encoder (typically a CLIP or SigLIP ViT)
+converts an image into feature vectors,
+which an MLP projector then maps
+into the LLM's word embedding space;
+the resulting visual tokens are concatenated with text tokens
+and fed into the LLM for autoregressive generation.
+This architecture harbors a fundamental asymmetry:
+the parameter count and pretraining data scale of the LLM backbone
+far exceed those of the visual pathway.
+Taking Qwen3-VL-235B-A22B as an example,
+its vision encoder is SigLIP2-SO-400M (400M parameters)
+while the language backbone contains 235B total parameters (22B active)---%
+a difference of roughly two orders of magnitude
+(588$\times$ in total parameters) \citep{baiQwen3VLTechnical2025}.
+In the shared self-attention computation
+where visual and text tokens interact,
+this scale disparity grants the language modality
+a structural advantage at the parameter level.
 
-\textbf{Within the Qwen family, visual-encoder capacity dominates.}
-Qwen3-VL-235B achieves the lowest HR
-on every split (0.30\%, 2.40\%, 4.80\%)
-and the highest F1 on Popular and Adversarial.
-Compared with Qwen3.5-35B-A3B,
-which shares the same training family
-but uses a smaller activated visual encoder
-(3\,B vs.\ 22\,B activated parameters),
-HR is consistently 50--75\% lower
-despite identical instruction-tuning regimes.
-Holding the language backbone family fixed,
-visual-encoder scale is therefore the dominant factor
-within this family;
-whether the same holds across families cannot be established here,
-because the closed-source dense models
-do not disclose visual-encoder parameters.
+\textbf{Two independent confounding factors.}
+\citet{zhouMitigatingModalityPrior2025}
+demonstrated through a structural causal model in CausalMM (ICLR~2025)
+that this architectural asymmetry introduces
+two independent confounding factors
+(\Cref{fig:causalmm_scm}):
+(1)~the \textbf{visual modality prior $P_V$},
+originating from the parametric bias of the vision encoder---%
+the training distribution of CLIP/SigLIP
+determines the encoder's sensitivity or blindness
+to specific visual patterns;
+and (2)~the \textbf{linguistic modality prior $P_L$},
+originating from the statistical co-occurrence regularities
+that the LLM has acquired
+from billions of tokens of text-only pretraining.
+These two priors influence the final output
+through distinct attention pathways:
+$P_V$ distorts the attention distribution within the vision encoder,
+thereby contaminating the visual embeddings passed to the LLM;
+$P_L$ activates pathways in the LLM's multi-head self-attention
+that are consistent with linguistic statistics,
+and its effect is most pronounced at the shallow-to-middle layers
+where visual tokens first interact with text tokens.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{causalmm_scm.png}
+  \caption{Structural Causal Model (SCM) of MLLM inference proposed by CausalMM.
+    Blue nodes ($V$, $L$) represent attention mechanisms;
+    red nodes ($P_V$, $P_L$) are modality priors acting as confounders;
+    gray nodes are image ($I$), visual embeddings ($T_V$),
+    text embeddings ($T_L$), and output ($O$).
+    Red paths indicate the confounding effects of $P_V$ and $P_L$
+    on attention and output.
+    Source: \citet{zhouMitigatingModalityPrior2025}, ICLR~2025.}
+  \label{fig:causalmm_scm}
+\end{figure}
 
-\textbf{GPT-5.4-mini: conservative strategy with asymmetric costs.}
-GPT-5.4-mini has the lowest Yes Ratio of all models (0.414 on Random)
-and the highest Precision (0.9831 on Random).
-This conservative profile yields a low FP count
-but the highest FN count (92 on Random),
-so its hallucinations manifest predominantly
-as omissions rather than fabrications.
-In safety-sensitive applications
-this asymmetric cost may be desirable
-(it is generally preferable not to invent objects),
-but it caps the achievable F1:
-HR on Adversarial rises more than tenfold relative to Random
-(0.70\% $\to$ 7.80\%)
-once the Yes/No decision can no longer be safely defaulted to ``No.''
-
-\textbf{Gemini 2.5 Flash: atypical Popular--Adversarial inversion.}
-Gemini is the only model whose HR \emph{decreases}
-from Popular (5.70\%) to Adversarial (5.10\%),
-though the gap is small (0.6\,pp).
-Since the standard interpretation
-(Adversarial is harder than Popular)
-holds for the other three models,
-this inversion suggests
-that Gemini's visual perception is comparatively robust
-to fine-grained semantic distractors
-but relatively sensitive to scene-level
-co-occurrence priors.
-A plausible mechanism
-is a perception pipeline
-that grounds responses more tightly in visible features
-than in scene context,
-which would also be consistent with
-its moderate but stable Popular performance.
-
-\textbf{Qwen3.5-35B: largest split-difficulty slope.}
-Qwen3.5-35B-A3B exhibits the steepest HR increase
-across splits (1.10\% $\to$ 6.20\% $\to$ 8.90\%, a 7.8\,pp rise),
-the largest in the panel.
-With only 3\,B activated visual parameters,
-the visual encoder is insufficient
-to support fine-grained discrimination
-once the negative samples become semantically adjacent.
-The high Recall (highest in three of three splits)
-reflects an opposite pressure
-toward answering ``Yes,''
-which is also visible in the panel's highest Yes Ratio (0.529 on Adversarial).
-
-\textbf{Synthesis.}
-Whereas the previous subsection diagnosed
-where in the perception--prior pipeline an error originates,
-the cross-model view identifies
-who is vulnerable to each mechanism.
-The comparison highlights two axes:
-visual-encoder capacity,
-which explains the gap between the two Qwen models
-and the rough position of Gemini;
-and response-bias calibration,
-which separates the conservative profile of GPT-5.4-mini
-from the more permissive profiles of the Qwen models.
-Models near the corner of high capacity and balanced calibration
-(Qwen3-VL) dominate the leaderboard;
-modest capacity with permissive calibration
-(Qwen3.5) sacrifices precision under adversarial pressure;
-and modest capacity with conservative calibration
-(GPT-5.4-mini) sacrifices recall.
-This two-axis view will recur in
-\Cref{sec:mathvista,sec:vqarad}
-under different task pressures.
-
+\textbf{A unified causal account of the three POPE error mechanisms.}
+Returning to the experimental results (\Cref{sec:pope_difficulty}),
+the three error patterns correspond precisely
+to how these two priors interact under different conditions.
+In the Random split,
+negative objects are unrelated to the scene
+and $P_L$ is barely engaged;
+the residual hallucination rate of 0.30\%--1.10\%
+stems from the baseline bias of $P_V$ alone,
+reflecting the upper bound of the vision encoder's perceptual capacity.
+The Popular split represents the $P_L$ effect in its purest form---%
+when visual evidence is ambiguous,
+the linguistic co-occurrence prior
+(``outdoor + eating $\to$ backpack'')
+suppresses weak visual signals
+through the LLM's shallow-to-middle layer self-attention,
+causing the hallucination rate to surge to 2.40\%--6.20\%.
+The Adversarial split exhibits a joint failure of $P_V$ and $P_L$:
+the vision encoder ($P_V$ bias)
+cannot reliably separate ``teddy bear'' and ``bear''
+at the fine-grained semantic boundary in feature space,
+and the LLM ($P_L$) subsequently merges the two at the semantic level,
+triggering a false positive.
+This also explains why increasing model scale
+cannot resolve Adversarial hallucinations
+(Qwen3-VL-235B still exhibits 4.80\%)---%
+scaling primarily strengthens $P_L$'s statistical precision,
+without altering the intrinsic fuzziness of conceptual boundaries
+within $P_V$'s feature space.
 \subsection{Failure Case Analysis}
 
-\subsubsection{Case 1: Semantic Granularity Confusion (Adversarial)}
+\subsubsection{Case 1: Near-synonym Semantic Confusion (Adversarial)}
 \label{sec:case1_pope}
 
 This case instantiates
-the fine-grained semantic discrimination mechanism
+the near-synonym semantic confusion mechanism
 identified in \Cref{sec:pope_difficulty}.
 \Cref{tab:pope_case1,fig:pope_case1} present a sample from the Adversarial split.
 The image contains
@@ -258,7 +292,7 @@ indicating a systematic error rather than an individual model deficiency.
   \end{minipage}
 \end{table}
 
-The root cause is semantic granularity confusion.
+The root cause is near-synonym semantic confusion.
 The image contains a teddy bear,
 an independent category in the COCO label set
 \citep{linMicrosoftCOCOCommon2015},
