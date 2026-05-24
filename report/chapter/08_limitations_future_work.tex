@@ -50,27 +50,6 @@ would be required to make such quantitative cross-model claims.
 
 \subsection{Future Work}
 
-\textbf{Language-prior override of visual content.}
-Recently, in a casual conversation with GPT-5.5,
-I noticed an interesting phenomenon:
-when I asked ``Which orange ball is bigger?''
-on the pair of Ebbinghaus-style images
-shown in \Cref{fig:ebbinghaus_probe},
-the model gave the same answer on both inputs,
-even though the second image is not a real illusion at all.
-What I find striking is that this is essentially the same mechanism
-identified in the POPE Popular split (\Cref{sec:case2_pope}),
-where models fall back on co-occurrence statistics
-once a familiar context cue is present;
-the Ebbinghaus probe just pushes it to an extreme,
-in which the memorized association
-``Ebbinghaus image $\Rightarrow$ equal sizes''
-appears to override the image signal entirely.
-This is consistent with the reasoning-time visual disengagement
-reported by \citet{liuMoreThinkingLess2025}
-and the broader language-prior failure modes
-surveyed by \citet{baiHallucinationMultimodalLarge2025}.
-
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
@@ -99,6 +78,28 @@ surveyed by \citet{baiHallucinationMultimodalLarge2025}.
     despite the obvious size difference in the right image.}
   \label{fig:ebbinghaus_probe}
 \end{figure}
+
+\textbf{Language-prior override of visual content.}
+Recently, in a casual conversation with GPT-5.5,
+I noticed an interesting phenomenon:
+when I asked ``Which orange ball is bigger?''
+on the pair of Ebbinghaus-style images
+shown in \Cref{fig:ebbinghaus_probe},
+the model gave the same answer on both inputs,
+even though the second image is not a real illusion at all.
+What I find striking is that this is essentially the same mechanism
+identified in the POPE Popular split (\Cref{sec:case2_pope}),
+where models fall back on co-occurrence statistics
+once a familiar context cue is present;
+the Ebbinghaus probe just pushes it to an extreme,
+in which the memorized association
+``Ebbinghaus image $\Rightarrow$ equal sizes''
+appears to override the image signal entirely.
+This is consistent with the reasoning-time visual disengagement
+reported by \citet{liuMoreThinkingLess2025}
+and the broader language-prior failure modes
+surveyed by \citet{baiHallucinationMultimodalLarge2025}.
+
 
 \textbf{A LAST-ViT-inspired remediation.}
 I happened to have read a recent paper

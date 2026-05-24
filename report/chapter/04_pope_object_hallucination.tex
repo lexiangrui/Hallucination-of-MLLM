@@ -28,8 +28,6 @@ and the four confusion matrix entries (TP/TN/FP/FN).
       & F1        & 0.8916 & 0.9097 & \cellcolor{pink!25}0.9218 & 0.9134 \\
       & Yes Ratio & 0.414  & 0.431  & 0.447  & 0.425 \\
       & HR        & 0.70\% & 0.80\% & 1.10\% & \cellcolor{pink!25}0.30\% \\
-      & TP/TN/FP/FN & 407/494/7/92 & 423/493/8/76
-        & 436/490/11/63 & 422/498/3/77 \\
     \midrule
     \multirow{7}{*}{Popular}
       & Accuracy  & 0.8570 & 0.8620 & 0.8730 & \cellcolor{pink!25}0.8970 \\
@@ -38,8 +36,6 @@ and the four confusion matrix entries (TP/TN/FP/FN).
       & F1        & 0.8515 & 0.8583 & 0.8724 & \cellcolor{pink!25}0.8908 \\
       & Yes Ratio & 0.464  & 0.475  & 0.496  & 0.444 \\
       & HR        & 5.40\% & 5.70\% & 6.20\% & \cellcolor{pink!25}2.40\% \\
-      & TP/TN/FP/FN & 410/447/54/89 & 418/444/57/81
-        & 434/439/62/65 & 420/477/24/79 \\
     \midrule
     \multirow{7}{*}{Adversarial}
       & Accuracy  & 0.8280 & 0.8730 & 0.8520 & \cellcolor{pink!25}0.8750 \\
@@ -48,8 +44,6 @@ and the four confusion matrix entries (TP/TN/FP/FN).
       & F1        & 0.8248 & 0.8695 & 0.8560 & \cellcolor{pink!25}0.8710 \\
       & Yes Ratio & 0.483  & 0.474  & 0.529  & 0.470 \\
       & HR        & 7.80\% & 5.10\% & 8.90\% & \cellcolor{pink!25}4.80\% \\
-      & TP/TN/FP/FN & 405/423/78/94 & 423/450/51/76
-        & 440/412/89/59 & 422/453/48/77 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -61,9 +55,8 @@ and the four confusion matrix entries (TP/TN/FP/FN).
 
 
 
-The four models exhibit distinct decision styles
-that can be characterized along two dimensions:
-hallucination control (HR) and response bias (Yes Ratio).
+The four models exhibit distinct decision styles,
+characterized by hallucination control (HR) and response bias (Yes Ratio).
 \Cref{fig:pope_hr_bar} visualizes the HR of all four models
 across the three splits.
 
@@ -79,8 +72,8 @@ across the three splits.
 \textbf{Qwen3-VL-235B} achieves the lowest HR on every split
 (0.30\%, 2.40\%, 4.80\%)
 with a stable Yes Ratio ($\leq$0.47),
-reflecting a strong visual encoder
-combined with a balanced decision style.
+suggesting a strong visual encoder
+paired with a balanced decision style.
 
 \textbf{Gemini 2.5 Flash} shows balanced Precision--Recall
 and is the only model whose HR \emph{decreases}
@@ -93,7 +86,7 @@ to near-synonym distractors than to co-occurrence distractors.
 but at the cost of the panel's highest Yes Ratio
 (peaking at 0.529 on Adversarial)
 and worst Adversarial HR (8.90\%),
-exemplifying a permissive decision style.
+a pattern consistent with a permissive decision style.
 
 \textbf{GPT-5.4-mini} adopts the opposite, conservative strategy:
 the lowest Yes Ratio (0.414 on Random)
@@ -110,11 +103,11 @@ under adversarial pressure.
 From Random to Popular to Adversarial,
 the Hallucination Rate of all four models increases monotonically
 (\Cref{tab:pope_results,fig:pope_hr_bar}),
-confirming the validity of POPE's three-tier negative-sampling design.
+consistent with POPE's three-tier negative-sampling design.
 Beyond a difficulty ranking,
-however, the three splits also expose
+however, the three splits isolate
 three qualitatively distinct error mechanisms
-that map cleanly onto the faithfulness taxonomy.
+that map onto the faithfulness taxonomy.
 
 \textbf{Random split: object-level perception.}
 Negative objects are sampled uniformly,
@@ -175,6 +168,20 @@ where visual and text tokens interact,
 this scale disparity grants the language modality
 a structural advantage at the parameter level.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{causalmm_scm.png}
+  \caption{Structural Causal Model (SCM) of MLLM inference proposed by CausalMM.
+    Blue nodes ($V$, $L$) represent attention mechanisms;
+    red nodes ($P_V$, $P_L$) are modality priors acting as confounders;
+    gray nodes are image ($I$), visual embeddings ($T_V$),
+    text embeddings ($T_L$), and output ($O$).
+    Red paths indicate the confounding effects of $P_V$ and $P_L$
+    on attention and output.
+    Source: \citet{zhouMitigatingModalityPrior2025}, ICLR~2025.}
+  \label{fig:causalmm_scm}
+\end{figure}
+
 \textbf{Two independent confounding factors.}
 \citet{zhouMitigatingModalityPrior2025}
 demonstrated through a structural causal model in CausalMM (ICLR~2025)
@@ -198,19 +205,7 @@ $P_L$ activates pathways in the LLM's multi-head self-attention
 that are consistent with linguistic statistics,
 and its effect is most pronounced at the shallow-to-middle layers
 where visual tokens first interact with text tokens.
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.85\textwidth]{causalmm_scm.png}
-  \caption{Structural Causal Model (SCM) of MLLM inference proposed by CausalMM.
-    Blue nodes ($V$, $L$) represent attention mechanisms;
-    red nodes ($P_V$, $P_L$) are modality priors acting as confounders;
-    gray nodes are image ($I$), visual embeddings ($T_V$),
-    text embeddings ($T_L$), and output ($O$).
-    Red paths indicate the confounding effects of $P_V$ and $P_L$
-    on attention and output.
-    Source: \citet{zhouMitigatingModalityPrior2025}, ICLR~2025.}
-  \label{fig:causalmm_scm}
-\end{figure}
+
 
 \textbf{A unified causal account of the three POPE error mechanisms.}
 Returning to the experimental results (\Cref{sec:pope_difficulty}),
@@ -246,7 +241,7 @@ within $P_V$'s feature space.
 \subsubsection{Case 1: Near-synonym Semantic Confusion (Adversarial)}
 \label{sec:case1_pope}
 
-This case instantiates
+This case illustrates
 the near-synonym semantic confusion mechanism
 identified in \Cref{sec:pope_difficulty}.
 \Cref{tab:pope_case1,fig:pope_case1} present a sample from the Adversarial split.
@@ -279,7 +274,7 @@ indicating a systematic error rather than an individual model deficiency.
       GPT-5.4-mini & Yes \\
       Gemini 2.5 Flash & Yes \\
       Qwen3.5-35B-A3B & Yes \\
-      Qwen3-VL-235B & Yes \\
+      Qwen3-VL-235B-A22B & Yes \\
       \bottomrule
     \end{tabular}
   \end{minipage}%
@@ -311,7 +306,7 @@ rather than the discriminability of low-level visual features.
 \subsubsection{Case 2: Linguistic Prior Bias (Popular)}
 \label{sec:case2_pope}
 
-This case exemplifies
+This case illustrates
 the linguistic-prior bias mechanism
 isolated by the Popular split (\Cref{sec:pope_difficulty}).
 \Cref{tab:pope_case2,fig:pope_case2} present a sample from the Popular split.
@@ -343,7 +338,7 @@ Again, all four models answer Yes.
       GPT-5.4-mini & Yes \\
       Gemini 2.5 Flash & Yes \\
       Qwen3.5-35B-A3B & Yes \\
-      Qwen3-VL-235B & Yes \\
+      Qwen3-VL-235B-A22B & Yes \\
       \bottomrule
     \end{tabular}
   \end{minipage}%

@@ -1,9 +1,9 @@
 \section{Hallucination Definition and Taxonomy}
 
-Hallucination remains a central challenge for MLLMs.
-Although different studies adopt varying terminology and perspectives,
-a broad consensus has emerged on the underlying concepts.
-This section reviews three representative surveys
+Hallucination is a well-documented limitation of MLLMs.
+Different studies adopt varying terminology,
+but the underlying concepts overlap substantially.
+This section reviews three recent surveys
 \citep{baiHallucinationMultimodalLarge2025,
        chenSurveyMultimodalHallucination2026,
        liuSurveyHallucinationLarge2024}
@@ -11,9 +11,8 @@ and then presents the taxonomy adopted in this work.
 
 \citet{baiHallucinationMultimodalLarge2025} define hallucination in MLLMs
 as generated text that is inconsistent
-with the corresponding visual content,
-emphasizing cross-modal inconsistency.
-They also trace the concept back to LLMs,
+with the corresponding visual content.
+They trace the concept back to LLMs,
 distinguishing factual hallucinations (deviations from real-world facts)
 from faithfulness hallucinations
 (deviations from the input context or self-consistency).
@@ -29,8 +28,7 @@ between the generated content and either the input conditions
 or established world knowledge.
 Their taxonomy extends the faithfulness-factuality dichotomy:
 faithfulness hallucinations are stratified by visual granularity
-into object-level, attribute-level, and scene-level errors,
-forming a progression from shallow perception to deeper scene understanding;
+into object-level, attribute-level, and scene-level errors;
 factuality hallucinations are divided into commonsense errors
 and domain-specific errors.
 
@@ -47,17 +45,16 @@ from descriptive hallucinations
 and a semantic perspective distinguishing object, attribute,
 and relation hallucinations.
 
-Synthesizing these frameworks
-and given that the experiments in this report
-primarily target visual question answering
-and image-text reasoning,
-I adopt the following definition and three-category taxonomy.
+Given that the experiments in this report
+target visual question answering and image-text reasoning,
+I adopt the following definition and three-category taxonomy
+based on the frameworks above.
 
 \begin{quote}
 \textit{An MLLM hallucination is a model response
 that is inconsistent with the input visual content,
 contradicts verifiable real-world knowledge,
-or contains flaws in the reasoning process.}
+or contains logical flaws in the reasoning process.}
 \end{quote}
 
 \Cref{tab:taxonomy_comparison} situates this definition
@@ -95,8 +92,6 @@ relative to the three surveys above.
     \bottomrule
   \end{tabular}
 \end{table}
-
-\noindent The three categories are detailed below.
 
 \subsection{Faithfulness Hallucination (Visual Inconsistency)}
 
@@ -149,9 +144,6 @@ even though all individual objects are correctly identified
   \label{fig:faith_examples}
 \end{figure}
 
-The central detection question for this category is:
-is the output consistent with the image?
-
 \subsection{Factuality Hallucination (Factual Inconsistency)}
 
 Factuality hallucination refers to a model response
@@ -187,9 +179,6 @@ in the VQA-RAD dataset
     at the commonsense and domain-specific levels.}
   \label{fig:fact_examples}
 \end{figure}
-
-The central detection question for this category is:
-is the output consistent with world knowledge?
 
 \subsection{Logical Hallucination (Reasoning Error)}
 
@@ -229,5 +218,3 @@ that contradict the visual evidence
   \label{fig:logic_examples}
 \end{figure}
 
-The central detection question for this category is:
-is the reasoning valid?

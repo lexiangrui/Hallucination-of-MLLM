@@ -1,3 +1,4 @@
+\newpage
 \section{Experiment 2: MathVista Mathematical Reasoning}
 \label{sec:mathvista}
 
@@ -10,27 +11,33 @@ evaluation metrics for all four models under Direct and CoT modes.
   \centering
   \caption{MathVista Direct and CoT combined results.
     $\Delta$ values are CoT minus Direct;
-    negative values indicate fewer hallucinations under CoT,
+    negative $\Delta$HR indicates fewer hallucinations under CoT,
     and positive net improvement indicates better overall performance.
     Best values are highlighted in pink.}
   \label{tab:mathvista_combined}
-  \scriptsize
-  \setlength{\tabcolsep}{3pt}
-  \resizebox{\textwidth}{!}{%
-  \begin{tabular}{lcccccccccc}
+  \small
+  \setlength{\tabcolsep}{9pt}
+  \begin{tabular}{l ccc ccc}
     \toprule
-    Model & Direct HR & CoT HR & $\Delta$HR
-      & Direct Avg & CoT Avg & $\Delta$Avg
-      & $\Delta$ Faith. & $\Delta$ Fact. & $\Delta$ Logical
-      & Net improvement \\
+    & \multicolumn{3}{c}{Hallucination Rate (\%)} & \multicolumn{3}{c}{Average Score} \\
+    \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+    Model & Direct & CoT & $\Delta$ & Direct & CoT & $\Delta$ \\
     \midrule
-    GPT-5.4-mini     & 45.1\% & 34.4\% & \cellcolor{pink!25}$-$10.7 & 3.31 & 4.35 & +1.04 & +8   & $-$10 & $-$105 & +107 \\
-    Gemini 2.5 Flash & 34.3\% & 27.6\% & \cellcolor{pink!25}$-$6.7  & 4.46 & 4.81 & +0.35 & $-$66 & $-$8  & +7     & +67  \\
-    Qwen3.5-35B-A3B  & 13.3\% & 15.5\% & +2.2                         & 5.00 & 5.34 & +0.34 & +26  & $-$3  & $-$1   & $-$22 \\
-    Qwen3-VL-235B    & 16.3\% & 24.0\% & +7.7                         & 4.85 & 4.94 & +0.09 & +41  & 0     & +36    & $-$77 \\
+    GPT-5.4-mini     & 45.1 & 34.4 & \cellcolor{pink!25}$-$10.7 & 3.31 & 4.35 & +1.04 \\
+    Gemini 2.5 Flash & 34.3 & 27.6 & \cellcolor{pink!25}$-$6.7  & 4.46 & 4.81 & +0.35 \\
+    Qwen3.5-35B-A3B  & 13.3 & 15.5 & +2.2                         & 5.00 & 5.34 & +0.34 \\
+    Qwen3-VL-235B    & 16.3 & 24.0 & +7.7                         & 4.85 & 4.94 & +0.09 \\
+    \midrule
+    & \multicolumn{3}{c}{$\Delta$ by Hallucination Type} & \multicolumn{1}{c}{Total} \\
+    \cmidrule(lr){2-4} \cmidrule(lr){5-5}
+    Model & Faith. & Fact. & Logical & $\Delta$ \\
+    \midrule
+    GPT-5.4-mini     & +8   & $-$10 & $-$105 & +107 \\
+    Gemini 2.5 Flash & $-$66 & $-$8  & +7     & +67  \\
+    Qwen3.5-35B-A3B  & +26  & $-$3  & $-$1   & $-$22 \\
+    Qwen3-VL-235B    & +41  & 0     & +36    & $-$77 \\
     \bottomrule
   \end{tabular}
-  }
 \end{table}
 
 \begin{figure}[htbp]
@@ -41,14 +48,6 @@ evaluation metrics for all four models under Direct and CoT modes.
   \label{fig:mathvista_composition}
 \end{figure}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.8\textwidth]{fig2_mathvista_direct_cot_bar.pdf}
-  \caption{Comparison of hallucination rates
-    between Direct and CoT modes.
-    $\Delta$ values indicate the change.}
-  \label{fig:mathvista_cot_bar}
-\end{figure}
 
 \subsection{Analysis}
 
@@ -82,14 +81,24 @@ they concentrate instead in visual perception and reasoning.
 
 \subsubsection{Comparison Between Direct and CoT Modes}
 
-CoT effects on MathVista divide cleanly according to Direct-mode
-baseline capability.
+CoT effects on MathVista divide according to Direct-mode
+baseline performance.
 Models with high Direct HR
 (GPT-5.4-mini at 45.1\%, Gemini at 34.3\%)
 improve substantially after CoT is introduced,
 whereas models with low Direct HR
 (Qwen3.5 at 13.3\%, Qwen3-VL at 16.3\%)
 degrade, as shown in \Cref{fig:mathvista_cot_bar}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{fig2_mathvista_direct_cot_bar.pdf}
+  \caption{Comparison of hallucination rates
+    between Direct and CoT modes.
+    $\Delta$ values indicate the change.}
+  \label{fig:mathvista_cot_bar}
+\end{figure}
+
 
 \textbf{CoT significantly improves weaker-baseline models.}
 GPT-5.4-mini is the largest beneficiary:
@@ -143,10 +152,10 @@ with models ``hallucinating visual details from textual priors.''
 The substantial increase in faithfulness hallucinations for both Qwen models
 is consistent with both observations.
 
-Taken together, the results suggest that CoT both improves and introduces
+The results suggest that CoT both reduces and introduces
 hallucinations through four simultaneous mechanisms.
-The first two explain improvements on weaker baselines,
-whereas the last two explain degradation on stronger baselines.
+The first two explain improvements on weaker models,
+whereas the last two explain degradation on stronger models.
 
 \begin{description}
   \item[Structured decomposition.]
@@ -176,31 +185,29 @@ whereas the last two explain degradation on stronger baselines.
     This mechanism explains why stronger-baseline models
     see increased HR despite high final-answer accuracy.
 
-  \item[Commitment error.] CoT forces the model to make explicit visual or mathematical assertions
+  \item[Snowball effect.] CoT forces the model to make explicit visual or mathematical assertions
     early in the reasoning process.
-    Once an intermediate step goes wrong,
-    the model continues reasoning around the incorrect premise,
-    producing ``informative but wrong'' responses.
     Once the model produces a hallucination early in reasoning,
     it elaborates coherently around the erroneous premise,
-    causing the error to propagate and amplify along the chain.
+    causing errors to propagate and amplify along the reasoning chain.
+    \citet{zhongInvestigatingMitigatingMultimodal2024} formalize this as
+    ``Multimodal Hallucination Snowballing,''
+    demonstrating that early hallucinations systematically induce
+    further hallucinations in subsequent steps.
 \end{description}
 
-These four mechanisms determine CoT's two-sided effect.
+These four mechanisms account for CoT's two-sided effect.
 When baseline reasoning ability is weak,
 structured decomposition and visual grounding outweigh
-the risks of exposure and commitment.
+the risks of exposure and snowballing.
 When the baseline is already strong and the single-step answer error rate
 is low, the remaining room for improvement is small,
 but every additional reasoning step introduces new opportunities
-for exposure effects and commitment errors.
+for exposure effects and snowball errors.
 
 \subsection{Failure Case Analysis}
 
-This section presents two typical failure cases,
-corresponding to commitment error and exposure effect respectively.
-
-\subsubsection{Case 1: CoT Commitment Error Leading to Logical Hallucination
+\subsubsection{Case 1: CoT Snowball Effect Leading to Logical Hallucination
   (GPT-5.4-mini, PID=30)}
 
 \Cref{tab:mathvista_case1_info} presents the sample information,
@@ -297,7 +304,7 @@ The correct answer is Common water flea (option B).
   \label{fig:mathvista_case2}
 \end{figure}
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{MathVista Case 2: responses under two modes.}
   \label{tab:mathvista_case2_answers}

@@ -17,8 +17,8 @@ of the form ``Is there an X in the image?'',
 and the model commits an object hallucination
 whenever it answers ``yes''
 while the ground-truth label is ``no.''
-The event is a false positive in the binary-classification view
-and instantiates the object-level faithfulness category of the taxonomy.
+The event is a false positive in the binary-classification view,
+corresponding to the object-level faithfulness category.
 
 The metrics treat ``yes'' (object present) as the positive class,
 so object hallucinations correspond to false positives.
@@ -87,8 +87,8 @@ and scores at or above 3 indicate no hallucination.
 GPT-5.5 serves as the Judge in this implementation.
 The judge's system prompt defines the scoring rubric,
 the hallucination criteria,
-and a three-way type classification,
-and is supplemented by five few-shot examples for consistency.
+and a three-way type classification.
+Five few-shot examples are included for scoring consistency.
 Whenever the judge assigns a score below 3,
 it additionally labels the hallucination type
 (faithfulness, factuality, or logical).
@@ -115,7 +115,7 @@ In CoT mode,
 the prompt further requires step-by-step reasoning
 with the final answer marked by ``Final answer:''.
 Both modes are evaluated
-to analyze the effect of explicit reasoning on hallucination behavior.
+to analyze the effect of explicit reasoning on hallucination rates.
 
 The evaluation metrics are shown in \Cref{tab:mathvista_metrics}.
 

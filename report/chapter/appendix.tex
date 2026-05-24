@@ -14,7 +14,7 @@ built on top of the MS COCO \texttt{val2014} split
 The paradigm was originally proposed
 by \citet{rohrbachObjectHallucinationImage2018}
 under the CHAIR metric for image captioning hallucination,
-and later systematized into a stable polling protocol
+and later formalized into a polling protocol
 by \citet{liEvaluatingObjectHallucination2023}.
 
 \textbf{Construction.}
@@ -42,8 +42,8 @@ in how the negative objects are sampled:
     are chosen as negatives,
     yielding semantically similar distractors.
 \end{itemize}
-The three splits induce a monotonic difficulty gradient,
-empirically confirmed in \Cref{sec:pope_difficulty}.
+The three splits create a monotonic difficulty gradient,
+empirically observed in \Cref{sec:pope_difficulty}.
 
 \textbf{Scale and balance.}
 Each split contains 3{,}000 probing questions

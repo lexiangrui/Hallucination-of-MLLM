@@ -5,10 +5,9 @@
 Multimodal Large Language Models (MLLMs) have demonstrated strong capabilities
 in visual question answering and image-text reasoning,
 yet they remain susceptible to hallucinations:
-outputs
-that are inconsistent with the visual input,
-contradict established world knowledge,
-or contain flawed reasoning.
+outputs that are inconsistent with the visual input,
+contradict world knowledge,
+or contain logical flaws in the reasoning process.
 This report investigates hallucination detection and evaluation in MLLMs.
 The assessment requirements are summarized as follows:
 
@@ -45,14 +44,14 @@ The assessment requirements are summarized as follows:
 
 \subsection{Evaluated Models}
 
-I evaluate four representative MLLMs
-that cover both closed-source and open-source models
-and span a range of architectures (dense and Mixture-of-Experts)
-and parameter scales (from 3\,B to 235\,B activated).
+I evaluate four MLLMs,
+covering closed-source and open-source models
+with dense and Mixture-of-Experts architectures
+(3\,B to 235\,B activated parameters).
 Two additional models serve as MLLM Judges
 in the detection pipeline and in the cross-judge consistency check
 (\Cref{sec:appendix}).
-\Cref{tab:model_config} summarizes the key configurations.
+\Cref{tab:model_config} summarizes the configurations.
 
 \begin{table}[htbp]
   \centering

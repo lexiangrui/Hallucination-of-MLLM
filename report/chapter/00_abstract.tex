@@ -2,57 +2,54 @@
 Multimodal Large Language Models (MLLMs) have demonstrated strong capabilities
 in visual question answering and image-text reasoning,
 yet they remain susceptible to hallucinations:
-outputs
-that are inconsistent with the visual input,
-contradict established world knowledge,
-or contain flaws in the reasoning process.
+outputs that are inconsistent with the visual input,
+contradict world knowledge,
+or contain logical flaws in the reasoning process.
 This report presents a framework
-for the automatic detection and evaluation of hallucinations in MLLMs.
+for automatic detection and evaluation of hallucinations in MLLMs.
 I adopt a three-category taxonomy
-covering faithfulness, factuality, and logical hallucinations,
-and evaluate four representative models
+(faithfulness, factuality, and logical hallucinations)
+and evaluate four models
 (GPT-5.4-mini, Gemini~2.5~Flash,
 Qwen3.5-35B-A3B, Qwen3-VL-235B-A22B)
-across three benchmarks
-(POPE, MathVista, VQA-RAD)
-using two detection methods
-(a rule-based pipeline and an MLLM-Judge protocol),
-yielding two findings.
+across three benchmarks (POPE, MathVista, VQA-RAD)
+using rule-based detection and an MLLM-Judge protocol.
+The main findings are as follows.
 (1)~Language priors structurally override visual perception.
-POPE's three splits expose the confounding effects of two modality priors:
+POPE's three splits isolate the confounding effects of two modality priors:
 the parametric bias of the visual encoder ($P_V$)
 and the statistical co-occurrence regularities
-acquired by the LLM from text-only pretraining ($P_L$),
-which influence the output through independent attention pathways.
+acquired by the LLM from text-only pretraining ($P_L$);
+both influence the output through independent attention pathways.
 When visual signals are ambiguous,
 $P_L$ suppresses residual visual evidence
 (Popular HR 2.40\%--6.20\%);
 when $P_V$ and $P_L$ fail jointly,
 conceptual boundary blur and semantic conflation
-combine to produce the most severe false positives
+produce the most severe false positives
 (Adversarial HR 4.80\%--8.90\%).
-This mechanism also explains why faithfulness hallucinations
+The same mechanism explains why faithfulness hallucinations
 account for over 96\% of errors in VQA-RAD:
 fluent medical knowledge cannot compensate
 for inadequate radiological visual grounding.
 (2)~The effect of Chain-of-Thought prompting
-depends on the model's baseline:
-CoT substantially reduces hallucinations on weaker baselines
+depends on the model's baseline performance:
+CoT substantially reduces hallucinations on weaker models
 (GPT-5.4-mini $-$10.7\,pp, Gemini~2.5~Flash $-$6.7\,pp)
 but increases them on stronger ones
 (Qwen3-VL $+$7.7\,pp).
-I attribute this two-sided effect to four interacting mechanisms:
+I attribute this to four interacting mechanisms:
 structured decomposition and visual grounding help weaker models
 correct reasoning and perception errors,
-whereas exposure effects and commitment errors make stronger models
-explicitly articulate latent visual misreadings
+whereas exposure effects and snowball errors cause stronger models
+to surface latent visual misreadings
 and continue reasoning from erroneous premises.
 Five independent error analyses
 (human alignment with Cohen's $\kappa = 0.70$,
 cross-judge consistency between GPT-5.5 and Claude Opus~4.7 with $\kappa = 0.78$,
 threshold sensitivity, length-bias assessment,
 and cross-model overlap)
-confirm the robustness of the evaluation framework;
-code and data are publicly available at
+validate the reliability of the evaluation framework.
+Code and data are available at
 \url{https://github.com/lexiangrui/Hallucination-of-MLLM}.
 \end{abstract}
