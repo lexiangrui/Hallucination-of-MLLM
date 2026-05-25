@@ -15,7 +15,7 @@ Qwen3.5-35B-A3B, Qwen3-VL-235B-A22B)
 across three benchmarks (POPE, MathVista, VQA-RAD)
 using rule-based detection and an MLLM-Judge protocol.
 The main findings are as follows.
-(1)~Language priors structurally override visual perception.
+\textbf{(1)~Language priors structurally override visual perception.}
 POPE's three splits isolate the confounding effects of two modality priors:
 the parametric bias of the visual encoder ($P_V$)
 and the statistical co-occurrence regularities
@@ -32,8 +32,8 @@ The same mechanism explains why faithfulness hallucinations
 account for over 96\% of errors in VQA-RAD:
 fluent medical knowledge cannot compensate
 for inadequate radiological visual grounding.
-(2)~The effect of Chain-of-Thought prompting
-depends on the model's baseline performance:
+\textbf{(2)~The effect of Chain-of-Thought prompting
+depends on the model's baseline performance:}
 CoT substantially reduces hallucinations on weaker models
 (GPT-5.4-mini $-$10.7\,pp, Gemini~2.5~Flash $-$6.7\,pp)
 but increases them on stronger ones

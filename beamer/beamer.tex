@@ -1,0 +1,1377 @@
+\documentclass[9pt,aspectratio=169]{beamer}
+
+\usetheme[block=fill, sectionpage=none]{metropolis}
+\useoutertheme{infolines}
+\usecolortheme{custom}
+\useinnertheme{metropolis}
+
+\usepackage{appendixnumberbeamer}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\hypersetup{colorlinks=true,linkcolor=.,urlcolor=blue}
+\usepackage{xspace}
+\usepackage{colortbl}
+\usepackage{makecell}
+
+% Fallback for tikz external commands referenced by metropolis theme
+% when the tikz `external` library is not loaded.
+\providecommand{\tikzexternaldisable}{}
+\providecommand{\tikzexternalenable}{}
+
+\definecolor{pink}{RGB}{255,182,193}
+\definecolor{faithBlue}{RGB}{33,102,172}
+\definecolor{factGreen}{RGB}{28,122,80}
+\definecolor{logicPurple}{RGB}{118,60,150}
+\graphicspath{{../report/figures/}}
+\setbeamerfont{title}{size=\LARGE,series=\bfseries}
+
+\title[Hallucination Detection and Evaluation in Multimodal Large Language Models]{Hallucination Detection and Evaluation\\in Multimodal Large Language Models}
+\date{May 2026}
+\author{Xiangrui Yue}
+\institute{}
+
+\begin{document}
+
+\frame[plain,noframenumbering]{\titlepage}
+
+\begin{frame}{Outline}
+  \setbeamertemplate{section in toc}[ball]
+  \vfill
+  \begin{columns}[t,onlytextwidth]
+    \column{0.48\textwidth}
+      \large
+      \tableofcontents[
+        hideallsubsections,
+        sectionstyle=show,
+        sections={1-5}
+      ]
+    \column{0.48\textwidth}
+      \large
+      \tableofcontents[
+        hideallsubsections,
+        sectionstyle=show,
+        sections={6-10}
+      ]
+  \end{columns}
+  \vfill
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{MLLM Hallucination: Problem and Task}
+  \begin{block}{Problem}
+    Multimodal LLMs have demonstrated strong capabilities
+    in visual question answering and image-text reasoning,
+    yet they remain susceptible to \alert{hallucinations}:
+    outputs inconsistent with the visual input,
+    contradicting world knowledge,
+    or containing logical flaws in the reasoning process.
+  \end{block}
+
+  \textbf{Task Requirements:}
+  \begin{enumerate}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}
+    \item \textbf{Definition \& classification:}
+          define $\geq 2$ hallucination types with explanations,
+          plus $\geq 2$ examples per type.
+    \item \textbf{Detection methods \& metrics:}
+          build $\geq 2$ methods (e.g., rule-based + MLLM-Judge)
+          and design $\geq 2$ evaluation metrics.
+    \item \textbf{Experimental evaluation (main task):}
+          evaluate $\geq 2$ models (one closed-source, one open-source)
+          on POPE + one recommended reasoning benchmark
+          (MathVista / ChartQA).
+    \item \textbf{Human alignment (Human-as-Judge):}
+          20--50 human-annotated gold labels;
+          compare auto verdicts vs human judgments,
+          analyze inconsistent cases.
+    \item \textbf{Analysis:}
+          CoT impact on hallucinations, cross-model comparison,
+          and in-depth analysis of $\geq 2$ typical failure cases.
+    \item \textbf{Extension:}
+          extend to other image-text tasks or domains
+          (OCR, medical, remote sensing),
+          or perform a cross-task generalization analysis.
+  \end{enumerate}
+\end{frame}
+
+\section{Models \& Datasets}
+
+\begin{frame}{Evaluated Models \& Datasets}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.41\textwidth}
+      \textbf{Evaluated Models}\\[0.1em]
+      \footnotesize
+      \renewcommand{\arraystretch}{0.9}
+      \setlength{\tabcolsep}{3pt}
+      \begin{tabular}{llll}
+        \toprule
+        Model & Role & Architecture & Access \\
+        \midrule
+        GPT-5.4-mini       & Evaluated      & Dense    & Closed \\
+        Gemini 2.5 Flash   & Evaluated      & Dense    & Closed \\
+        Qwen3.5-35B-A3B    & Evaluated      & MoE 35\,B  & Open \\
+        Qwen3-VL-235B-A22B & Evaluated      & MoE 235\,B & Open \\
+        \midrule
+        GPT-5.5            & MLLM Judge     & Dense    & Closed \\
+        Claude Opus 4.7    & Judge consist. & Dense    & Closed \\
+        \bottomrule
+      \end{tabular}\\[0.8em]
+
+      \small\textbf{Evaluation Datasets}\\[0.1em]
+      \footnotesize
+      \setlength{\tabcolsep}{3pt}
+      \begin{tabular}{lll}
+        \toprule
+        Dataset & Task Type & Samples \\
+        \midrule
+        POPE      & Object existence probing  & 3{,}000 (3 $\times$ 1{,}000) \\
+        MathVista & Math visual reasoning     & 1{,}000 (testmini) \\
+        VQA-RAD   & Medical radiology VQA     & 451 (test) \\
+        \bottomrule
+      \end{tabular}
+
+    \column{0.55\textwidth}
+      \footnotesize
+      \begin{itemize}\setlength{\itemsep}{0.45em}\setlength{\parskip}{0pt}
+        \item \textbf{POPE} converts object hallucination evaluation
+              into a binary existence probing task
+              built on top of the MS COCO \textit{val2014} split.
+              Each split contains 3{,}000 probing questions
+              with a balanced 1{,}500 Yes / 1{,}500 No
+              ground-truth distribution.
+        \item \textbf{MathVista} is a comprehensive benchmark
+              for evaluating the mathematical reasoning of
+              foundation models in visual contexts.
+              The task requires simultaneous visual perception,
+              mathematical knowledge, and multi-step reasoning,
+              well suited to trigger all three hallucination types.
+        \item \textbf{VQA-RAD} is the first manually constructed
+              medical VQA dataset in which clinicians generated
+              questions and reference answers directly from
+              radiology images.
+              It serves as a high-stakes domain testbed because
+              both visual perception (anatomy, pathology)
+              and clinical knowledge are required.
+      \end{itemize}
+  \end{columns}
+
+  \vspace{0.6em}
+  \begin{block}{Experimental conditions.}
+    \footnotesize
+    All four models are accessed through APIs
+    with a unified random seed of 42.
+    Temperature is kept at each platform's default,
+    and the maximum token length is uncapped.
+    POPE samples 1{,}000 items per split;
+    MathVista uses the full \textsc{testmini} set (1{,}000 items);
+    VQA-RAD uses the test split (451 items).
+    GPT-5.5 serves as the MLLM Judge throughout,
+    and a human alignment study is conducted
+    as part of the error analysis.
+  \end{block}
+\end{frame}
+
+\section{Hallucination Taxonomy}
+
+\begin{frame}{Definition and Three-Category Taxonomy}
+  \begin{block}{Definition}
+    \textit{An MLLM hallucination is a model response
+    that is inconsistent with the input visual content,
+    contradicts verifiable real-world knowledge,
+    or contains logical flaws in the reasoning process.}
+  \end{block}
+
+  \vspace{0.4em}
+  {\centering\textbf{\large Taxonomy}\par}
+  \vspace{-0.8em}
+  {\centering\rule{0.3\textwidth}{0.4pt}\par}
+  \vspace{0.2em}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.32\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{faith_object.pdf}\\[0.3em]
+      \footnotesize
+      \textbf{\textcolor{faithBlue}{Faithfulness (Visual Inconsistency)}}\\[0.2em]
+      A model response that is inconsistent
+      with the visual content of the input image.
+    \column{0.32\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{fact_common.pdf}\\[0.3em]
+      \footnotesize
+      \textbf{\textcolor{factGreen}{Factuality (Factual Inconsistency)}}\\[0.2em]
+      A model response that contradicts
+      established, verifiable real-world knowledge.
+    \column{0.32\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{logic_deductive.pdf}\\[0.3em]
+      \footnotesize
+      \textbf{\textcolor{logicPurple}{Logical (Reasoning Error)}}\\[0.2em]
+      A model response with flaws in the reasoning
+      process, where the conclusion does not logically follow
+      from the visual evidence or its own premises.
+  \end{columns}
+\end{frame}
+
+\section{Experimental Design}
+
+\begin{frame}{Detection Methods}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.5\textwidth}
+      \textbf{\small Rule-based Method (POPE)}\\[0.3em]
+      \footnotesize
+      POPE operationalizes object hallucination
+      as a binary probing task:
+      for each image, the benchmark issues yes/no questions
+      ``Is there an X in the image?'',
+      and the model commits an object hallucination
+      whenever it answers ``yes''
+      while the ground-truth label is ``no''
+      (a false positive in the binary-classification view).
+
+      \vspace{0.4em}
+      \textbf{Answer normalization}
+      (follows the RUCAIBox/POPE official script):
+      \begin{enumerate}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}
+        \item Take the first sentence of the response
+              (split by ``.'').
+        \item Remove all commas;
+              split by whitespace into a set of words.
+        \item If ``No'', ``not'', or ``no'' appears
+              in the set, return ``no''.
+        \item Otherwise return ``yes''.
+      \end{enumerate}
+
+      \vspace{0.6em}
+      {\color{black!30}\rule{0.95\columnwidth}{0.4pt}}
+      \vspace{0.3em}
+
+      \textbf{\small MLLM Judge (MathVista + VQA-RAD)}\\[0.3em]
+      \footnotesize
+      Follows the MMHal-Bench evaluation protocol:
+      a 0--6 Likert scale jointly assesses
+      informativeness and hallucination level
+      of each response.
+      A threshold of 3 separates the two regimes:
+      scores below 3 indicate hallucination,
+      scores at or above 3 indicate no hallucination.
+      Whenever the score is below 3,
+      the judge additionally labels the hallucination type
+      (faithfulness, factuality, or logical).
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{Judge Framework.pdf}\\[0.4em]
+      \footnotesize
+      MLLM Judge evaluation framework:
+      the judge receives a question, a model response,
+      and a scoring rubric,
+      and produces a score (0--6)
+      with an optional hallucination type label.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Evaluation Metrics}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.5\textwidth}
+      \renewcommand{\arraystretch}{0.9}
+      \setlength{\tabcolsep}{3pt}
+
+      \small\textbf{POPE} (rule-based, classification metrics)\\[0.1em]
+      \footnotesize
+      \begin{tabular}{lll}
+        \toprule
+        Metric & Formula & Description \\
+        \midrule
+        Accuracy           & $(TP+TN)/N$        & Overall correctness \\
+        Precision          & $TP/(TP+FP)$       & Acc.\ when predicting Yes \\
+        Recall             & $TP/(TP+FN)$       & Detection rate for Yes \\
+        F1                 & $2PR/(P+R)$        & Harmonic mean of P, R \\
+        Yes Ratio          & $N_{\text{yes}}/N$ & Response-bias indicator \\
+        \rowcolor{pink!50}
+        Hallucination Rate & $FP/N$             & Core metric \\
+        \bottomrule
+      \end{tabular}\\[0.5em]
+
+      \small\textbf{MathVista} (MLLM Judge, 0--6 score)\\[0.1em]
+      \footnotesize
+      \begin{tabular}{lll}
+        \toprule
+        Metric & Definition & Description \\
+        \midrule
+        \rowcolor{pink!50}
+        Hallucination Rate & $N_{\text{score}<3}/N$       & Lower is better \\
+        Average Score      & $\sum \text{score}_i / N$    & Response quality \\
+        Type-specific      & faith./fact./logical          & Source breakdown \\
+        \bottomrule
+      \end{tabular}\\[0.5em]
+
+      \small\textbf{VQA-RAD} (MLLM Judge + medical adaptation)\\[0.1em]
+      \footnotesize
+      \begin{tabular}{lll}
+        \toprule
+        Metric & Definition & Description \\
+        \midrule
+        \rowcolor{pink!50}
+        Hallucination Rate & $N_{\text{score}<3}/N$       & Core metric \\
+        Average Score      & $\sum \text{score}_i / N$    & Response quality \\
+        Type-specific      & faith./fact./logical          & Source breakdown \\
+        Stratified HR      & by closed / open             & Answer-type strata \\
+        \bottomrule
+      \end{tabular}
+    \column{0.5\textwidth}
+      \footnotesize
+      \textbf{Hallucination Rate (HR)}
+      is the core metric across all three datasets,
+      with two operationalizations:
+      a false-positive rate on POPE
+      (rule-based classification view)
+      and the proportion of responses with Judge score $<$ 3
+      on MathVista and VQA-RAD.
+
+      \vspace{0.4em}
+      \textbf{Accuracy}
+      measures the proportion of correct predictions
+      $(TP+TN)/N$ on POPE.
+      It jointly reflects Yes-correct and No-correct,
+      but can be misleading when the model
+      exhibits strong response bias
+      (e.g., answering ``yes'' on nearly all questions).
+
+      \vspace{0.4em}
+      \textbf{Precision}
+      is the proportion of Yes predictions
+      that are correct $(TP/(TP+FP))$.
+      High precision means the model rarely imagines
+      non-existent objects.
+      Low precision directly corresponds
+      to a high object hallucination rate.
+
+      \vspace{0.4em}
+      \textbf{Recall}
+      is the proportion of actual Yes items
+      that are correctly predicted $(TP/(TP+FN))$.
+      High recall ensures the model reliably detects
+      objects that are genuinely present.
+
+      \vspace{0.4em}
+      \textbf{Yes Ratio}
+      detects response bias on POPE:
+      values near 0.5 signal balanced predictions,
+      a high ratio suggests over-claiming,
+      a low ratio suggests over-rejection.
+
+  \end{columns}
+\end{frame}
+
+\section{Experiment 1: POPE Object Probing}
+
+\begin{frame}{POPE: Results and Cross-Model Analysis}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{fig1_pope_hr_bar.pdf}
+
+      \vspace{0.2em}
+      \footnotesize
+      Hallucination Rate increases from
+      \textit{Random} $\to$ \textit{Popular} $\to$ \textit{Adversarial},
+      exposing progressively harder object-existence probes.
+
+    \column{0.5\textwidth}
+      \footnotesize
+      \renewcommand{\arraystretch}{0.88}
+      \setlength{\tabcolsep}{3pt}
+      \begin{tabular}{llcccc}
+        \toprule
+        Split & Metric & GPT & Gemini & Qwen3.5 & Qwen3-VL \\
+        \midrule
+        \multirow{3}{*}{Random}
+          & HR (\%) & 0.70 & 0.80 & 1.10 & \cellcolor{pink!50}0.30 \\
+          & F1      & 0.892 & 0.910 & \cellcolor{pink!50}0.922 & 0.913 \\
+          & YesR    & 0.414 & 0.431 & 0.447 & 0.425 \\
+        \midrule
+        \multirow{3}{*}{Popular}
+          & HR (\%) & 5.40 & 5.70 & 6.20 & \cellcolor{pink!50}2.40 \\
+          & F1      & 0.852 & 0.858 & 0.872 & \cellcolor{pink!50}0.891 \\
+          & YesR    & 0.464 & 0.475 & 0.496 & 0.444 \\
+        \midrule
+        \multirow{3}{*}{Adversarial}
+          & HR (\%) & 7.80 & 5.10 & 8.90 & \cellcolor{pink!50}4.80 \\
+          & F1      & 0.825 & 0.870 & 0.856 & \cellcolor{pink!50}0.871 \\
+          & YesR    & 0.483 & 0.474 & 0.529 & 0.470 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.1em}
+      \begin{itemize}\setlength{\itemsep}{0.1em}
+        \item \textbf{Universal difficulty gradient.}
+              All four models show HR rising
+              Random $\to$ Popular $\to$ Adversarial,
+              confirming POPE's intended progression.
+        \item \textbf{Qwen3-VL} has the lowest HR on all splits:
+              strongest hallucination control.
+        \item \textbf{Gemini} is most robust from Popular to Adversarial
+              (HR $5.70\%\to5.10\%$).
+        \item \textbf{Qwen3.5} maximizes Recall but over-claims
+              (Adversarial YesR $=0.529$).
+        \item \textbf{GPT-5.4-mini} is conservative;
+              the ``default No'' shortcut collapses under adversarial pressure.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Three Splits Detect Three Error Mechanisms}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.56\textwidth}
+      \begin{block}{1. Random: object-level perception}
+        \footnotesize
+        Negative objects are visually unrelated to the scene.
+        HR remains near saturation (0.30\%--1.10\%),
+        so remaining errors mainly reflect the visual encoder's
+        parametric prior $P_V$.
+      \end{block}
+      \vspace{-0.7em}
+
+      \begin{block}{2. Popular: linguistic-prior override}
+        \footnotesize
+        Absent objects are high-frequency co-occurrences
+        (e.g., outdoor eating $\to$ backpack).
+        HR jumps to 2.40\%--6.20\% because the LLM prior $P_L$
+        suppresses weak or ambiguous visual evidence.
+      \end{block}
+      \vspace{-0.7em}
+
+      \begin{block}{3. Adversarial: semantic-boundary failure}
+        \footnotesize
+        Distractors are near-synonyms of visible objects
+        (e.g., teddy bear vs. bear).
+        HR peaks at 4.80\%--8.90\% when $P_V$ blurs fine-grained
+        categories and $P_L$ merges them semantically.
+      \end{block}
+
+      {\footnotesize
+      \textbf{The architectural asymmetry of MLLMs.}
+
+      Mainstream MLLMs connect a CLIP/SigLIP-style vision encoder
+      to a much larger LLM through a projector. Visual tokens are
+      mapped into the word-embedding space, then mixed with text
+      tokens inside the LLM's self-attention. Because the language
+      backbone has far more parameters and pretraining data than the
+      visual pathway, language priors have a structural advantage
+      whenever visual evidence is weak or fine-grained.\par}
+
+    \column{0.41\textwidth}
+      \centering
+      \includegraphics[width=0.94\textwidth]{causalmm_scm.png}
+
+      \vspace{0.25em}
+      \raggedright
+      \footnotesize
+      \textbf{Two independent confounding factors}\\[0.2em]
+      \textbf{Visual modality prior $P_V$.}
+      The vision encoder carries biases from CLIP/SigLIP pretraining.
+      It determines which objects, textures, and fine-grained category
+      boundaries are easy or difficult to encode. In Random, this prior
+      mostly measures baseline visual perception; in Adversarial, it
+      blurs near-synonyms such as ``teddy bear'' and ``bear.''
+
+      \vspace{0.2em}
+      \textbf{Linguistic modality prior $P_L$.}
+      The LLM backbone carries co-occurrence regularities from
+      text-only pretraining. When an image context suggests a likely
+      object but the object is absent, this prior can activate a
+      plausible answer and overpower weak visual evidence. Popular
+      isolates this effect most clearly, while Adversarial combines it
+      with visual semantic confusion.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{POPE Case Analysis: Two Systematic False Positives}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.34\textheight]{pope_000000567886.jpg}
+
+      \vspace{0.25em}
+      \footnotesize
+      \textbf{Case 1: Adversarial split}\\
+      Present: teddy bear, person, book\\
+      Query: ``Is there a \alert{bear} in the image?''\\
+      Ground truth: \textbf{No}
+
+      \vspace{0.25em}
+      \renewcommand{\arraystretch}{0.9}
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{lcccc}
+        \toprule
+        Model & GPT & Gemini & Qwen3.5 & Qwen3-VL \\
+        \midrule
+        Answer & Yes & Yes & Yes & Yes \\
+        \bottomrule
+      \end{tabular}
+
+      \begin{exampleblock}{Case 1: semantic-boundary confusion}
+        \footnotesize
+        The image contains a \emph{teddy bear}, but POPE asks about
+        \emph{bear} as a real animal category.
+        All models merge the toy category with the animal category,
+        showing that the adversarial split tests fine-grained
+        conceptual boundaries, not only low-level visual resolution.
+      \end{exampleblock}
+
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.34\textheight]{pope_000000569839.jpg}
+
+      \vspace{0.25em}
+      \footnotesize
+      \textbf{Case 2: Popular split}\\
+      Present: person, sandwich, hot dog\\
+      Query: ``Is there a \alert{backpack} in the image?''\\
+      Ground truth: \textbf{No}
+
+      \vspace{0.25em}
+      \renewcommand{\arraystretch}{0.9}
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{lcccc}
+        \toprule
+        Model & GPT & Gemini & Qwen3.5 & Qwen3-VL \\
+        \midrule
+        Answer & Yes & Yes & Yes & Yes \\
+        \bottomrule
+      \end{tabular}
+
+      \begin{exampleblock}{Case 2: linguistic-prior override}
+        \footnotesize
+        In outdoor eating scenes, \emph{backpack} is a plausible
+        high-frequency co-occurring object.
+        When the visual signal is weak or cluttered,
+        the language prior fills in a statistically likely object
+        that is absent from the actual image.
+      \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\section{Experiment 2: MathVista Reasoning}
+
+\begin{frame}{MathVista Results and Hallucination Distribution}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.5\textwidth}
+      \textbf{\footnotesize Result summary: Direct vs. CoT prompting}
+
+      \vspace{0.25em}
+      \footnotesize
+      \setlength{\tabcolsep}{3pt}
+      \renewcommand{\arraystretch}{0.82}
+      \begin{tabular}{l ccc ccc}
+        \toprule
+        & \multicolumn{3}{c}{Hallucination Rate (\%)} & \multicolumn{3}{c}{Average Score} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        Model & Direct & CoT & $\Delta$ & Direct & CoT & $\Delta$ \\
+        \midrule
+        GPT-5.4-mini     & 45.1 & 34.4 & \cellcolor{pink!50}$-$10.7 & 3.31 & 4.35 & +1.04 \\
+        Gemini 2.5 Flash & 34.3 & 27.6 & \cellcolor{pink!50}$-$6.7  & 4.46 & 4.81 & +0.35 \\
+        Qwen3.5-35B-A3B  & 13.3 & 15.5 & +2.2                         & 5.00 & 5.34 & +0.34 \\
+        Qwen3-VL-235B    & 16.3 & 24.0 & +7.7                         & 4.85 & 4.94 & +0.09 \\
+        \midrule
+        & \multicolumn{3}{c}{$\Delta$ by Hallucination Type} & \multicolumn{1}{c}{Total} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-5}
+        Model & Faith. & Fact. & Logical & $\Delta$ \\
+        \midrule
+        GPT-5.4-mini     & +8   & $-$10 & \cellcolor{pink!50}$-$105 & +107 \\
+        Gemini 2.5 Flash & \cellcolor{pink!50}$-$66 & $-$8  & +7     & +67  \\
+        Qwen3.5-35B-A3B  & +26  & $-$3  & $-$1   & $-$22 \\
+        Qwen3-VL-235B    & +41  & 0     & +36    & $-$77 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.5em}
+      \textbf{\footnotesize Key observations: CoT polarization}\\[0.1em]
+      \scriptsize
+      \begin{itemize}\setlength{\itemsep}{0.1em}\setlength{\parskip}{0pt}
+        \item \textbf{Weak baselines improve} ---
+              GPT-5.4-mini ($-10.7$ pp, mainly logical $248\to143$);
+              Gemini ($-6.7$ pp, mainly faithfulness $278\to212$).
+        \item \textbf{Strong baselines degrade} ---
+              Qwen3.5 ($+2.2$ pp, faithfulness $98\to124$);
+              Qwen3-VL ($+7.7$ pp, faithfulness $113\to154$;
+              116 Direct-correct samples turn hallucinated).
+        \item Average score rises for all four models,
+              yet HR rises for both Qwens:
+              CoT trades terseness for exposable reasoning.
+      \end{itemize}
+
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{fig4_mathvista_composition.pdf}
+
+      \vspace{0.1em}
+      {\scriptsize\emph{Hallucination-type composition across models and prompting modes.}\par}
+
+      \vspace{0.4em}
+      \textbf{\footnotesize Distribution differences}\\[0.1em]
+      \scriptsize
+      \begin{itemize}\setlength{\itemsep}{0.12em}\setlength{\parskip}{0pt}
+        \item \textbf{Faithfulness dominates 7/8 configurations}
+              ($>57\%$ each), peaking at Gemini Direct (81.0\%).
+              MathVista's bottleneck: ``see first''
+              (numbers, labels, arrows, spatial relations)
+              before reasoning.
+        \item \textbf{Exception: GPT-5.4-mini Direct} (logical 55.0\%).
+              Median response is only one word, so wrong final
+              options are judged as logical failures rather than
+              visible reasoning mistakes. CoT recovers the normal
+              distribution (logical $\to 41.6\%$).
+        \item \textbf{Factuality stays $<4\%$} in all configurations.
+              The main bottleneck is visual grounding plus reasoning,
+              not missing world knowledge.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{CoT Impact: Results and Four Mechanisms}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.45\textwidth}
+      \centering
+      \includegraphics[width=0.9\textwidth]{fig2_mathvista_direct_cot_bar.pdf}
+
+      \vspace{0.2em}
+      \begin{block}{Observed impact}
+        \scriptsize
+        CoT helps weaker Direct baselines:
+        GPT-5.4-mini HR drops from 45.1\% to 34.4\%
+        ($-$10.7\,pp), and Gemini drops from 34.3\% to 27.6\%
+        ($-$6.7\,pp).
+        It hurts stronger Direct baselines:
+        Qwen3.5 rises to 15.5\% (+2.2\,pp),
+        and Qwen3-VL rises to 24.0\% (+7.7\,pp).
+        \vspace{0.25em}
+
+        \alert{Key tension:}
+        Average score increases for all four models,
+        but hallucination rate increases for both Qwen models.
+        CoT can make answers more informative while also exposing
+        judge-detectable hallucinations inside the reasoning chain.
+      \end{block}
+
+    \column{0.52\textwidth}
+      \textbf{Four mechanisms}
+      \vspace{0.2em}
+      {\setbeamertemplate{enumerate item}[ball]
+      \scriptsize
+      
+      The results suggest that CoT both reduces and introduces hallucinations through four si-
+      multaneous mechanisms. The first two explain improvements on weaker models, whereas the
+      last two explain degradation on stronger models.
+      \vspace{0.2em}
+      \begin{enumerate}
+        \setlength{\itemsep}{0.55em}
+        \item \textbf{Structured decomposition.}
+          CoT decomposes a complex multi-step problem into
+          controllable intermediate steps.
+          When the model is forced to derive rather than guess,
+          many problems that cannot be solved in a single step
+          become answerable.
+
+        \item \textbf{Visual grounding.}
+          CoT prompts require the model to explicitly cite visual
+          evidence during reasoning,
+          reducing its tendency to take linguistic-prior shortcuts.
+          The reasoning constraint pushes the model to inspect the
+          chart before describing it.
+
+        \item \textbf{Exposure effect.}
+          Visual perception errors that remain hidden in Direct mode
+          are explicitly described in the CoT reasoning chain and
+          captured by the MLLM Judge.
+          Even when the final answer is correct,
+          visual misreadings in intermediate steps lower the score.
+
+        \item \textbf{Snowball effect.}
+          CoT forces the model to make explicit visual or mathematical
+          assertions early in the reasoning process.
+          Once the model produces a hallucination early in reasoning,
+          it elaborates coherently around the erroneous premise,
+          causing errors to propagate and amplify along the reasoning chain.
+      \end{enumerate}}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{MathVista Case Analysis: Snowball vs Exposure}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.22\textheight]{mathvista_pid30.jpg}
+
+      \vspace{0.15em}
+      \footnotesize
+      \textbf{Case 1: CoT snowball}\\
+      \scriptsize
+      Geometry reasoning: two chords $AB$, $CD$ intersect at $E$;\\
+      $\angle D=35^\circ$. Find $\angle C$.\\
+      Ground truth: \textbf{B} ($70^\circ$)
+
+      \vspace{0.15em}
+      \scriptsize
+      \renewcommand{\arraystretch}{0.86}
+      \setlength{\tabcolsep}{3pt}
+      \begin{tabular}{llcc}
+        \toprule
+        Mode & Response & Score & Type \\
+        \midrule
+        Direct & B ($70^\circ$) & 5 & none \\
+        CoT & flawed reasoning $\to$ C ($80^\circ$) & 1 & logical \\
+        \bottomrule
+      \end{tabular}
+
+      \begin{exampleblock}{Case 1 : Snowball effect}
+        \footnotesize
+        In Direct mode, the model directly outputs the correct option.
+        In CoT mode, it misapplies the triangle angle-sum formula in
+        the first step. After finding that the computed answer
+        ($40^\circ$) is not among the options, it fabricates a
+        supplementary-angle explanation and arrives at $80^\circ$.
+        Once an incorrect premise is locked in, subsequent steps appear
+        plausible but rest on the initial false assumption.
+      \end{exampleblock}
+
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.22\textheight]{mathvista_pid15.jpg}
+
+      \vspace{0.15em}
+      \footnotesize
+      \textbf{Case 2: CoT exposure}\\
+      \scriptsize
+      Biology food web reasoning: which organism is most affected if
+      algae is eliminated?\\
+      Ground truth: \textbf{B} Common water flea
+
+      \vspace{0.15em}
+      \scriptsize
+      \renewcommand{\arraystretch}{0.86}
+      \setlength{\tabcolsep}{3pt}
+      \begin{tabular}{llcc}
+        \toprule
+        Mode & Response & Score & Type \\
+        \midrule
+        Direct & B (correct answer) & 5 & none \\
+        CoT & B + false arrow claim & 2 & faith. \\
+        \bottomrule
+      \end{tabular}
+
+      \begin{exampleblock}{Case 2 : Exposure effect}
+        \footnotesize
+        In CoT mode, the model gives a detailed food-web analysis but
+        incorrectly claims that ``Algae has arrows pointing to Tilapia.''
+        The diagram contains no such arrow. Direct mode may still reach
+        the correct answer through a shortcut or partial visual
+        perception; CoT forces the model to describe arrow relationships,
+        exposing the visual misreading to the MLLM Judge and dropping the
+        score from 5 to 2.
+      \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\section{Extension: VQA-RAD Medical VQA}
+
+\begin{frame}{VQA-RAD Results and Analysis}
+  \centering
+  \footnotesize
+  \begin{tabular}{l cccc}
+    \toprule
+    \multicolumn{5}{c}{\textbf{Overall Results}} \\
+    \midrule
+    Metric
+      & GPT-5.4-mini & Gemini 2.5 Flash & Qwen3.5-35B & Qwen3-VL-235B \\
+    \midrule
+    Hallucination Rate & \cellcolor{pink!50}33.26\% & 66.30\% & 39.25\% & 58.31\% \\
+    Average Score      & \cellcolor{pink!50}4.52    & 2.68    & 4.20    & 3.57 \\
+    $n_{\text{hallucinated}}$ & \cellcolor{pink!50}150 & 299 & 177 & 263 \\
+    \quad Faithfulness & 145 (96.7\%) & 296 (99.0\%) & 171 (96.6\%) & 257 (97.7\%) \\
+    \quad Factuality   & 1 (0.7\%)    & 2 (0.7\%)    & 4 (2.3\%)    & 5 (1.9\%) \\
+    \quad Logical      & 4 (2.7\%)    & 1 (0.3\%)    & 2 (1.1\%)    & 1 (0.4\%) \\
+    None               & 301 & 152 & 274 & 188 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.45em}
+  \begin{block}{Result analysis}
+    \footnotesize
+    \begin{itemize}\setlength{\itemsep}{0.12em}
+      \item \textbf{Faithfulness dominates absolutely:}
+            96.6\%--99.0\% of all hallucinations are faithfulness errors,
+            so medical VQA failures mainly come from weak radiological
+            visual grounding rather than missing medical knowledge.
+      \item \textbf{Model ranking reverses across tasks:}
+            GPT-5.4-mini performs best here
+            (HR = 33.26\%, Avg = 4.52), while Qwen3-VL,
+            strongest on POPE, regresses to HR = 58.31\%.
+            Natural-image competence does not transfer reliably
+            to X-ray/MRI perception.
+      \item \textbf{Open questions are harder than closed ones:}
+            every model shows higher HR on open-ended answers,
+            indicating that lesion localization and free-text description
+            expose the knowledge--perception gap more strongly than
+            conservative yes/no screening responses.
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{VQA-RAD Case Analysis}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.23\textheight]{vqarad_fc_0.jpg}
+
+      \vspace{0.15em}
+      \footnotesize
+      \textbf{Case 1: Conservative refusal}\\
+      \scriptsize
+      Chest X-ray: evidence of an aortic aneurysm?\\
+      Expected answer: \textbf{Yes}
+
+      \vspace{0.15em}
+      \scriptsize
+      \setlength{\tabcolsep}{3pt}
+      \renewcommand{\arraystretch}{0.84}
+      \begin{tabular}{lccc}
+        \toprule
+        Model & Summary & Score & Type \\
+        \midrule
+        GPT-5.4 & no convincing evidence & 2 & faith. \\
+        Gemini & cannot confirm & 2 & faith. \\
+        Qwen3.5 & suggests aneurysm & 6 & none \\
+        Qwen3-VL & no clear evidence & 2 & faith. \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.15em}
+      \begin{exampleblock}{Case 1 : Conservative refusal }
+        \footnotesize
+        Three models describe abnormal signs such as mild widening or
+        prominence of the mediastinal aorta, but ultimately refuse to
+        make a positive diagnosis. They perceive the abnormality but
+        retreat at the decision stage. In clinical screening, this
+        conservative answer is equivalent to a missed diagnosis.
+      \end{exampleblock}
+
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.23\textheight]{vqarad_fc_102.jpg}
+
+      \vspace{0.15em}
+      \footnotesize
+      \textbf{Case 2: Knowledge $\neq$ perception}\\
+      \scriptsize
+      Axial MRI: which side is the lesion?\\
+      Expected answer: \textbf{left} (radiologist's view)
+
+      \vspace{0.15em}
+      \scriptsize
+      \setlength{\tabcolsep}{3pt}
+      \renewcommand{\arraystretch}{0.84}
+      \begin{tabular}{lccc}
+        \toprule
+        Model & Summary & Score & Type \\
+        \midrule
+        GPT-5.4 & reverses convention & 2 & faith. \\
+        Gemini & reads MRI as abdominal CT & 0 & faith. \\
+        Qwen3.5 & mislocalizes lesion & 2 & faith. \\
+        Qwen3-VL & wrong right-frontal claim & 2 & faith. \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.15em}
+      \begin{exampleblock}{Case 2 : Faulty vision}
+        \footnotesize
+        The lesion sits on the viewer's right, corresponding to the
+        patient's left hemisphere. GPT-5.4-mini sees the image-side
+        location but applies the convention in the wrong direction.
+        The Qwen models recite the rule correctly but mislocalize the
+        lesion. Fluent clinical terminology fills the gap left by
+        uncertain visual evidence.
+      \end{exampleblock}
+  \end{columns}
+\end{frame}
+
+\section{Error Analysis}
+
+\begin{frame}{Human Alignment Verification}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.48\textwidth}
+      \textbf{\footnotesize Setup}
+      \scriptsize
+      \begin{itemize}\setlength{\itemsep}{0.06em}
+        \item 40 MathVista CoT samples, stratified by model
+              (10 per model; seed 42).
+        \item Single-blind annotation:
+              model name and Judge verdict hidden.
+        \item Human annotator labels hallucination presence and type.
+        \item Metrics: Accuracy, Precision, Recall, F1,
+              Cohen's $\kappa$, and type agreement.
+      \end{itemize}
+
+      \vspace{0.1em}
+      {\raggedright\textbf{\footnotesize Key results (per-model breakdown)}\par}
+      \centering
+      \scriptsize
+      \setlength{\tabcolsep}{3.5pt}
+      \renewcommand{\arraystretch}{0.85}
+      \begin{tabular}{l c ccc}
+        \toprule
+        Subset & $N$ & Accuracy & F1 & $\kappa$ \\
+        \midrule
+        \rowcolor{pink!50}
+        Overall          & 40 & 0.850 & 0.824 & 0.700 \\
+        \midrule
+        GPT-5.4-mini     & 10 & \alert{1.000} & \alert{1.000} & \alert{1.000} \\
+        Qwen3.5-35B      & 10 & \alert{1.000} & \alert{1.000} & \alert{1.000} \\
+        Qwen3-VL-235B    & 10 & 0.800 & 0.750 & 0.600 \\
+        Gemini 2.5 Flash & 10 & 0.600 & 0.333 & 0.200 \\
+        \bottomrule
+      \end{tabular}\\[0.15em]
+      {\scriptsize\raggedright Overall Recall $= 1.000$ (no misses);
+       Type agreement $= 0.929$ (13/14).\par}
+
+      \vspace{0.5em}
+      {\raggedright\textbf{\footnotesize Confusion matrix (Human $\backslash$ Judge)}\par}
+      \centering
+      \scriptsize
+      \setlength{\tabcolsep}{5pt}
+      \renewcommand{\arraystretch}{0.9}
+      \begin{tabular}{lrrrl}
+        \toprule
+        Human $\backslash$ Judge & No halluc. & Halluc. & Total & \\
+        \midrule
+        No halluc. & 20 & \cellcolor{pink!70}\alert{6} & 26 & \scriptsize $\leftarrow$ over-judge \\
+        Halluc.    &  \cellcolor{pink!70}\textbf{0} & 14 & 14 & \scriptsize $\leftarrow$ no miss \\
+        \midrule
+        Total      & 20 & 20 & 40 & \\
+        \bottomrule
+      \end{tabular}
+
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[width=0.6\textwidth]{annotate.png}\\[0.12em]
+      {\scriptsize Annotation interface used in the single-blind human alignment study.}
+
+      \vspace{0.3em}
+      \textbf{\footnotesize Analysis conclusions}
+      \scriptsize
+      \begin{itemize}\setlength{\itemsep}{0.16em}
+        \item \textbf{Substantial agreement:}
+              the Judge reaches 85.0\% accuracy,
+              $F1 = 0.824$, and $\kappa = 0.700$.
+        \item \textbf{No missed hallucinations:}
+              recall is 1.000, so all 14 human-flagged hallucinations
+              are also caught by the Judge.
+        \item \textbf{Disagreements are one-sided:}
+              all 6 errors fall into the human-no / Judge-yes quadrant,
+              making over-judgment the dominant failure mode.
+        \item \textbf{Over-judgment pattern:}
+              mismatches concentrate on unobservable inference
+              such as age gaps or birth decades; the model refuses to guess,
+              while the Judge still penalizes the mismatch with the reference.
+        \item \textbf{Type labels are reliable:}
+              type agreement reaches 0.929 (13/14), showing that the
+              three-way taxonomy remains stable once hallucination is detected.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Error Experiments I: Judge and Threshold Robustness}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+      \textbf{\footnotesize 1. Judge model consistency}
+
+      \vspace{0.15em}
+      \scriptsize
+      Setup: 100 MathVista samples per response model;
+      GPT-5.5 and Claude Opus 4.7 use identical prompts.
+
+      \vspace{0.2em}
+      \centering
+      \setlength{\tabcolsep}{2.2pt}
+      \renewcommand{\arraystretch}{0.9}
+      \begin{tabular}{lccccc}
+        \toprule
+        Model & GPT HR & Claude HR & $\Delta$HR & $\kappa$ & $\rho$ \\
+        \midrule
+        GPT-5.4-mini & 45.0\% & 44.0\% & $-$1.0 & 0.980 & 0.805 \\
+        Gemini 2.5 & 37.0\% & 27.0\% & \alert{$-$10.0} & 0.591 & 0.658 \\
+        Qwen3.5 & 14.0\% & 18.0\% & $+$4.0 & 0.777 & 0.722 \\
+        Qwen3-VL & 15.0\% & 22.0\% & $+$7.0 & 0.638 & 0.669 \\
+        \midrule
+        Overall & -- & -- & -- & \alert{0.776} & \alert{0.740} \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.3em}
+      \raggedright
+      \begin{itemize}\setlength{\itemsep}{0.18em}\setlength{\parskip}{0pt}
+        \item \textbf{Substantial overall agreement}
+              ($\kappa = 0.776$, $\rho = 0.740$).
+              Model ranking is fully preserved under both judges:
+              Qwens $>$ GPT-5.4-mini $>$ Gemini.
+        \item \textbf{GPT-5.4-mini is the most stable} ($\kappa = 0.98$).
+              Its often single-token Direct responses leave
+              almost no room for judge interpretation.
+        \item \textbf{Gemini diverges the most} ($\kappa = 0.591$;
+              Claude rates HR $10$\,pp lower than GPT-5.5).
+              Verbose responses sit closer to the
+              ``informative but wrong'' calibration boundary
+              between the two judges.
+        \item \textbf{Limitation:} both judges are frontier
+              closed-source models; an open-source or
+              domain-specific judge would strengthen the claim.
+      \end{itemize}
+
+    \column{0.47\textwidth}
+      \textbf{\footnotesize 2. Threshold sensitivity}
+
+      \vspace{0.15em}
+      \scriptsize
+      HR($T$) is recomputed as $N_{\text{score}<T}/N$ for
+      MathVista Direct, varying the judge-score threshold.
+
+      \vspace{0.2em}
+      \centering
+      \setlength{\tabcolsep}{2.2pt}
+      \renewcommand{\arraystretch}{0.9}
+      \begin{tabular}{lcccccc}
+        \toprule
+        Model & $T{=}2$ & $T{=}3$ & $T{=}4$ & $\Delta(3{\to}2)$ & $\Delta(4{\to}3)$ \\
+        \midrule
+        GPT-5.4-mini & 18.1\% & 45.1\% & 45.3\% & \alert{$-$27.0} & $+$0.2 \\
+        Gemini 2.5 & 1.2\% & 34.3\% & 34.6\% & \alert{$-$33.1} & $+$0.3 \\
+        Qwen3.5 & 0.8\% & 13.3\% & 13.3\% & \alert{$-$12.5} & $\phantom{+}0.0$ \\
+        Qwen3-VL & 2.1\% & 16.3\% & 16.4\% & \alert{$-$14.2} & $+$0.1 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.2em}
+      \includegraphics[width=0.76\textwidth]{fig3_threshold_sensitivity_line.pdf}
+
+      \vspace{0.1em}
+      \raggedright
+      \begin{itemize}\setlength{\itemsep}{0.04em}
+        \item HR($T=3$) and HR($T=4$) differ by $<0.3$\,pp:
+              scores are strongly bimodal.
+        \item The largest jump is $T=2\to3$ (12.5--33.1\,pp);
+              ranking remains unchanged.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Error Experiments II: Length and Cross-Model Consistency}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+      \textbf{\footnotesize 3. Length bias analysis}
+
+      \vspace{0.15em}
+      \scriptsize
+      Spearman correlations test whether longer MathVista responses
+      receive systematically higher judge scores.
+
+      \vspace{0.2em}
+      \centering
+      \setlength{\tabcolsep}{2.2pt}
+      \renewcommand{\arraystretch}{0.88}
+      \begin{tabular}{lcccc}
+        \toprule
+        Model & Direct $\rho$ & CoT $\rho$ & Direct Q1$\to$Q4 & CoT Q1$\to$Q4 \\
+        \midrule
+        GPT-5.4-mini & $+$0.086 & $+$0.015 & 3.19$\to$3.46 & 4.17$\to$3.95 \\
+        Gemini 2.5 & $-$0.142 & $-$0.218 & 4.61$\to$3.80 & 5.30$\to$4.33 \\
+        Qwen3.5 & \alert{$+$0.530} & $+$0.006 & \alert{4.56$\to$5.33} & 5.32$\to$5.26 \\
+        Qwen3-VL & $+$0.394 & \alert{$-$0.241} & 4.38$\to$4.92 & 5.32$\to$4.32 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.3em}
+      \raggedright
+      \begin{itemize}\setlength{\itemsep}{0.15em}\setlength{\parskip}{0pt}
+        \item \textbf{No uniform length bias.}
+              Correlation sign depends on each model's quality pattern;
+              there is no systematic ``longer $\to$ higher score''.
+        \item \textbf{Qwen3.5 Direct $\rho = +0.530$} (panel maximum):
+              Q1$\to$Q4 of 4.56$\to$5.33 shows
+              ``longer because more correct'', not ``higher because longer''.
+        \item \textbf{Gemini negative correlation} ($-0.142$):
+              verbose responses sit closer to the
+              ``informative but wrong'' boundary,
+              so length itself predicts a lower score.
+        \item \textbf{CoT reverses positive correlations}
+              (Qwen3-VL: $+0.394 \to -0.241$):
+              longer chains contain more visual assertions
+              and therefore more opportunities to be penalized.
+      \end{itemize}
+
+    \column{0.47\textwidth}
+      \textbf{\footnotesize 4. Cross-model hallucination consistency}
+
+      \vspace{0.1em}
+      \scriptsize
+      For each item, count how many of the four models hallucinate.
+      Hard Ratio = samples where $\geq$3/4 models hallucinate.
+
+      \vspace{0.15em}
+      \centering
+      \setlength{\tabcolsep}{2.1pt}
+      \renewcommand{\arraystretch}{0.9}
+      \begin{tabular}{lcccccc}
+        \toprule
+        Dataset & 0/4 & 1/4 & 2/4 & 3/4 & 4/4 & Hard \\
+        \midrule
+        MathVista (Direct) & 387 & 321 & 175 & 49 & 68 & 11.7\% \\
+        MathVista (CoT)    & 487 & 232 & 132 & 77 & 72 & 14.9\% \\
+        \rowcolor{pink!30}
+        VQA-RAD            & 59  & 118 & 122 & 81 & 71 & \alert{33.7\%} \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.2em}
+      \raggedright
+      \begin{minipage}[c]{0.55\linewidth}
+        \scriptsize
+        \begin{itemize}\setlength{\itemsep}{0.1em}\setlength{\parskip}{0pt}
+          \item \textbf{VQA-RAD difficulty is intrinsic.}
+                Only 13.1\% fully correct (59/451);
+                33.7\% with $\geq$3/4 hallucinating.
+                High HR is a domain-level perception gap,
+                not an idiosyncratic model weakness.
+          \item \textbf{CoT polarization signature.}
+                Direct: 38.7\% fully correct / 6.8\% fully wrong;
+                CoT pushes both tails to 48.7\% / 7.2\%,
+                middle cells shrink.
+          \item \textbf{No single dominant model.}
+                Each model has a different weak axis
+                across POPE / MathVista / VQA-RAD;
+                cross-task trade-offs persist.
+        \end{itemize}
+      \end{minipage}%
+      \hfill
+      \begin{minipage}[c]{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig5_radar_comparison.pdf}\\[-0.05em]
+        {\scriptsize\emph{Radar: 6 dims.}\par}
+      \end{minipage}
+  \end{columns}
+\end{frame}
+
+\section{Limitations \& Future Work}
+
+\begin{frame}{Limitations}
+  \scriptsize
+  \begin{enumerate}\setlength{\itemsep}{0.6em}
+    \item \textbf{Narrow benchmark coverage}
+      \begin{itemize}
+        \item Three datasets (POPE, MathVista, VQA-RAD) probe three distinct
+              hallucination regimes but do not span the full landscape.
+        \item Excluded: HallusionBench (visual illusions and language-context
+              manipulations), AMBER (multi-dimensional, LLM-free),
+              MM-Vet and MMBench (broader capability suites).
+        \item Whether the CoT polarization effect and the
+              knowledge--perception gap on VQA-RAD generalize
+              to these probes remains untested.
+      \end{itemize}
+
+    \item \textbf{Restricted model panel}
+      \begin{itemize}
+        \item Four models from three families (OpenAI, Google, Alibaba).
+        \item Smaller open-weight models (LLaVA, MiniGPT, InstructBLIP
+              families) and parameter-scale ablations within a single family
+              are excluded.
+        \item Cannot disentangle effects driven by model scale from those
+              driven by training methodology or visual-encoder choice.
+      \end{itemize}
+
+    \item \textbf{Sample-limited human alignment}
+      \begin{itemize}
+        \item 40-sample annotation pool yields $\kappa = 0.70$ with
+              95\% CI $[0.48, 0.90]$ --- wide enough for aggregate
+              ``substantial'' agreement but not for per-model claims.
+        \item The per-model breakdown (Gemini $\kappa = 0.20$,
+              Qwen3-VL $\kappa = 0.60$) is suggestive but each model
+              is evaluated on only 10 samples.
+        \item A scaled-up effort ($N \geq 80$ per model) would be
+              required for statistically grounded cross-model claims.
+      \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Future Work}
+  \centering
+  \includegraphics[width=0.6\textwidth]{lastvit_attention_compare.png}\\[0.15em]
+  {\scriptsize\emph{Vanilla ViT scatters attention across the background;
+   LAST-ViT concentrates on the foreground subject.
+   Reproduced from Shi et al.\ (2026), Fig.~1.}\par}
+
+  \vspace{0.4em}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+      \textbf{\footnotesize LAST-ViT} (Shi et al., CVPR 2026)
+      \scriptsize
+      \begin{itemize}\setlength{\itemsep}{0.1em}\setlength{\parskip}{0pt}
+        \item In standard ViTs, the CLS token (image-level summary used
+              for final prediction) tends to draw most of its content
+              from \textbf{background} regions rather than the actual subject.
+        \item Reason is mundane: background patches occupy more area,
+              and the training objective only checks the final label
+              without constraining \emph{which patches} the model attends to.
+        \item Fix: lightweight plug-in that re-weights how patch
+              information aggregates into CLS, \textbf{biasing it toward
+              the foreground without retraining the backbone}
+              (consistent gains across twelve vision benchmarks).
+      \end{itemize}
+
+    \column{0.48\textwidth}
+      \textbf{\footnotesize Parallel insight $\to$ MLLM hallucination}
+      \scriptsize
+      \begin{itemize}\setlength{\itemsep}{0.1em}\setlength{\parskip}{0pt}
+        \item Same shortcut pattern, different axis:
+              instead of \emph{background patches drowning out
+              foreground patches in one image}, the \emph{language prior
+              drowns out the image signal across a conversation turn}.
+        \item CausalMM's dual-prior framework gives this a causal grounding:
+              $P_V$ and $P_L$ act through independent confounding pathways,
+              and intervention on either can partially offset the other.
+        \item \alert{Conjecture:} A decoding-time re-weighting strategy
+              that pulls attention back toward visual tokens when
+              $P_V$ and $P_L$ conflict may reduce language-prior
+              hallucinations \emph{without degrading language capability}.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\section{References}
+
+\newcommand{\smallbibfonts}{%
+  \setbeamerfont{bibliography item}{size=\fontsize{4pt}{4.5pt}\selectfont}
+  \setbeamerfont{bibliography entry author}{size=\fontsize{4pt}{4.5pt}\selectfont}
+  \setbeamerfont{bibliography entry title}{size=\fontsize{4pt}{4.5pt}\selectfont}
+  \setbeamerfont{bibliography entry location}{size=\fontsize{4pt}{4.5pt}\selectfont}
+  \setbeamerfont{bibliography entry note}{size=\fontsize{4pt}{4.5pt}\selectfont}
+}
+
+\begin{frame}[t]{References}
+  \smallbibfonts
+  \vspace{-0.4em}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.49\textwidth}
+      \begin{thebibliography}{9}
+        \setlength{\itemsep}{0pt}
+        \setlength{\parsep}{0pt}
+        \bibitem{li2023pope}
+          Li, Y. et al. (2023).
+          \newblock Evaluating Object Hallucination in Large Vision-Language Models.
+          \newblock \emph{EMNLP}.
+
+        \bibitem{lu2024mathvista}
+          Lu, P. et al. (2024).
+          \newblock MathVista: Evaluating Mathematical Reasoning of Foundation Models in Visual Contexts.
+          \newblock \emph{ICLR}.
+
+        \bibitem{lau2018vqarad}
+          Lau, J. J. et al. (2018).
+          \newblock A dataset of clinically generated visual questions and answers about radiology images.
+          \newblock \emph{Scientific Data}.
+
+        \bibitem{lin2014coco}
+          Lin, T.-Y. et al. (2014).
+          \newblock Microsoft COCO: Common Objects in Context.
+          \newblock \emph{ECCV}.
+
+        \bibitem{wei2022cot}
+          Wei, J. et al. (2022).
+          \newblock Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.
+          \newblock \emph{NeurIPS}.
+
+        \bibitem{liu2025morethinking}
+          Liu, C. et al. (2025).
+          \newblock More thinking, less seeing? Assessing amplified hallucination in multimodal reasoning models.
+          \newblock \emph{NeurIPS}.
+
+        \bibitem{kancheti2025cot}
+          Kancheti, S. S. et al. (2025).
+          \newblock Chain-of-Thought Degrades Visual Spatial Reasoning Capabilities of Multimodal LLMs.
+          \newblock \emph{COLM}.
+
+        \bibitem{zheng2024thinking}
+          Zheng, H. et al. (2024).
+          \newblock Thinking Before Looking: Improving Multimodal LLM Reasoning via Mitigating Visual Hallucination.
+          \newblock arXiv:2411.12591.
+      \end{thebibliography}
+
+    \column{0.49\textwidth}
+      \begin{thebibliography}{9}
+        \setlength{\itemsep}{0pt}
+        \setlength{\parsep}{0pt}
+        \bibitem{bai2025survey}
+          Bai, Z. et al. (2025).
+          \newblock Hallucination of Multimodal Large Language Models: A Survey.
+          \newblock arXiv:2404.18930.
+
+        \bibitem{chen2026survey}
+          Chen, Z. et al. (2026).
+          \newblock A Survey of Multimodal Hallucination Evaluation and Detection.
+          \newblock \emph{IJCV}.
+
+        \bibitem{liu2024survey}
+          Liu, H. et al. (2024).
+          \newblock A Survey on Hallucination in Large Vision-Language Models.
+          \newblock arXiv:2402.00253.
+
+        \bibitem{rohrbach2018object}
+          Rohrbach, A. et al. (2018).
+          \newblock Object Hallucination in Image Captioning.
+          \newblock \emph{EMNLP}.
+
+        \bibitem{zhong2024snowball}
+          Zhong, W. et al. (2024).
+          \newblock Investigating and mitigating multimodal hallucination snowballing in large vision-language models.
+          \newblock \emph{ACL}.
+
+        \bibitem{zhou2025modalityprior}
+          Zhou, G. et al. (2025).
+          \newblock Mitigating Modality Prior-Induced Hallucinations in Multimodal Large Language Models.
+          \newblock \emph{ICLR}.
+
+        \bibitem{shi2026lastvit}
+          Shi, C. et al. (2026).
+          \newblock Vision Transformers Need More Than Registers.
+          \newblock \emph{CVPR}.
+
+        \bibitem{guan2024hallusionbench}
+          Guan, T. et al. (2024).
+          \newblock HallusionBench: An Advanced Diagnostic Suite for Entangled Language Hallucination and Visual Illusion.
+          \newblock \emph{CVPR}.
+      \end{thebibliography}
+  \end{columns}
+\end{frame}
+
+\frame[plain,noframenumbering]{%
+  \centering
+  \vfill
+  {\LARGE \textbf{Thank You}}
+
+  \vspace{1em}
+  {\large Code \& data:} \\
+  \url{https://github.com/lexiangrui/Hallucination-of-MLLM}
+
+  \vspace{2em}
+  \begin{block}{}
+    \centering
+    Questions \& discussion welcome
+  \end{block}
+  \vfill
+}
+
+\end{document}

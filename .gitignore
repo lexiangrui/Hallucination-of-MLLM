@@ -16,8 +16,6 @@ data/vqa-rad/data
 
 # Output
 
-Beamer/
-
 # LaTeX
 *.aux
 *.log
