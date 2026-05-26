@@ -424,7 +424,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Three Splits Detect Three Error Mechanisms}
+\begin{frame}{POPE: Three Splits Detect Three Error Mechanisms}
   \begin{columns}[c,onlytextwidth]
     \column{0.56\textwidth}
       \begin{block}{1. Random: object-level perception}
@@ -490,7 +490,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{POPE Case Analysis: Two Systematic False Positives}
+\begin{frame}{POPE Case Analysis}
   \begin{columns}[T,onlytextwidth]
     \column{0.48\textwidth}
       \centering
@@ -558,7 +558,7 @@
 
 \section{Experiment 2: MathVista Reasoning}
 
-\begin{frame}{MathVista Results and Hallucination Distribution}
+\begin{frame}{MathVista: Results and Hallucination Distribution}
   \begin{columns}[T,onlytextwidth]
     \column{0.5\textwidth}
       \textbf{\footnotesize Result summary: Direct vs. CoT prompting}
@@ -590,7 +590,7 @@
       \end{tabular}
 
       \vspace{0.5em}
-      \textbf{\footnotesize Key observations: CoT polarization}\\[0.1em]
+      \textbf{\footnotesize Key observations: CoT effects}\\[0.1em]
       \scriptsize
       \begin{itemize}\setlength{\itemsep}{0.1em}\setlength{\parskip}{0pt}
         \item \textbf{Weak baselines improve} ---
@@ -633,29 +633,33 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{CoT Impact: Results and Four Mechanisms}
+\begin{frame}{MathVista: CoT Impact and Four Mechanisms}
   \begin{columns}[T,onlytextwidth]
     \column{0.45\textwidth}
       \centering
       \includegraphics[width=0.9\textwidth]{fig2_mathvista_direct_cot_bar.pdf}
 
       \vspace{0.2em}
-      \begin{block}{Observed impact}
+      \begin{block}{Recent findings from prior work}
         \scriptsize
-        CoT helps weaker Direct baselines:
-        GPT-5.4-mini HR drops from 45.1\% to 34.4\%
-        ($-$10.7\,pp), and Gemini drops from 34.3\% to 27.6\%
-        ($-$6.7\,pp).
-        It hurts stronger Direct baselines:
-        Qwen3.5 rises to 15.5\% (+2.2\,pp),
-        and Qwen3-VL rises to 24.0\% (+7.7\,pp).
+        This pattern is consistent with two recent studies on CoT
+        in multimodal reasoning.
+        \textbf{Liu et al. (2025)} show through attention analysis
+        that as reasoning chains become longer,
+        attention gradually drifts away from the image toward
+        linguistic priors, producing
+        ``more thinking, less seeing.''
         \vspace{0.25em}
 
-        \alert{Key tension:}
-        Average score increases for all four models,
-        but hallucination rate increases for both Qwen models.
-        CoT can make answers more informative while also exposing
-        judge-detectable hallucinations inside the reasoning chain.
+        \textbf{Kancheti et al. (2025)} further report,
+        across 17 evaluated models,
+        that CoT consistently degrades visual-spatial reasoning
+        because models begin to hallucinate visual details from
+        textual priors.
+        \vspace{0.25em}
+
+        The sharp rise in Qwen faithfulness hallucinations under CoT
+        is consistent with both observations.
       \end{block}
 
     \column{0.52\textwidth}
@@ -701,7 +705,7 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{MathVista Case Analysis: Snowball vs Exposure}
+\begin{frame}{MathVista Case Analysis}
   \begin{columns}[T,onlytextwidth]
     \column{0.48\textwidth}
       \centering
@@ -779,7 +783,7 @@
 
 \section{Extension: VQA-RAD Medical VQA}
 
-\begin{frame}{VQA-RAD Results and Analysis}
+\begin{frame}{VQA-RAD: Results and Analysis}
   \centering
   \footnotesize
   \begin{tabular}{l cccc}
@@ -902,9 +906,11 @@
 
 \section{Error Analysis}
 
-\begin{frame}{Human Alignment Verification}
+\begin{frame}{Error Analysis}
   \begin{columns}[c,onlytextwidth]
     \column{0.48\textwidth}
+      \textbf{\small 1. Human Alignment Verification (Human-as-Judge) }
+      \vspace{0.15em}
       \textbf{\footnotesize Setup}
       \scriptsize
       \begin{itemize}\setlength{\itemsep}{0.06em}
@@ -985,10 +991,10 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Error Experiments I: Judge and Threshold Robustness}
+\begin{frame}{Error Analysis}
   \begin{columns}[T,onlytextwidth]
     \column{0.50\textwidth}
-      \textbf{\footnotesize 1. Judge model consistency}
+      \textbf{\small 2. Judge model consistency}
 
       \vspace{0.15em}
       \scriptsize
@@ -997,16 +1003,15 @@
 
       \vspace{0.2em}
       \centering
-      \setlength{\tabcolsep}{2.2pt}
       \renewcommand{\arraystretch}{0.9}
       \begin{tabular}{lccccc}
         \toprule
         Model & GPT HR & Claude HR & $\Delta$HR & $\kappa$ & $\rho$ \\
         \midrule
         GPT-5.4-mini & 45.0\% & 44.0\% & $-$1.0 & 0.980 & 0.805 \\
-        Gemini 2.5 & 37.0\% & 27.0\% & \alert{$-$10.0} & 0.591 & 0.658 \\
-        Qwen3.5 & 14.0\% & 18.0\% & $+$4.0 & 0.777 & 0.722 \\
-        Qwen3-VL & 15.0\% & 22.0\% & $+$7.0 & 0.638 & 0.669 \\
+        Gemini 2.5-flash & 37.0\% & 27.0\% & \alert{$-$10.0} & 0.591 & 0.658 \\
+        Qwen3.5-35b & 14.0\% & 18.0\% & $+$4.0 & 0.777 & 0.722 \\
+        Qwen3-VL-235b & 15.0\% & 22.0\% & $+$7.0 & 0.638 & 0.669 \\
         \midrule
         Overall & -- & -- & -- & \alert{0.776} & \alert{0.740} \\
         \bottomrule
@@ -1018,7 +1023,7 @@
         \item \textbf{Substantial overall agreement}
               ($\kappa = 0.776$, $\rho = 0.740$).
               Model ranking is fully preserved under both judges:
-              Qwens $>$ GPT-5.4-mini $>$ Gemini.
+              Qwen3.5-35b $>$ Qwen3-VL-235b $>$ GPT-5.4-mini $>$ Gemini 2.5-flash.
         \item \textbf{GPT-5.4-mini is the most stable} ($\kappa = 0.98$).
               Its often single-token Direct responses leave
               almost no room for judge interpretation.
@@ -1027,13 +1032,11 @@
               Verbose responses sit closer to the
               ``informative but wrong'' calibration boundary
               between the two judges.
-        \item \textbf{Limitation:} both judges are frontier
-              closed-source models; an open-source or
-              domain-specific judge would strengthen the claim.
+              
       \end{itemize}
 
     \column{0.47\textwidth}
-      \textbf{\footnotesize 2. Threshold sensitivity}
+      \textbf{\small 3. Threshold sensitivity}
 
       \vspace{0.15em}
       \scriptsize
@@ -1042,7 +1045,6 @@
 
       \vspace{0.2em}
       \centering
-      \setlength{\tabcolsep}{2.2pt}
       \renewcommand{\arraystretch}{0.9}
       \begin{tabular}{lcccccc}
         \toprule
@@ -1069,10 +1071,10 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Error Experiments II: Length and Cross-Model Consistency}
+\begin{frame}{Error Analysis}
   \begin{columns}[T,onlytextwidth]
     \column{0.50\textwidth}
-      \textbf{\footnotesize 3. Length bias analysis}
+      \textbf{\small 4. Length bias analysis}
 
       \vspace{0.15em}
       \scriptsize
@@ -1114,7 +1116,7 @@
       \end{itemize}
 
     \column{0.47\textwidth}
-      \textbf{\footnotesize 4. Cross-model hallucination consistency}
+      \textbf{\small 5. Cross-model hallucination consistency}
 
       \vspace{0.1em}
       \scriptsize
@@ -1233,7 +1235,7 @@
       \end{itemize}
 
     \column{0.48\textwidth}
-      \textbf{\footnotesize Parallel insight $\to$ MLLM hallucination}
+      \textbf{\footnotesize }{Inspiration for hallucination inhibition}
       \scriptsize
       \begin{itemize}\setlength{\itemsep}{0.1em}\setlength{\parskip}{0pt}
         \item Same shortcut pattern, different axis:
