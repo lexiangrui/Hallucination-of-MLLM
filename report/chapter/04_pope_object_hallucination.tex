@@ -79,7 +79,8 @@ paired with a balanced decision style.
 and is the only model whose HR \emph{decreases}
 from Popular (5.70\%) to Adversarial (5.10\%),
 indicating greater robustness
-to near-synonym distractors than to co-occurrence distractors.
+to co-occurrence distractors (Adversarial)
+than to global frequency bias (Popular).
 
 \textbf{Qwen3.5-35B-A3B} attains the highest Recall on every split
 ($\geq$0.87)
@@ -101,7 +102,7 @@ under adversarial pressure.
 
 \textbf{Monotonic difficulty gradient.}
 From Random to Popular to Adversarial,
-the Hallucination Rate of all four models increases monotonically
+the Hallucination Rate of most models increases monotonically
 (\Cref{tab:pope_results,fig:pope_hr_bar}),
 consistent with POPE's three-tier negative-sampling design.
 Beyond a difficulty ranking,
@@ -119,28 +120,33 @@ is near saturation.
 This split therefore measures raw object-level visual perception,
 with negligible interference from language priors.
 
-\textbf{Popular split: resistance to linguistic priors.}
-Negative objects are high-frequency co-occurring categories
-that are statistically associated with the scene
-but absent from the specific image
-(e.g., asking about a backpack in an outdoor eating scene).
+\textbf{Popular split: global frequency bias.}
+Negative objects are drawn from the top-$K$ most frequent categories
+in the entire COCO dataset,
+which are globally common regardless of scene context,
+but absent from the specific image.
 HR rises sharply to 2.40\%--6.20\%,
 roughly 5--8 times the Random level.
-The surge isolates the contribution of language-prior bias:
+The surge reflects the high-frequency language prior:
 when the visual evidence is ambiguous,
-models fall back on the statistical co-occurrence patterns
+models tend to affirm frequently occurring categories,
+falling back on the statistical distribution
 learned during pretraining.
-Case~2 in \Cref{sec:case2_pope} provides a direct instance of this mechanism.
+Case~1 in \Cref{sec:case1_pope} provides a direct example.
 
-\textbf{Adversarial split: near-synonym semantic discrimination.}
-Negative objects are semantically similar to objects that do appear in the image
-(e.g., asking about a bear when only a teddy bear is present).
+\textbf{Adversarial split: high-frequency co-occurrence interference.}
+Negative objects are selected based on COCO training co-occurrence statistics,
+co-occurring frequently with objects present in the image
+but absent from the specific image.
 HR rises further to 4.80\%--8.90\%
-and the model can no longer rely on scene-level associations:
-the visual encoder must resolve fine-grained semantic boundaries.
-Case~1 in \Cref{sec:case1_pope}
+and the model is now disrupted by the co-occurrence statistics
+from its training data:
+the conditional co-occurrence probability learned in the language module
+overrides visual perception.
+Case~2 in \Cref{sec:case2_pope}
 shows that this is the hardest of the three failure modes,
-because the underlying cause, confusion of conceptual hierarchies, is
+because the underlying cause, the strength of the co-occurrence prior
+exceeding that of the visual signal, is
 not addressable by scale alone.
 
 \subsubsection{Root Cause: The Confounding Effects of Dual Modality Priors}
@@ -217,111 +223,50 @@ and $P_L$ is barely engaged;
 the residual hallucination rate of 0.30\%--1.10\%
 stems from the baseline bias of $P_V$ alone,
 reflecting the upper bound of the vision encoder's perceptual capacity.
-The Popular split represents the $P_L$ effect in its purest form---%
-when visual evidence is ambiguous,
-the linguistic co-occurrence prior
-(``outdoor + eating $\to$ backpack'')
-suppresses weak visual signals
-through the LLM's shallow-to-middle layer self-attention,
+The Popular split represents the $P_L$ high-frequency prior in its purest form---%
+backpack, as a globally frequent category in COCO,
+is selected as a negative object regardless of image context.
+When visual evidence is ambiguous,
+models tend to affirm such high-frequency words,
+as illustrated by Case~1
+where all four models incorrectly assert the presence of a backpack,
 causing the hallucination rate to surge to 2.40\%--6.20\%.
 The Adversarial split exhibits a joint failure of $P_V$ and $P_L$:
-the vision encoder ($P_V$ bias)
-cannot reliably separate ``teddy bear'' and ``bear''
-at the fine-grained semantic boundary in feature space,
-and the LLM ($P_L$) subsequently merges the two at the semantic level,
-triggering a false positive.
+$P_L$'s co-occurrence prior makes bear a distractor
+because it co-occurs frequently with person and book in the training statistics,
+while $P_V$ fails to provide sufficiently fine-grained visual discrimination
+to counteract this co-occurrence bias.
+Their combined effect, as shown in Case~2,
+causes all four models to merge bear with teddy bear,
+producing the highest hallucination rate (4.80\%--8.90\%).
 This also explains why increasing model scale
 cannot resolve Adversarial hallucinations
 (Qwen3-VL-235B still exhibits 4.80\%)---%
 scaling primarily strengthens $P_L$'s statistical precision,
-without altering the intrinsic fuzziness of conceptual boundaries
-within $P_V$'s feature space.
+and the co-occurrence prior is precisely
+what gets amplified with more training data,
+rather than being mitigated by larger models.
 \subsection{Failure Case Analysis}
 
-\subsubsection{Case 1: Near-synonym Semantic Confusion (Adversarial)}
+\subsubsection{Case 1: Global Frequency Bias (Popular)}
 \label{sec:case1_pope}
 
 This case illustrates
-the near-synonym semantic confusion mechanism
-identified in \Cref{sec:pope_difficulty}.
-\Cref{tab:pope_case1,fig:pope_case1} present a sample from the Adversarial split.
-The image contains
-a teddy bear, a person, and a book.
-The question asks whether there is a bear in the image,
-and the ground truth is No.
-All four models answer Yes,
-indicating a systematic error rather than an individual model deficiency.
-
-\begin{table}[htbp]
-  \centering
-  \begin{minipage}[c]{0.5\textwidth}
-    \centering
-    \caption{POPE Case 1: sample information and model responses.}
-    \label{tab:pope_case1}
-    \small
-    \begin{tabular}{@{}ll@{}}
-      \toprule
-      \multicolumn{2}{c}{\textbf{Sample Information}} \\
-      \midrule
-      Image & COCO\_val2014\_000000567886 \\
-      Objects present & teddy bear, person, book \\
-      Objects absent & bear, car, tv \\
-      Question & Is there a bear in the image? \\
-      Ground Truth & No \\
-      \midrule
-      \multicolumn{2}{c}{\textbf{Model Responses}} \\
-      \midrule
-      GPT-5.4-mini & Yes \\
-      Gemini 2.5 Flash & Yes \\
-      Qwen3.5-35B-A3B & Yes \\
-      Qwen3-VL-235B-A22B & Yes \\
-      \bottomrule
-    \end{tabular}
-  \end{minipage}%
-  \hspace{0.02\textwidth}%
-  \begin{minipage}[c]{0.45\textwidth}
-    \centering
-    \includegraphics[width=0.9\textwidth]{pope_000000567886.jpg}
-    \captionof{figure}{POPE Case 1: a teddy bear on a couch.}
-    \label{fig:pope_case1}
-  \end{minipage}
-\end{table}
-
-The root cause is near-synonym semantic confusion.
-The image contains a teddy bear,
-an independent category in the COCO label set
-\citep{linMicrosoftCOCOCommon2015},
-while the question asks about a bear (a real animal).
-All four models associate ``teddy bear'' with ``bear''
-at the semantic level,
-triggering a positive judgment upon seeing the toy.
-This is essentially conceptual hierarchy confusion:
-models conflate visually similar objects with semantically identical ones.
-This error cannot be resolved
-by increasing model scale or improving visual encoder resolution,
-as it concerns the clarity of conceptual boundaries
-in semantic representations
-rather than the discriminability of low-level visual features.
-
-\subsubsection{Case 2: Linguistic Prior Bias (Popular)}
-\label{sec:case2_pope}
-
-This case illustrates
-the linguistic-prior bias mechanism
+the global frequency bias mechanism
 isolated by the Popular split (\Cref{sec:pope_difficulty}).
-\Cref{tab:pope_case2,fig:pope_case2} present a sample from the Popular split.
+\Cref{tab:pope_case1,fig:pope_case1} present a sample from the Popular split.
 The image shows
 a person eating a sandwich and a hot dog outdoors.
 The question asks whether there is a backpack in the image,
 and the ground truth is No.
-Again, all four models answer Yes.
+All four models answer Yes.
 
 \begin{table}[htbp]
   \centering
   \begin{minipage}[c]{0.6\textwidth}
     \centering
-    \caption{POPE Case 2: sample information and model responses.}
-    \label{tab:pope_case2}
+    \caption{POPE Case 1: sample information and model responses.}
+    \label{tab:pope_case1}
     \small
     \begin{tabular}{@{}ll@{}}
       \toprule
@@ -346,23 +291,91 @@ Again, all four models answer Yes.
   \begin{minipage}[c]{0.3\textwidth}
     \centering
     \includegraphics[width=0.9\textwidth]{pope_000000569839.jpg}
-    \captionof{figure}{POPE Case 2: an outdoor dining scene.}
+    \captionof{figure}{POPE Case 1: an outdoor dining scene.}
+    \label{fig:pope_case1}
+  \end{minipage}
+\end{table}
+
+The root cause is global frequency bias.
+``Backpack'' is one of the most frequently occurring categories
+in the COCO dataset
+\citep{linMicrosoftCOCOCommon2015},
+and was therefore selected as a negative sample
+by the Popular sampling strategy,
+regardless of the image context.
+The language module has learned a high prior probability
+for such frequently occurring categories during pretraining;
+when the visual signal is ambiguous,
+this high-frequency prior overrides visual perception,
+causing the model to produce an affirmative answer.
+The Popular split exploits this:
+models mistake the statistical distribution of frequent categories
+in the training data for visual evidence.
+
+\subsubsection{Case 2: High-frequency Co-occurrence Interference (Adversarial)}
+\label{sec:case2_pope}
+
+This case illustrates
+the high-frequency co-occurrence interference mechanism
+identified in \Cref{sec:pope_difficulty}.
+\Cref{tab:pope_case2,fig:pope_case2} present a sample from the Adversarial split.
+The image contains
+a teddy bear, a person, and a book.
+The question asks whether there is a bear in the image,
+and the ground truth is No.
+All four models answer Yes,
+indicating a systematic error rather than an individual model deficiency.
+
+\begin{table}[htbp]
+  \centering
+  \begin{minipage}[c]{0.5\textwidth}
+    \centering
+    \caption{POPE Case 2: sample information and model responses.}
+    \label{tab:pope_case2}
+    \small
+    \begin{tabular}{@{}ll@{}}
+      \toprule
+      \multicolumn{2}{c}{\textbf{Sample Information}} \\
+      \midrule
+      Image & COCO\_val2014\_000000567886 \\
+      Objects present & teddy bear, person, book \\
+      Objects absent & bear, car, tv \\
+      Question & Is there a bear in the image? \\
+      Ground Truth & No \\
+      \midrule
+      \multicolumn{2}{c}{\textbf{Model Responses}} \\
+      \midrule
+      GPT-5.4-mini & Yes \\
+      Gemini 2.5 Flash & Yes \\
+      Qwen3.5-35B-A3B & Yes \\
+      Qwen3-VL-235B-A22B & Yes \\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}%
+  \hspace{0.02\textwidth}%
+  \begin{minipage}[c]{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{pope_000000567886.jpg}
+    \captionof{figure}{POPE Case 2: a teddy bear on a couch.}
     \label{fig:pope_case2}
   \end{minipage}
 \end{table}
 
-The root cause is linguistic prior bias.
-In outdoor scenes with people eating,
-``backpack'' is a high-frequency co-occurring object.
-The statistical prior in the language module
-(outdoor + person + eating $\to$ high backpack probability)
-overrides the visual module's actual perception,
-causing the model to produce an affirmative answer.
-This is precisely the mechanism that the Popular split exploits:
-models fill visual uncertainty
-with linguistic priors from training data.
-The contrast between the two cases further confirms
-that the Popular and Adversarial splits
-target distinct error mechanisms,
-with Popular primarily exploiting linguistic priors
-and Adversarial primarily testing semantic discrimination.
+The root cause is high-frequency co-occurrence interference.
+According to the COCO training co-occurrence statistics,
+``bear'' co-occurs frequently
+with objects present in the image (``person,'' ``book''),
+and was therefore selected as a negative sample
+by the Adversarial sampling strategy.
+The language module has learned this co-occurrence pattern,
+and the conditional co-occurrence probability
+creates a strong affirmative bias;
+meanwhile, the vision encoder lacks sufficient fine-grained discrimination
+between teddy bear and bear
+to counteract this bias through the visual signal.
+Their combined effect causes all four models to answer Yes.
+The Adversarial split exploits a different dynamic:
+the joint failure of $P_L$'s co-occurrence prior
+and $P_V$'s perceptual limitation
+produces a higher hallucination rate
+than either Random or Popular.

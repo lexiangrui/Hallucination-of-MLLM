@@ -34,13 +34,13 @@ in how the negative objects are sampled:
   \item \textit{Popular:} negative objects are drawn
     from the top-K most frequent COCO categories,
     again excluding the present ones,
-    creating high-frequency co-occurrence distractors.
+    creating global frequency bias.
   \item \textit{Adversarial:} for each image,
     the three categories
     that co-occur most frequently with the present objects
     in the COCO training statistics
     are chosen as negatives,
-    yielding semantically similar distractors.
+    yielding high-frequency co-occurrence interference.
 \end{itemize}
 The three splits create a monotonic difficulty gradient,
 empirically observed in \Cref{sec:pope_difficulty}.

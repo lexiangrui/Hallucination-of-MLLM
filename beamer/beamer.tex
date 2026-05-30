@@ -409,7 +409,7 @@
       \vspace{0.1em}
       \begin{itemize}\setlength{\itemsep}{0.1em}
         \item \textbf{Universal difficulty gradient.}
-              All four models show HR rising
+              Most models show HR rising
               Random $\to$ Popular $\to$ Adversarial,
               confirming POPE's intended progression.
         \item \textbf{Qwen3-VL} has the lowest HR on all splits:
@@ -428,7 +428,7 @@
   \begin{columns}[c,onlytextwidth]
     \column{0.56\textwidth}
       \begin{block}{1. Random: object-level perception}
-        \footnotesize
+        \scriptsize
         Negative objects are visually unrelated to the scene.
         HR remains near saturation (0.30\%--1.10\%),
         so remaining errors mainly reflect the visual encoder's
@@ -436,21 +436,22 @@
       \end{block}
       \vspace{-0.7em}
 
-      \begin{block}{2. Popular: linguistic-prior override}
-        \footnotesize
-        Absent objects are high-frequency co-occurrences
-        (e.g., outdoor eating $\to$ backpack).
+      \begin{block}{2. Popular: global frequency bias}
+        \scriptsize
+        Absent objects are the most frequent COCO categories
+        regardless of scene context (e.g., backpack is a
+        globally common category).
         HR jumps to 2.40\%--6.20\% because the LLM prior $P_L$
-        suppresses weak or ambiguous visual evidence.
+        elevates high-frequency words when visual evidence is weak.
       \end{block}
       \vspace{-0.7em}
 
-      \begin{block}{3. Adversarial: semantic-boundary failure}
-        \footnotesize
-        Distractors are near-synonyms of visible objects
-        (e.g., teddy bear vs. bear).
-        HR peaks at 4.80\%--8.90\% when $P_V$ blurs fine-grained
-        categories and $P_L$ merges them semantically.
+      \begin{block}{3. Adversarial: co-occurrence interference}
+        \scriptsize
+        Distractors are selected by co-occurrence statistics
+        (e.g., bear co-occurs with person and book in training data).
+        HR peaks at 4.80\%--8.90\% where $P_L$'s co-occurrence
+        prior overrides $P_V$'s visual evidence.
       \end{block}
 
       {\footnotesize
@@ -477,16 +478,18 @@
       It determines which objects, textures, and fine-grained category
       boundaries are easy or difficult to encode. In Random, this prior
       mostly measures baseline visual perception; in Adversarial, it
-      blurs near-synonyms such as ``teddy bear'' and ``bear.''
+      fails to provide enough discrimination to counteract
+      the co-occurrence prior.
 
       \vspace{0.2em}
       \textbf{Linguistic modality prior $P_L$.}
       The LLM backbone carries co-occurrence regularities from
-      text-only pretraining. When an image context suggests a likely
-      object but the object is absent, this prior can activate a
-      plausible answer and overpower weak visual evidence. Popular
-      isolates this effect most clearly, while Adversarial combines it
-      with visual semantic confusion.
+      text-only pretraining. Popular isolates the unconditional
+      frequency prior: models tend to affirm globally frequent
+      words when visual evidence is weak. Adversarial activates
+      the conditional co-occurrence prior, where objects that
+      frequently appear together in training data trigger
+      false positives.
   \end{columns}
 \end{frame}
 
@@ -494,42 +497,11 @@
   \begin{columns}[T,onlytextwidth]
     \column{0.48\textwidth}
       \centering
-      \includegraphics[height=0.34\textheight]{pope_000000567886.jpg}
-
-      \vspace{0.25em}
-      \footnotesize
-      \textbf{Case 1: Adversarial split}\\
-      Present: teddy bear, person, book\\
-      Query: ``Is there a \alert{bear} in the image?''\\
-      Ground truth: \textbf{No}
-
-      \vspace{0.25em}
-      \renewcommand{\arraystretch}{0.9}
-      \setlength{\tabcolsep}{4pt}
-      \begin{tabular}{lcccc}
-        \toprule
-        Model & GPT & Gemini & Qwen3.5 & Qwen3-VL \\
-        \midrule
-        Answer & Yes & Yes & Yes & Yes \\
-        \bottomrule
-      \end{tabular}
-
-      \begin{exampleblock}{Case 1: semantic-boundary confusion}
-        \footnotesize
-        The image contains a \emph{teddy bear}, but POPE asks about
-        \emph{bear} as a real animal category.
-        All models merge the toy category with the animal category,
-        showing that the adversarial split tests fine-grained
-        conceptual boundaries, not only low-level visual resolution.
-      \end{exampleblock}
-
-    \column{0.48\textwidth}
-      \centering
       \includegraphics[height=0.34\textheight]{pope_000000569839.jpg}
 
       \vspace{0.25em}
       \footnotesize
-      \textbf{Case 2: Popular split}\\
+      \textbf{Case 1: Popular split (global frequency bias)}\\
       Present: person, sandwich, hot dog\\
       Query: ``Is there a \alert{backpack} in the image?''\\
       Ground truth: \textbf{No}
@@ -545,13 +517,42 @@
         \bottomrule
       \end{tabular}
 
-      \begin{exampleblock}{Case 2: linguistic-prior override}
+      \begin{exampleblock}{Case 1: global frequency bias}
         \footnotesize
-        In outdoor eating scenes, \emph{backpack} is a plausible
-        high-frequency co-occurring object.
-        When the visual signal is weak or cluttered,
-        the language prior fills in a statistically likely object
-        that is absent from the actual image.
+        ``Backpack'' is one of the most frequent categories in COCO,
+        selected as a negative regardless of scene context.
+        When visual evidence is ambiguous, the model defaults to
+        affirming high-frequency words learned during pretraining.
+      \end{exampleblock}
+
+    \column{0.48\textwidth}
+      \centering
+      \includegraphics[height=0.34\textheight]{pope_000000567886.jpg}
+
+      \vspace{0.25em}
+      \footnotesize
+      \textbf{Case 2: Adversarial split (co-occurrence interference)}\\
+      Present: teddy bear, person, book\\
+      Query: ``Is there a \alert{bear} in the image?''\\
+      Ground truth: \textbf{No}
+
+      \vspace{0.25em}
+      \renewcommand{\arraystretch}{0.9}
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{lcccc}
+        \toprule
+        Model & GPT & Gemini & Qwen3.5 & Qwen3-VL \\
+        \midrule
+        Answer & Yes & Yes & Yes & Yes \\
+        \bottomrule
+      \end{tabular}
+
+      \begin{exampleblock}{Case 2: co-occurrence interference}
+        \footnotesize
+        ``Bear'' co-occurs frequently with person and book
+        in the COCO training statistics.
+        $P_L$'s co-occurrence prior triggers a Yes answer,
+        while $P_V$ fails to distinguish teddy bear from bear.
       \end{exampleblock}
   \end{columns}
 \end{frame}
